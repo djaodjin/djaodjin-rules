@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>HTTP Request Pipeline</h1>
+<div>
+  <div>
+    <h2>Domain</h2>
+    <div class="col-md-12">
+      <div>
+        <p>
+          The site is available at {{site_available_at_url}}.
+        </p>
+      </div>
+    </div>
+</div>
+
+<div>
+    <h2>Access Rules</h2>
+    <div ng-app="ruleApp"  ng-controller="RuleListCtrl">
+      <table>
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Path</th>
+            <th>Access Rule</th>
+            <th>Forward</th>
+            <th>Delete</th>
+          </tr>
+        </thead>
+        <tbody dnd-list="rules">
+          <tr ng-repeat="rule in rules" ng-cloak="" id="rule-[[rule.rank]]">
+            <td width="100">
+              <div class="btn btn-default btn-sm">
+                <i class="fa fa-bars"></i></div>
+            </td>
+            <td>[[rule.path]]</td>
+            <td width="200">
+              <select name="rule" class="form-control input-sm"
+                      ng-model="rule.allow"
+                      ng-change="updateAllow(rule)">
+                {% for rule in rules %}
+                <option value="{{rule.0}}">{{rule.1}}</option>
+                {% endfor %}
+              </select>
+            </td>
+            <td width="100" class="text-center">
+              <input type="checkbox" name="is_forward"
+                     ng-model="rule.is_forward"
+                     ng-change="updateForward(rule)"
+                     ng-checked="rule.is_forward" />
+            </td>
+            <td width="100">
+              <button class="btn btn-danger btn-sm" ng-click="remove($index)">
+                <i class="fa fa-trash-o"></i></button>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="5">
+              <a href="#"
+                 data-toggle="modal" data-target="#new-rule">Add ...</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+<!-- modal dialog for Adding a rule -->
+<div class="modal fade"
+     id="new-rule" tabindex="-1" role="dialog"
+     aria-labelledby="Add Access Rule" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close"
+                        data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Path accessed ...</h4>
+            </div>
+            <div class="modal-body">
+                <div id="div_id_new_rule_path" class="form-group">
+                    <div class="controls ">
+                        <input class="form-control form-control"
+                               id="id_new_rule_path" maxlength="255"
+                               name="new_rule_path" type="text"
+                               ng-model="newRule.path">
+                               <p class="help-block">Your path should end with '/'. If not it will be automatically added.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default"
+                        data-dismiss="modal">Cancel</button>
+                <button id="new-rule-submit" ng-click="create()"
+                        type="button" class="btn btn-primary"
+                        data-dismiss="modal">Create</button>
+            </div>
+        </div>
+    </div>
+</div>
+    </div>
+<!-- end of modal dialog for Adding a rule -->
+</div>
+
+<div class="row">
+    <h2>Web application</h2>
+    <div class="col-md-12" style="margin-bottom:50px;">
+    <label for="">Entry point *</label>
+        <form id="entry-point-form" class="form-inline" method="post" >
+            {% csrf_token %}
+
+            <div class="form-group col-md-6">
+
+            <div class="row">
+              <div class="input-group col-md-12" data-trip data-trip-index="4" data-trip-content="<p>Set the entry point where authorized requests should be forwarded to.</p>" data-trip-position="s">
+                <input class="form-control form-control" id="id_entry_point" maxlength="100" name="entry_point" type="text" value="{{form.instance.entry_point}}">
+                <span class="input-group-btn">
+                  <button type="submit" class="btn btn-primary">Update</button>
+                </span>
+              </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <button class="btn btn-primary" id="generate-key-btn" >Generate Key</button>
+            </div>
+        </form>
+    </div>
+<!-- modal dialog for Encrypted Session Key -->
+<div class="modal fade"
+     id="generate-key" tabindex="-1" role="dialog"
+     aria-labelledby="Encrypted Session Key" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close"
+                        data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Encrypted Session Key</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <div class="controls">
+                        <input class="form-control form-control"
+                               name="key" maxlength="32" type="text" disabled
+                               value="Generating ..." />
+                    </div>
+                </div>
+                <div>
+                    <p>
+This is the AES key used to encrypt the session cookie passed
+to your application when a request was authorized.
+                    </p>
+                    <p>
+The key will only be displayed once. Keep it secure.
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="regenerate-key" type="button"
+                        class="btn btn-default">Generate</button>
+                <button type="button" class="btn btn-primary"
+                        data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- end of modal dialog for Encrypted Session Key -->
+</div>
+</div>
+{% endblock %}
+
+{% block bodyscripts %}
+<script type="text/javascript">
+/* Implementation Note #1:
+       Not including a list of dependent modules (2nd parameter to `module`)
+       "re-opens" the module for additional configuration.
+   Implementation Note #2:
+       Pasting this code in $(document).ready will lead to a $injector/unpr
+       error in Angularjs.
+*/
+var app = angular.module('ruleApp');
+/* Add the CSRF Token: */
+app.config(['$interpolateProvider', '$httpProvider', function($interpolateProvider, $httpProvider) {
+    $httpProvider.defaults.headers.common['X-CSRFToken'] = '{{csrf_token|escapejs}}';
+    /* Makes it easier to separate between django and angularjs templates */
+    $interpolateProvider.startSymbol('[[');
+    $interpolateProvider.endSymbol(']]');
+}]);
+app.constant('urls', {
+    snaplines_api_rule_url: "{% url 'snaplines_api_rule_list' app %}",
+});
+
+
+function generateKey(self) {
+        $.ajax({ type: "PUT",
+           url: "{% url 'snaplines_api_generate_key' app %}",
+           datatype: "json",
+           success: function(result) {
+               self.find("[name='key']").val(result.enc_key);
+           },
+           error: function(data) {
+               self.find("[name='key']").val("ERROR");
+               showMessages(["An error occurred while generating the key ("
+                   + data.status + " " + data.statusText
+                   + "). Please accept our apologies."], "error");
+           }
+        });
+}
+
+
+$(document).ready(function() {
+    $('#new-rule').on('shown.bs.modal', function(){
+      $('#id_new_rule_path').focus();
+    });
+
+    $("#domain-form").submit(function (e) {
+        $.ajax({ type: "PUT",
+           url: "{% url 'snaplines_api_app_detail' app %}",
+           data: JSON.stringify({
+               "domain":
+                   $("#domain-form").find("[name='domain']").val()}),
+           datatype: "json",
+           contentType: "application/json; charset=utf-8",
+           success: function(result) {
+                showMessages(["Domain updated."], "success");
+           },
+           error: function(data) {
+               showMessages(["An error occurred while updating "
+                   + " the domain (" + data.status + " " + data.statusText
+                   + "). Please accept our apologies."], "error");
+           }
+        });
+        return false;
+    });
+
+    $("#entry-point-form").submit(function (e) {
+        $.ajax({ type: "PUT",
+           url: "{% url 'snaplines_api_app_detail' app %}",
+           data: JSON.stringify({
+               "entry_point":
+                   $("#entry-point-form").find("[name='entry_point']").val()}),
+           datatype: "json",
+           contentType: "application/json; charset=utf-8",
+           success: function(result) {
+                showMessages(["Entry point updated."], "success");
+           },
+           error: function(data) {
+               if( data.responseJSON ) {
+                   message = "";
+                   for( var key in data.responseJSON ) {
+                       if( data.responseJSON.hasOwnProperty(key) ) {
+                          message += key + ": " + data.responseJSON[key] + "\n";
+                       }
+                   }
+                   showMessages([message], "error");
+               } else {
+                 showMessages(["An error occurred while updating "
+                   + " the entry point (" + data.status + " " + data.statusText
+                   + "). Please accept our apologies."], "error");
+               }
+           }
+        });
+        return false;
+    });
+
+
+    $("#regenerate-key").click(function(e) {
+        generateKey($('#generate-key'));
+    });
+    $("#generate-key").on('show.bs.modal', function(e) {
+        generateKey($(this));
+    });
+});
+</script>
+{% endblock %}
