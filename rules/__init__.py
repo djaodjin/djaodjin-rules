@@ -22,21 +22,9 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from django.apps import apps as django_apps
-from django.core.exceptions import ImproperlyConfigured
+"""
+PEP 386-compliant version number for the rules django app.
+"""
 
-from . import settings
+__version__ = '0.1-dev'
 
-
-def get_app_model():
-    """
-    Returns the Site model that is active in this project.
-    """
-    try:
-        return django_apps.get_model(settings.RULES_APP_MODEL)
-    except ValueError:
-        raise ImproperlyConfigured(
-            "RULES_APP_MODEL must be of the form 'app_label.model_name'")
-    except LookupError:
-        raise ImproperlyConfigured("RULES_APP_MODEL refers to model '%s'"\
-" that has not been installed" % settings.RULES_APP_MODEL)

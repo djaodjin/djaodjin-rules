@@ -26,9 +26,8 @@ import logging
 
 from django.shortcuts import get_object_or_404
 
-from . import get_app_model
 from .compat import datetime_or_now
-from .models import Engagement, get_current_app
+from .models import Engagement, get_app_model, get_current_app
 
 LOGGER = logging.getLogger(__name__)
 

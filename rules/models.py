@@ -28,6 +28,9 @@ Models for the rules application.
 
 import datetime, logging
 
+from django.apps import apps as django_apps
+from django.core.exceptions import ImproperlyConfigured
+
 from django.db import models
 from django.utils.timezone import utc
 from django.utils.module_loading import import_string
@@ -148,6 +151,20 @@ class Rule(models.Model):
         return '%d' % self.rule_op
 
 
+def get_app_model():
+    """
+    Returns the Site model that is active in this project.
+    """
+    try:
+        return django_apps.get_model(settings.RULES_APP_MODEL)
+    except ValueError:
+        raise ImproperlyConfigured(
+            "RULES_APP_MODEL must be of the form 'app_label.model_name'")
+    except LookupError:
+        raise ImproperlyConfigured("RULES_APP_MODEL refers to model '%s'"\
+" that has not been installed" % settings.RULES_APP_MODEL)
+
+
 def get_current_app():
     """
     Returns the default app for a site.
@@ -156,7 +173,6 @@ def get_current_app():
         app = import_string(settings.DEFAULT_APP_CALLABLE)()
         LOGGER.debug("rules.get_current_app: '%s'", app)
     else:
-        from . import get_app_model
         app = get_app_model().get(pk=settings.DEFAULT_APP_ID)
     return app
 
