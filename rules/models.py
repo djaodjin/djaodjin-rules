@@ -75,7 +75,7 @@ class AppManager(models.Manager):
         return app, created
 
 
-class App(models.Model): #pylint: disable=super-on-old-class
+class BaseApp(models.Model): #pylint: disable=super-on-old-class
     """
     A ``App`` is used to select a database and a firewall profile.
 
@@ -115,6 +115,12 @@ class App(models.Model): #pylint: disable=super-on-old-class
     class Meta:
         swappable = 'RULES_APP_MODEL'
         abstract = True
+
+
+class App(BaseApp):
+
+    def __unicode__(self): #pylint: disable=super-on-old-class
+        return unicode(self.slug)
 
 
 class Rule(models.Model):
