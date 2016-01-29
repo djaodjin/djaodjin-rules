@@ -187,7 +187,7 @@ class SessionProxyMixin(AppMixin):
                 redirect = fail_func(request, **params)
                 if redirect:
                     content_type = request.META.get('CONTENT_TYPE', '')
-                    if (content_type.startswith('text/html')
+                    if (content_type.lower() in ['text/html', 'text/plain']
                         and isinstance(redirect, basestring)):
                         return (_insert_url(
                             request, self.redirect_field_name, redirect), False)
