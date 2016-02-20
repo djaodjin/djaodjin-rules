@@ -1,4 +1,4 @@
-# Copyright (c) 2015, DjaoDjin inc.
+# Copyright (c) 2016, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -52,6 +52,6 @@ setup(
     download_url='https://github.com/djaodjin/djaodjin-rules/tarball/%s' \
         % rules.__version__,
     license='BSD',
-    description='DjaoDjin rules implementation',
+    description='HTTP proxy firewall Django App',
     long_description=open('README.md').read(),
 )
