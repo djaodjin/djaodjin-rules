@@ -205,4 +205,68 @@ ruleControllers.controller("RuleListCtrl",
                   "). Please accept our apologies."], "error");
             });
     };
+
+    $scope.generateKey = function(modal) {
+        var keyInput = $(modal).find("[name='key']");
+        $http.put(urls.rules_api_generate_key).then(
+           function success(result) {
+               keyInput.val(result.data.enc_key);
+           },
+           function error(data) {
+               keyInput.val("ERROR");
+               showMessages(["An error occurred while generating the key ("
+                   + data.status + " " + data.statusText
+                   + "). Please accept our apologies."], "error");
+           });
+    };
+
+    // XXX little ugly but works, at least for now.
+    $("#generate-key").on('show.bs.modal', function(e) {
+        $scope.generateKey("#generate-key");
+    });
+
+    $scope.submitDomain = function () {
+        var element = $(this);
+        $.ajax({ type: "PUT",
+           url: urls.rules_api_detail_url,
+           data: JSON.stringify({
+               "domain": element.find("[name='domain']").val()}),
+           datatype: "json",
+           contentType: "application/json; charset=utf-8",
+           success: function(result) {
+                showMessages(["Domain updated."], "success");
+           },
+           error: function(data) {
+               showMessages(["An error occurred while updating "
+                   + " the domain (" + data.status + " " + data.statusText
+                   + "). Please accept our apologies."], "error");
+           }
+        });
+        return false;
+    };
+
+    $scope.submitEntryPoint = function(form) {
+        var entryPoint = $(form).find("[name='entry_point']");
+        $http.put(urls.rules_api_detail_url, {"entry_point": entryPoint.val()}
+           ).then(function success(result) {
+                showMessages(["Entry point updated."], "success");
+           },
+           function error(data) {
+               if( data.responseJSON ) {
+                   message = "";
+                   for( var key in data.responseJSON ) {
+                       if( data.responseJSON.hasOwnProperty(key) ) {
+                          message += key + ": " + data.responseJSON[key] + "\n";
+                       }
+                   }
+                   showMessages([message], "error");
+               } else {
+                 showMessages(["An error occurred while updating "
+                   + " the entry point (" + data.status + " " + data.statusText
+                   + "). Please accept our apologies."], "error");
+               }
+           });
+        return false;
+    };
+
 }]);

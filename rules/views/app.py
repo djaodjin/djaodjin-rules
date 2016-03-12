@@ -1,4 +1,4 @@
-# Copyright (c) 2015, DjaoDjin inc.
+# Copyright (c) 2016, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -293,13 +293,13 @@ class SessionProxyMixin(AppMixin):
                 headers[key.replace('_', '-')] = value
 
         site = RequestSite(request)
-        if not 'HOST' in headers:
+        if 'HOST' not in headers:
             headers.update({'HOST': site.domain})
-        if not 'X-FORWARDED-FOR' in headers:
+        if 'X-FORWARDED-FOR' not in headers:
             headers.update({'X-FORWARDED-FOR': site.domain})
-        if not 'X-REAL-IP' in headers:
+        if 'X-REAL-IP' not in headers:
             headers.update({'X-REAL-IP': request.META.get('REMOTE_ADDR', None)})
-        if not 'COOKIE' in headers:
+        if 'COOKIE' not in headers:
             headers.update({'COOKIE': cookie_string})
 
         if request.META.get(

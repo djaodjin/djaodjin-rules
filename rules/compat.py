@@ -28,6 +28,7 @@ from django.utils.timezone import utc
 
 from . import settings
 
+#pylint: disable=invalid-name,no-name-in-module,unused-import,import-error
 
 def datetime_or_now(dtime_at=None):
     if not dtime_at:
@@ -36,13 +37,10 @@ def datetime_or_now(dtime_at=None):
         dtime_at = dtime_at.replace(tzinfo=utc)
     return dtime_at
 
-#pylint: disable=invalid-name
-
 try:
     from django.apps import apps
     get_model = apps.get_model
 except ImportError: # django < 1.8
-    #pylint: disable=unused-import
     from django.db.models.loading import get_model
 
 
@@ -75,6 +73,6 @@ else:
 try:
     from django.contrib.auth import get_user_model
 except ImportError: # django < 1.5
-    from django.contrib.auth.models import User #pylint: disable=unused-import
+    from django.contrib.auth.models import User
 else:
     User = get_user_model()
