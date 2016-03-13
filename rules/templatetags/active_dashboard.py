@@ -22,13 +22,13 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import logging
+import re, logging
 
 from django import template
 
+from .. import settings
 from ..compat import datetime_or_now
 from ..models import Engagement
-
 
 LOGGER = logging.getLogger(__name__)
 
@@ -36,16 +36,20 @@ register = template.Library()
 
 
 @register.filter()
-def engaged(request, trigger='default'):
+def engaged(request):
     last_visited = None
-    obj, created = Engagement.objects.get_or_create(
-        slug=trigger, user=request.user)
-    if created:
-        # Avoid too many INSERT statements
-        obj.last_visited = datetime_or_now()
-        obj.save()
-        LOGGER.info(
-            "initial '%s' engagement with %s", trigger, request.path)
-    else:
-        last_visited = obj.last_visited
+    for trigger_tuple in settings.ENGAGED_TRIGGERS:
+        if re.match(trigger_tuple[0], request.path):
+            trigger = trigger_tuple[1]
+            obj, created = Engagement.objects.get_or_create(
+                slug=trigger, user=request.user)
+            if created:
+                # Avoid too many INSERT statements
+                obj.last_visited = datetime_or_now()
+                obj.save()
+                LOGGER.info(
+                    "initial '%s' engagement with %s", trigger, request.path)
+            else:
+                last_visited = obj.last_visited
+            break
     return last_visited
