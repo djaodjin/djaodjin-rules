@@ -1,4 +1,4 @@
-# Copyright (c) 2015, DjaoDjin inc.
+# Copyright (c) 2016, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -22,46 +22,48 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from . import settings
+import datetime, logging
 
-#pylint: disable=invalid-name,no-name-in-module,unused-import,import-error
-
-try:
-    from django.apps import apps
-    get_model = apps.get_model
-except ImportError: # django < 1.8
-    from django.db.models.loading import get_model
+from django.apps import apps as django_apps
+from django.core.exceptions import ImproperlyConfigured
+from django.utils.module_loading import import_string
+from django.utils.timezone import utc
 
 
-def get_model_class(full_name, settings_meta):
+LOGGER = logging.getLogger(__name__)
+
+
+def datetime_or_now(dtime_at=None):
+    if not dtime_at:
+        return datetime.datetime.utcnow().replace(tzinfo=utc)
+    if dtime_at.tzinfo is None:
+        dtime_at = dtime_at.replace(tzinfo=utc)
+    return dtime_at
+
+
+def get_app_model():
     """
-    Returns a model class loaded from *full_name*. *settings_meta* is the name
-    of the corresponding settings variable (used for error messages).
+    Returns the Site model that is active in this project.
     """
-    from django.core.exceptions import ImproperlyConfigured
-
+    from . import settings
     try:
-        app_label, model_name = full_name.split('.')
+        return django_apps.get_model(settings.RULES_APP_MODEL)
     except ValueError:
         raise ImproperlyConfigured(
-            "%s must be of the form 'app_label.model_name'" % settings_meta)
-    model_class = get_model(app_label, model_name)
-    if model_class is None:
-        raise ImproperlyConfigured(
-            "%s refers to model '%s' that has not been installed"
-            % (settings_meta, full_name))
-    return model_class
+            "RULES_APP_MODEL must be of the form 'app_label.model_name'")
+    except LookupError:
+        raise ImproperlyConfigured("RULES_APP_MODEL refers to model '%s'"\
+" that has not been installed" % settings.RULES_APP_MODEL)
 
 
-if isinstance(settings.ACCOUNT_MODEL, str):
-    Account = get_model_class(settings.ACCOUNT_MODEL, 'ACCOUNT_MODEL')
-else:
-    Account = settings.ACCOUNT_MODEL
-
-
-try:
-    from django.contrib.auth import get_user_model
-except ImportError: # django < 1.5
-    from django.contrib.auth.models import User
-else:
-    User = get_user_model()
+def get_current_app():
+    """
+    Returns the default app for a site.
+    """
+    from . import settings
+    if settings.DEFAULT_APP_CALLABLE:
+        app = import_string(settings.DEFAULT_APP_CALLABLE)()
+        LOGGER.debug("rules.get_current_app: '%s'", app)
+    else:
+        app = get_app_model().objects.get(pk=settings.DEFAULT_APP_ID)
+    return app

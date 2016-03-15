@@ -24,54 +24,17 @@
 
 import logging
 
-from django.core.urlresolvers import reverse
-from django.shortcuts import get_object_or_404
+from . import settings
+from .models import Engagement
+from .utils import datetime_or_now
+from .extras import AppMixinBase
 
-from .compat import datetime_or_now
-from .models import Engagement, get_app_model, get_current_app
 
 LOGGER = logging.getLogger(__name__)
 
 
-class AppMixin(object):
-    """
-    Returns a ``App`` from a URL.
-    """
-    app_url_kwarg = 'app'
-
-    @property
-    def account(self):
-        if not hasattr(self, '_account'):
-            self._account = self.app.account
-        return self._account
-
-    @property
-    def app(self):
-        if not hasattr(self, '_app'):
-            if self.app_url_kwarg in self.kwargs:
-                self._app = get_object_or_404(get_app_model(),
-                    slug=self.kwargs.get(self.app_url_kwarg))
-            else:
-                self._app = get_current_app()
-        return self._app
-
-    def get_context_data(self, **kwargs):
-        context = super(AppMixin, self).get_context_data(**kwargs)
-        context.update({'app': self.app})
-        urls_rules = {
-            'api_rules': reverse('rules_api_rule_list', args=(self.app,)),
-            'api_detail': reverse('rules_api_app_detail', args=(self.app,)),
-            'api_generate_key': reverse(
-                'rules_api_generate_key', args=(self.app,))
-        }
-        if 'urls' in context:
-            if 'rules' in context['urls']:
-                context['urls']['rules'].update(urls_rules)
-            else:
-                context['urls'].update({'rules': urls_rules})
-        else:
-            context.update({'urls': {'rules': urls_rules}})
-        return context
+class AppMixin(AppMixinBase, settings.EXTRA_MIXIN):
+    pass
 
 
 class EngagementMixin(object):

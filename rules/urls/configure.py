@@ -24,15 +24,9 @@
 
 from django.conf.urls import url
 
-from ..settings import SLUG_RE
-from ..views import AppRedirectView
 from ..views.app import AppDashboardView
 
 urlpatterns = [
-    url(r'^proxy/rules/', AppRedirectView.as_view(
-        pattern_name='rules_update'),
-        name='rules_app_update'),
-    url(r'^proxy/(?P<app>%s)/rules/'  % SLUG_RE,
-        AppDashboardView.as_view(),
-        name='rules_update'),
+    url(r'^proxy/rules/',
+        AppDashboardView.as_view(), name='rules_update'),
 ]

@@ -28,17 +28,16 @@ URLs for the resources API of rules.
 
 from django.conf.urls import url
 
-from ...settings import SLUG_RE
 from ...api.keys import (AppUpdateAPIView, GenerateKeyAPIView)
 from ...api.rules import RuleListAPIView, RuleDetailAPIView
 
 urlpatterns = [
-    url(r'^proxy/(?P<app>%s)/key/' % SLUG_RE,
+    url(r'^proxy/key/',
         GenerateKeyAPIView.as_view(), name='rules_api_generate_key'),
-    url(r'^proxy/(?P<app>%s)/rules(?P<rule>\S+)' % SLUG_RE,
+    url(r'^proxy/rules(?P<rule>\S+)',
         RuleDetailAPIView.as_view(), name='rules_api_rule_detail'),
-    url(r'^proxy/(?P<app>%s)/rules' % SLUG_RE,
+    url(r'^proxy/rules',
         RuleListAPIView.as_view(), name='rules_api_rule_list'),
-    url(r'^proxy/(?P<app>%s)/$' % SLUG_RE,
+    url(r'^proxy/$',
         AppUpdateAPIView.as_view(), name='rules_api_app_detail'),
 ]

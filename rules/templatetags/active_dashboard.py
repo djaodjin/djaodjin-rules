@@ -27,8 +27,9 @@ import re, logging
 from django import template
 
 from .. import settings
-from ..compat import datetime_or_now
 from ..models import Engagement
+from ..utils import datetime_or_now
+
 
 LOGGER = logging.getLogger(__name__)
 

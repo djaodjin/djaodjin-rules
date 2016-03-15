@@ -91,7 +91,7 @@ def _load_func(path):
     return func
 
 
-class SessionProxyMixin(AppMixin):
+class SessionProxyMixin(object):
     """
     Proxy to the application
 
@@ -398,7 +398,7 @@ class SessionProxyMixin(AppMixin):
         return proxy_response
 
 
-class SessionProxyView(SessionProxyMixin, TemplateView):
+class SessionProxyView(SessionProxyMixin, AppMixin, TemplateView):
 
     pass
 
@@ -427,7 +427,7 @@ class AppDashboardView(AppMixin, UpdateView):
                 cls_name = cls_path.split('.')[-1].lower()
                 try:
                     queryset = cls.objects.filter(
-                        organization=self.account, is_active=True)
+                        organization=self.app.account, is_active=True)
                 except FieldError:
                     queryset = cls.objects.all()
                 for obj in queryset:
@@ -436,5 +436,5 @@ class AppDashboardView(AppMixin, UpdateView):
                          rule[1] % {cls_path: obj.title})]
             else:
                 rules += [rule]
-        context.update({'rules': rules, 'organization': self.account})
+        context.update({'rules': rules, 'organization': self.app.account})
         return context
