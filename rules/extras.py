@@ -52,19 +52,20 @@ class AppMixinBase(object):
         if account_url_kwarg in self.kwargs:
             url_kwargs.update({
                 account_url_kwarg: self.kwargs[account_url_kwarg]})
-        urls_rules = {
-            'api_rules': reverse('rules_api_rule_list', kwargs=url_kwargs),
-            'api_detail': reverse('rules_api_app_detail', kwargs=url_kwargs),
-            'api_generate_key': reverse(
-                'rules_api_generate_key', kwargs=url_kwargs),
-            'rules_update': reverse('rules_update', kwargs=url_kwargs)
-        }
+        urls = {
+            'rules':{
+               'api_rules': reverse('rules_api_rule_list', kwargs=url_kwargs),
+               'api_detail': reverse('rules_api_app_detail', kwargs=url_kwargs),
+               'api_generate_key': reverse(
+                   'rules_api_generate_key', kwargs=url_kwargs),
+               'app': reverse('rules_update', kwargs=url_kwargs)}}
         if 'urls' in context:
-            if 'rules' in context['urls']:
-                context['urls']['rules'].update(urls_rules)
-            else:
-                context['urls'].update({'rules': urls_rules})
+            for key, val in urls.iteritems():
+                if key in context['urls']:
+                    context['urls'][key].update(val)
+                else:
+                    context['urls'].update({key: val})
         else:
-            context.update({'urls': {'rules': urls_rules}})
+            context.update({'urls': urls})
         context.update({'app': self.app})
         return context
