@@ -242,7 +242,8 @@ class SessionProxyMixin(object):
             try:
                 return self.fetch_remote_page()
             except RequestException as err:
-                if 'text/html' in request.META.get('HTTP_ACCEPT'):
+                content_types = request.META.get('HTTP_ACCEPT', [])
+                if 'text/html' in content_types:
                     messages.error(
                         request, 'Unable to forward request. %s' % err)
         return None
