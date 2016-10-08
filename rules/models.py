@@ -63,7 +63,7 @@ class AppManager(models.Manager):
         app, created = super(AppManager, self).get_or_create(
             defaults=defaults, **kwargs)
         for rank_min_one, (path, rule_op, is_forward) \
-            in enumerate([('/', Rule.ANY, False)]):
+            in enumerate(settings.DEFAULT_RULES):
             #pylint:disable=no-member
             Rule.objects.db_manager(using=self._db).get_or_create(
                 app=app, rank=rank_min_one + 1,

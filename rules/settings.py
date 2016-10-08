@@ -1,4 +1,4 @@
-# Copyright (c) 2015, DjaoDjin inc.
+# Copyright (c) 2016, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,7 @@ _SETTINGS = {
     'ACCOUNT_URL_KWARG': None,
     'DEFAULT_APP_CALLABLE': None,
     'DEFAULT_APP_ID': getattr(settings, 'SITE_ID', 1),
+    'DEFAULT_RULES': [('/', 0, False)],
     'ENGAGED_TRIGGERS': tuple([]),
     'EXTRA_MIXIN': object,
     'PATH_PREFIX_CALLABLE': None,
@@ -55,6 +56,7 @@ ACCOUNT_MODEL = _SETTINGS.get('ACCOUNT_MODEL')
 ACCOUNT_URL_KWARG = _SETTINGS.get('ACCOUNT_URL_KWARG')
 DEFAULT_APP_CALLABLE = _SETTINGS.get('DEFAULT_APP_CALLABLE')
 DEFAULT_APP_ID = _SETTINGS.get('DEFAULT_APP_ID')
+DEFAULT_RULES = _SETTINGS.get('DEFAULT_RULES')
 ENGAGED_TRIGGERS = _SETTINGS.get('ENGAGED_TRIGGERS')
 EXTRA_MIXIN = _SETTINGS.get('EXTRA_MIXIN')
 PATH_PREFIX_CALLABLE = _SETTINGS.get('PATH_PREFIX_CALLABLE')
