@@ -28,8 +28,7 @@ from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib import messages
 from django.contrib.sites.requests import RequestSite
 from django.core.exceptions import FieldError
-from django.http import HttpResponse
-from django.http.cookie import SimpleCookie
+from django.http import HttpResponse, SimpleCookie
 from django.views.generic import UpdateView, TemplateView
 import requests
 from requests.exceptions import RequestException
@@ -156,7 +155,11 @@ class SessionProxyMixin(object):
         if self.app.forward_session:
             cookies[SESSION_COOKIE_NAME] = self.session_cookie_string
         #pylint: disable=maybe-no-member
-        cookie_string = cookies.output(header='', sep='; ')
+        # Something changed in `SimpleCookie.output` that creates an invalid
+        # cookie string starting with a spacel or there are more strident
+        # checks in the requests module (2.11.1) that prevents passing
+        # a cookie string starting with a space.
+        cookie_string = cookies.output(header='', sep=';').strip()
 
         # Retrieve the HTTP headers from a WSGI environment dictionary.  See
         # https://docs.djangoapp.com/en/dev/ref/request-response/\
