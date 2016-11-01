@@ -150,13 +150,18 @@ def check_permissions(request, app, redirect_field_name=REDIRECT_FIELD_NAME,
                     login_url or django_settings.LOGIN_URL), False, session)
             fail_func = _load_func(
                 settings.RULE_OPERATORS[matched.rule_op][1])
+            LOGGER.debug("calling %s(user=%s, params=%s) ...",
+                fail_func.__name__, request.user, params)
             redirect = fail_func(request, **params)
+            LOGGER.debug("calling %s(user=%s, params=%s) => %s",
+                fail_func.__name__, request.user, params, redirect)
             if redirect:
                 content_type = request.META.get('CONTENT_TYPE', '')
                 if (content_type.lower() in ['text/html', 'text/plain']
                     and isinstance(redirect, basestring)):
                     return (_insert_url(
                         request, redirect_field_name, redirect), False, session)
+                LOGGER.debug("Looks like an API call => PermissionDenied")
                 raise PermissionDenied
             return (None, matched.is_forward, session)
     LOGGER.debug("unmatched %s", request.path)
