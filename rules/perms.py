@@ -63,7 +63,9 @@ def _get_full_page_path(page_path):
     if not page_path.startswith("/"):
         page_path = "/" + page_path
     if settings.PATH_PREFIX_CALLABLE:
-        path_prefix = "/" + import_string(settings.PATH_PREFIX_CALLABLE)()
+        path_prefix = import_string(settings.PATH_PREFIX_CALLABLE)()
+        if path_prefix and not path_prefix.startswith("/"):
+            path_prefix = "/" + path_prefix
     return "%s%s" % (path_prefix, page_path)
 
 
