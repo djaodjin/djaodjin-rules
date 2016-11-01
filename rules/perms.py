@@ -128,6 +128,11 @@ def _find_rule(request, app):
     return (None, {})
 
 
+def _get_accept_list(request):
+    http_accept = request.META.get('HTTP_ACCEPT', '*/*')
+    return [item.strip() for item in http_accept.split(',')]
+
+
 
 def check_permissions(request, app, redirect_field_name=REDIRECT_FIELD_NAME,
                       login_url=None):
@@ -156,13 +161,14 @@ def check_permissions(request, app, redirect_field_name=REDIRECT_FIELD_NAME,
             LOGGER.debug("calling %s(user=%s, params=%s) => %s",
                 fail_func.__name__, request.user, params, redirect)
             if redirect:
-                content_type = request.META.get('CONTENT_TYPE', '')
-                if (content_type.lower() in ['text/html', 'text/plain']
+                http_accepts = _get_accept_list(request)
+                if ('text/html' in http_accepts
                     and isinstance(redirect, basestring)):
                     return (_insert_url(
                         request, redirect_field_name, redirect), False, session)
-                LOGGER.debug("Content-Type: '%s' looks like an API call "\
-                    "=> PermissionDenied", content_type)
+                LOGGER.debug("Looks like an API call (Accept: '%s')"\
+                    " => PermissionDenied",
+                    request.META.get('HTTP_ACCEPT', '*/*'))
                 raise PermissionDenied
             return (None, matched.is_forward, session)
     LOGGER.debug("unmatched %s", request.path)
