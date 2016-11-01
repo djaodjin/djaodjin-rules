@@ -60,9 +60,11 @@ def _insert_url(request, redirect_field_name=REDIRECT_FIELD_NAME,
 
 def _get_full_page_path(page_path):
     path_prefix = ""
+    if not page_path.startswith("/"):
+        page_path = "/" + page_path
     if settings.PATH_PREFIX_CALLABLE:
-        path_prefix = import_string(settings.PATH_PREFIX_CALLABLE)()
-    return '/%s%s' % (path_prefix, page_path)
+        path_prefix = "/" + import_string(settings.PATH_PREFIX_CALLABLE)()
+    return "%s%s" % (path_prefix, page_path)
 
 
 def _load_func(path):
