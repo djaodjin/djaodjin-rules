@@ -161,7 +161,8 @@ def check_permissions(request, app, redirect_field_name=REDIRECT_FIELD_NAME,
                     and isinstance(redirect, basestring)):
                     return (_insert_url(
                         request, redirect_field_name, redirect), False, session)
-                LOGGER.debug("Looks like an API call => PermissionDenied")
+                LOGGER.debug("Content-Type: '%s' looks like an API call "\
+                    "=> PermissionDenied", content_type)
                 raise PermissionDenied
             return (None, matched.is_forward, session)
     LOGGER.debug("unmatched %s", request.path)
