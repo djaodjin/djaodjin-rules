@@ -304,10 +304,13 @@ class AppDashboardView(AppMixin, UpdateView):
         return self.app
 
     def get_context_data(self, **kwargs):
+        #pylint:disable=too-many-locals
         context = super(AppDashboardView, self).get_context_data(**kwargs)
         rules = []
-        for rule in settings.DB_RULE_OPERATORS:
-            look = re.search(r'%\((\S+)\)s', rule[1])
+        for idx, rule in enumerate(settings.RULE_OPERATORS):
+            short_name, _, defaults = rule
+            parms = defaults.copy()
+            look = re.search(r'%\((\S+)\)s', short_name)
             if look:
                 cls_path = look.group(1)
                 cls = get_model(cls_path)
@@ -318,10 +321,12 @@ class AppDashboardView(AppMixin, UpdateView):
                 except FieldError:
                     queryset = cls.objects.all()
                 for obj in queryset:
-                    rules += [
-                        ('%d/%s' % (rule[0], json.dumps({cls_name: obj.slug})),
-                         rule[1] % {cls_path: obj.title})]
+                    parms.update({cls_name: obj.slug})
+                    identifier = '%d/%s' % (idx, json.dumps(parms))
+                    parms.update()
+                    descr = short_name % {cls_path: obj.title}
+                    rules += [(identifier, descr)]
             else:
-                rules += [rule]
+                rules += [(str(idx), short_name)]
         context.update({'rules': rules, 'organization': self.app.account})
         return context

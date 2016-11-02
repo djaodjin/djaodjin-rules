@@ -22,7 +22,7 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import json, re, urlparse
+import json, urlparse
 
 from rest_framework import serializers
 
@@ -55,8 +55,7 @@ class AppSerializer(serializers.ModelSerializer):
 
 
 class RuleSerializer(serializers.ModelSerializer):
-    allow = serializers.CharField(required=False,
-        source='get_allow')
+    allow = serializers.CharField(required=False, source='get_allow')
     is_forward = serializers.BooleanField(required=False)
 
     class Meta:
@@ -73,20 +72,17 @@ class RuleSerializer(serializers.ModelSerializer):
                     raise ValueError("unknown rule %d" % rule_op)
                 if len(parts) > 1:
                     params = json.loads(parts[1])
-                    look = re.search(r'%\((\S+)\)s',
-                        settings.DB_RULE_OPERATORS[rule_op][1])
-                    if look:
-                        try:
-                            cls_path = look.group(1)
-                            cls_name = cls_path.split('.')[-1].lower()
-                            kwargs = json.dumps({cls_name: params[cls_name]})
-                        except KeyError:
-                            raise serializers.ValidationError(
-                                "invalid params for rule %d" % rule_op)
+                    kwargs = {}
+                    for key, dft in settings.RULE_OPERATORS[rule_op][2].items():
+                        if key in params:
+                            kwargs[key] = params[key]
+                        else:
+                            kwargs[key] = dft
+                    kwargs_encoded = json.dumps(kwargs)
                 else:
-                    kwargs = ""
+                    kwargs_encoded = ""
                 attrs['rule_op'] = rule_op
-                attrs['kwargs'] = kwargs
+                attrs['kwargs'] = kwargs_encoded
             except ValueError, err:
                 raise serializers.ValidationError(str(err))
         return super(RuleSerializer, self).validate(attrs)

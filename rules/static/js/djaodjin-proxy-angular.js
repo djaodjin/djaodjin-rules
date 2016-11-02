@@ -39,8 +39,8 @@ app.directive("dndList", function() {
                 // on stop we determine the new index of the
                 // item and store it there
                 var newIndex = ($(ui.item).index());
-                var oldRank = toUpdate[startIndex].rank;
-                var newRank = toUpdate[newIndex].rank;
+                var oldRank = toUpdate.results[startIndex].rank;
+                var newRank = toUpdate.results[newIndex].rank;
                 scope.saveOrder(oldRank, newRank);
             },
             axis: "y"
@@ -98,8 +98,7 @@ ruleServices.factory("Rule", ["Resource", "urls",
     return $resource(
         // No slash, it is already part of @path.
         urls.rules_api_rule_url, {},
-        {saveData: {method: "PATCH", isArray: true},
-         update: { method: "put", isArray: false,
+        {update: { method: "put", isArray: false,
                    url: urls.rules_api_rule_url + ":rule",
                    params: {"rule": "@path"}},
          remove: { method: "delete", isArray: false,
@@ -150,19 +149,15 @@ ruleControllers.controller("RuleListCtrl",
     $scope.save = function(rule, success) {
         if ( !rule.rank ) {
             rule.rank = 0;
-            return Rule.create($scope.params, rule, success, function(data) {
-                // error
-                showMessages(["An error occurred while creating a rule (" +
-                  data.status + " " + data.statusText +
-                  "). Please accept our apologies."], "error");
+            return Rule.create($scope.params, rule, success,
+                function(resp) { // error
+                    showErrorMessages(resp);
             });
         }
         else {
-            return Rule.update($scope.params, rule, success, function(data) {
-                // error
-                showMessages(["An error occurred while updating a rule (" +
-                  data.status + " " + data.statusText +
-                  "). Please accept our apologies."], "error");
+            return Rule.update($scope.params, rule, success,
+                function(resp) { // error
+                    showErrorMessages(resp);
             });
         }
     };
@@ -195,14 +190,12 @@ ruleControllers.controller("RuleListCtrl",
     };
 
     $scope.saveOrder = function(startIndex, newIndex) {
-        Rule.saveData([{oldpos: startIndex, newpos: newIndex}],
-            function success(data) {
-                $scope.rules = data;
-            }, function err(data) {
-                // error
-                showMessages(["An error occurred while updating a rule (" +
-                  data.status + " " + data.statusText +
-                  "). Please accept our apologies."], "error");
+        $http.patch(urls.rules_api_rule_url,
+            [{oldpos: startIndex, newpos: newIndex}]).then(
+            function success(resp) {
+                $scope.rules = resp.data;
+            }, function(resp) { // error
+                showErrorMessages(resp);
             });
     };
 
@@ -212,11 +205,9 @@ ruleControllers.controller("RuleListCtrl",
            function success(result) {
                keyInput.val(result.data.enc_key);
            },
-           function error(data) {
+           function error(resp) {
                keyInput.val("ERROR");
-               showMessages(["An error occurred while generating the key ("
-                   + data.status + " " + data.statusText
-                   + "). Please accept our apologies."], "error");
+               showErrorMessages(resp);
            });
     };
 
@@ -236,10 +227,8 @@ ruleControllers.controller("RuleListCtrl",
            success: function(result) {
                 showMessages(["Domain updated."], "success");
            },
-           error: function(data) {
-               showMessages(["An error occurred while updating "
-                   + " the domain (" + data.status + " " + data.statusText
-                   + "). Please accept our apologies."], "error");
+           error: function(resp) {
+               showErrorMessages(resp);
            }
         });
         return false;
@@ -251,20 +240,8 @@ ruleControllers.controller("RuleListCtrl",
            ).then(function success(result) {
                 showMessages(["Entry point updated."], "success");
            },
-           function error(data) {
-               if( data.responseJSON ) {
-                   message = "";
-                   for( var key in data.responseJSON ) {
-                       if( data.responseJSON.hasOwnProperty(key) ) {
-                          message += key + ": " + data.responseJSON[key] + "\n";
-                       }
-                   }
-                   showMessages([message], "error");
-               } else {
-                 showMessages(["An error occurred while updating "
-                   + " the entry point (" + data.status + " " + data.statusText
-                   + "). Please accept our apologies."], "error");
-               }
+           function error(resp) {
+               showErrorMessages(resp);
            });
         return false;
     };

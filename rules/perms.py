@@ -23,12 +23,11 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import json, logging, urlparse
-from importlib import import_module
 from itertools import izip
 
 from django.conf import settings as django_settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
-from django.core.exceptions import ImproperlyConfigured, PermissionDenied
+from django.core.exceptions import PermissionDenied
 from django.utils.module_loading import import_string
 
 from . import settings
@@ -67,27 +66,6 @@ def _get_full_page_path(page_path):
         if path_prefix and not path_prefix.startswith("/"):
             path_prefix = "/" + path_prefix
     return "%s%s" % (path_prefix, page_path)
-
-
-def _load_func(path):
-    """
-    Load a function from its path as a string.
-    """
-    dot_pos = path.rfind('.')
-    module, attr = path[:dot_pos], path[dot_pos + 1:]
-    try:
-        mod = import_module(module)
-    except ImportError as err:
-        raise ImproperlyConfigured('Error importing %s: "%s"'
-            % (path, err))
-    except ValueError:
-        raise ImproperlyConfigured('Error importing %s: ' % path)
-    try:
-        func = getattr(mod, attr)
-    except AttributeError:
-        raise ImproperlyConfigured('Module "%s" does not define a "%s"'
-            % (module, attr))
-    return func
 
 
 def _find_rule(request, app):
@@ -153,8 +131,8 @@ def check_permissions(request, app, redirect_field_name=REDIRECT_FIELD_NAME,
                 LOGGER.debug("user is not authenticated")
                 return (_insert_url(request, redirect_field_name,
                     login_url or django_settings.LOGIN_URL), False, session)
-            fail_func = _load_func(
-                settings.RULE_OPERATORS[matched.rule_op][1])
+            _, fail_func, defaults = settings.RULE_OPERATORS[matched.rule_op]
+            params = defaults.copy().update(params)
             LOGGER.debug("calling %s(user=%s, params=%s) ...",
                 fail_func.__name__, request.user, params)
             redirect = fail_func(request, **params)
