@@ -132,12 +132,13 @@ def check_permissions(request, app, redirect_field_name=REDIRECT_FIELD_NAME,
                 return (_insert_url(request, redirect_field_name,
                     login_url or django_settings.LOGIN_URL), False, session)
             _, fail_func, defaults = settings.RULE_OPERATORS[matched.rule_op]
-            params = defaults.copy().update(params)
-            LOGGER.debug("calling %s(user=%s, params=%s) ...",
-                fail_func.__name__, request.user, params)
-            redirect = fail_func(request, **params)
-            LOGGER.debug("calling %s(user=%s, params=%s) => %s",
-                fail_func.__name__, request.user, params, redirect)
+            kwargs = defaults.copy()
+            kwargs.update(params)
+            LOGGER.debug("calling %s(user=%s, kwargs=%s) ...",
+                fail_func.__name__, request.user, kwargs)
+            redirect = fail_func(request, **kwargs)
+            LOGGER.debug("calling %s(user=%s, kwargs=%s) => %s",
+                fail_func.__name__, request.user, kwargs, redirect)
             if redirect:
                 http_accepts = _get_accept_list(request)
                 if ('text/html' in http_accepts
