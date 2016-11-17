@@ -44,11 +44,8 @@ _SETTINGS = {
     'EXTRA_MIXIN': object,
     'PATH_PREFIX_CALLABLE': None,
     'RULE_OPERATORS': (
-        ('Any',
-         ''),
-        ('Authenticated',
-         'django.contrib.auth.decorators.login_required'),
-    ),
+        '',
+        'django.contrib.auth.decorators.login_required'),
     'SESSION_SERIALIZER': 'rules.api.serializers.UserSerializer'
 }
 _SETTINGS.update(getattr(settings, 'RULES', {}))
