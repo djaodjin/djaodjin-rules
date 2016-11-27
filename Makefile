@@ -19,9 +19,9 @@ install::
 	cd $(srcDir) && $(PYTHON) ./setup.py --quiet \
 		build -b $(CURDIR)/build install
 
-install-conf:: credentials
+install-conf:: $(srcDir)/credentials
 
-credentials: $(srcDir)/testsite/etc/credentials
+$(srcDir)/credentials: $(srcDir)/testsite/etc/credentials
 	[ -f $@ ] || \
 		SECRET_KEY=`python -c 'import sys ; from random import choice ; sys.stdout.write("".join([choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^*-_=+") for i in range(50)]))'` ; \
 		sed -e "s,\%(SECRET_KEY)s,$${SECRET_KEY}," $< > $@
@@ -30,6 +30,6 @@ initdb: install-conf
 	-rm -f $(srcDir)/db.sqlite
 	cd $(srcDir) && $(PYTHON) ./manage.py migrate $(RUNSYNCDB) --noinput
 
-doc:
+doc: install-conf
 	$(installDirs) docs
 	cd $(srcDir) && sphinx-build -b html ./docs $(PWD)/docs

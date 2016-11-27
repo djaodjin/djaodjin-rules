@@ -22,10 +22,40 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#pylint:disable=line-too-long
+# There does not seem to be a way to make simple table with line breaks
+# in cells.
 """
 Convenience module for access of rules application settings,
 which enforces default settings when the main settings module
 does not contain the appropriate settings.
+
+========================  ======================  =============
+ Name                      Default                 Description
+========================  ======================  =============
+ACCOUNT_MODEL             AUTH_USER_MODEL         Model used in a multi-party implementation.
+ACCOUNT_URL_KWARG         None                    Variable name used in url definition to select an account.
+DEFAULT_APP_CALLABLE      None                    Function to get the default app.
+DEFAULT_APP_ID            SITE_ID                 Primary key to get the default app.
+DEFAULT_RULES             ('/', 0, False)         Rules used when creating a new account
+ENGAGED_TRIGGERS          []                      Triggers to record
+EXTRA_MIXIN               object                  Mixin to derive from
+PATH_PREFIX_CALLABLE      None                    Function to retrive the path prefix
+RULE_OPERATORS            ('', 'login_required')  Rules that can be used to decorate a URL.
+SESSION_SERIALIZER        ``UserSerializer``      Serializer used to represent sessions.
+========================  ======================  =============
+
+To override defaults, add a RULES configuration block to your project
+settings.py
+
+Example:
+
+.. code-block:: python
+
+    RULES = {
+      'ACCOUNT_MODEL': 'saas.Organization'
+    }
+
 """
 import inspect
 from importlib import import_module

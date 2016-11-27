@@ -319,7 +319,11 @@ class AppDashboardView(AppMixin, UpdateView):
                     queryset = cls.objects.filter(
                         organization=self.app.account, is_active=True)
                 except FieldError:
-                    queryset = cls.objects.all()
+                    try:
+                        queryset = cls.objects.filter(
+                            organization=self.app.account)
+                    except FieldError:
+                        queryset = cls.objects.all()
                 for obj in queryset:
                     parms.update({cls_name: obj.slug})
                     identifier = '%d/%s' % (idx, json.dumps(parms))
