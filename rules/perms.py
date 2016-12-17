@@ -68,11 +68,16 @@ def _get_full_page_path(page_path):
     return "%s%s" % (path_prefix, page_path)
 
 
-def _find_rule(request, app):
+def find_rule(request, app):
     """
     Returns a tuple mad of the rule that was matched and a dictionnary
     of parameters that where extracted from the URL (i.e. :slug).
     """
+    matched_rule = getattr(request, 'matched_rule', None)
+    matched_params = getattr(request, 'matched_params', {})
+    if matched_rule:
+        # Use cached tuple.
+        return (matched_rule, matched_params)
     params = {}
     request_path = request.path
     parts = [part for part in request_path.split('/') if part]
@@ -115,7 +120,7 @@ def _get_accept_list(request):
 def check_permissions(request, app, redirect_field_name=REDIRECT_FIELD_NAME,
                       login_url=None):
     session = {}
-    matched, params = _find_rule(request, app)
+    matched, params = find_rule(request, app)
     if matched:
         # We will need manager relations and subscriptions in
         # almost all cases, so let's just load all of it here.
