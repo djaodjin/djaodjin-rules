@@ -24,10 +24,15 @@
 
 from __future__ import unicode_literals
 
+import logging
+
 from django.middleware.csrf import CsrfViewMiddleware
 
 from .perms import find_rule
 from .utils import get_current_app
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 class RulesMiddleware(CsrfViewMiddleware):
@@ -44,10 +49,13 @@ class RulesMiddleware(CsrfViewMiddleware):
             app = get_current_app()
             request.matched_rule, request.matched_params = find_rule(
                 request, app)
-            if request.matched_rule.is_forward:
+            if (request.matched_rule.is_forward
+                and request.method not in ('GET', 'HEAD', 'OPTIONS', 'TRACE')):
                 # We are forwarding the request so the CSRF is delegated
                 # to the application handling the forwarded request.
                 #pylint:disable=protected-access
                 request._dont_enforce_csrf_checks = True
+                LOGGER.debug("dont enforce csrf checks on %s %s",
+                    request.method, request.path)
         return super(RulesMiddleware, self).process_view(
             request, callback, callback_args, callback_kwargs)
