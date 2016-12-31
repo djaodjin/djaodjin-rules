@@ -96,6 +96,12 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
        help_text='Encryption key used to sign proxyed requests')
     forward_session = models.BooleanField(default=True)
 
+    objects = AppManager()
+
+    class Meta:
+        swappable = 'RULES_APP_MODEL'
+        abstract = True
+
     def __unicode__(self): #pylint: disable=super-on-old-class
         return unicode(self.slug)
 
@@ -106,11 +112,15 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
         return Rule.objects.db_manager(using=self._state.db).filter(
             app=self).order_by('rank')
 
-    objects = AppManager()
-
-    class Meta:
-        swappable = 'RULES_APP_MODEL'
-        abstract = True
+    def get_changes(self, update_fields):
+        changes = {}
+        for field_name in ('entry_point', 'enc_key', 'forward_session'):
+            pre_value = getattr(self, field_name, None)
+            post_value = update_fields.get(field_name, None)
+            if post_value is not None and pre_value != post_value:
+                changes[field_name] = {
+                    'pre': pre_value, 'post': post_value}
+        return changes
 
 
 class App(BaseApp):
