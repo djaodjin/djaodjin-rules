@@ -76,7 +76,7 @@ def find_rule(request, app):
     request_path_parts = [part for part in request_path.split('/') if part]
     for rule in app.get_rules():
         LOGGER.debug("Match %s with %s ...",
-            request_path_parts.join('/'), rule.get_full_page_path())
+            '/'.join(request_path_parts), rule.get_full_page_path())
         params = rule.match(request_path_parts)
         if params is not None:
             LOGGER.debug(
