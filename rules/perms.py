@@ -1,4 +1,4 @@
-# Copyright (c) 2016, DjaoDjin inc.
+# Copyright (c) 2017, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -22,8 +22,7 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import json, logging, urlparse
-from itertools import izip
+import logging, urlparse
 
 from django.conf import settings as django_settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
@@ -57,15 +56,9 @@ def _insert_url(request, redirect_field_name=REDIRECT_FIELD_NAME,
     return redirect_to_login(path, inserted_url, redirect_field_name)
 
 
-def _get_full_page_path(page_path):
-    path_prefix = ""
-    if not page_path.startswith("/"):
-        page_path = "/" + page_path
-    if settings.PATH_PREFIX_CALLABLE:
-        path_prefix = import_string(settings.PATH_PREFIX_CALLABLE)()
-        if path_prefix and not path_prefix.startswith("/"):
-            path_prefix = "/" + path_prefix
-    return "%s%s" % (path_prefix, page_path)
+def _get_accept_list(request):
+    http_accept = request.META.get('HTTP_ACCEPT', '*/*')
+    return [item.strip() for item in http_accept.split(',')]
 
 
 def find_rule(request, app):
@@ -80,41 +73,51 @@ def find_rule(request, app):
         return (matched_rule, matched_params)
     params = {}
     request_path = request.path
-    parts = [part for part in request_path.split('/') if part]
+    request_path_parts = [part for part in request_path.split('/') if part]
     for rule in app.get_rules():
-        page_path = _get_full_page_path(rule.path)
-        LOGGER.debug("Match %s with %s ...", request_path, page_path)
-        # Normalize to avoid issues with path starting or ending with '/':
-        pat_parts = [part for part in page_path.split('/') if part]
-        if len(parts) >= len(pat_parts):
-            # Only worth matching if the URL is longer than the pattern.
-            try:
-                params = json.loads(rule.kwargs)
-            except ValueError:
-                params = {}
-            matched = rule
-            for part, pat_part in izip(parts, pat_parts):
-                if pat_part.startswith(':'):
-                    slug = pat_part[1:]
-                    if slug in params:
-                        params.update({slug: part})
-                elif part != pat_part:
-                    matched = None
-                    break
-            if matched:
-                LOGGER.debug(
-                    "matched %s with %s (rule=%d, forward=%s, params=%s)",
-                    request_path, page_path,
-                    matched.rule_op, matched.is_forward,
-                    params)
-                return (matched, params)
+        LOGGER.debug("Match %s with %s ...",
+            request_path_parts.join('/'), rule.get_full_page_path())
+        params = rule.match(request_path_parts)
+        if params is not None:
+            LOGGER.debug(
+                "matched %s with %s (rule=%d, forward=%s, params=%s)",
+                request_path, rule.get_full_page_path(),
+                rule.rule_op, rule.is_forward, params)
+            return (rule, params)
     return (None, {})
 
 
-def _get_accept_list(request):
-    http_accept = request.META.get('HTTP_ACCEPT', '*/*')
-    return [item.strip() for item in http_accept.split(',')]
+def redirect_or_denied(request, inserted_url,
+                       redirect_field_name=REDIRECT_FIELD_NAME, descr=None):
+    http_accepts = _get_accept_list(request)
+    if ('text/html' in http_accepts
+        and isinstance(inserted_url, basestring)):
+        return _insert_url(request,
+            redirect_field_name=redirect_field_name, inserted_url=inserted_url)
+    LOGGER.debug("Looks like an API call (Accept: '%s')"\
+        " => PermissionDenied", request.META.get('HTTP_ACCEPT', '*/*'))
+    if descr is None:
+        descr = ""
+    raise PermissionDenied(descr)
 
+
+def fail_rule(request, rule, params, redirect_field_name=REDIRECT_FIELD_NAME,
+              login_url=None):
+    if not request.user.is_authenticated():
+        LOGGER.debug("user is not authenticated")
+        return _insert_url(request, redirect_field_name,
+            login_url or django_settings.LOGIN_URL)
+    _, fail_func, defaults = settings.RULE_OPERATORS[rule.rule_op]
+    kwargs = defaults.copy()
+    kwargs.update(params)
+    LOGGER.debug("calling %s(user=%s, kwargs=%s) ...",
+        fail_func.__name__, request.user, kwargs)
+    redirect = fail_func(request, **kwargs)
+    LOGGER.debug("calling %s(user=%s, kwargs=%s) => %s",
+        fail_func.__name__, request.user, kwargs, redirect)
+    if redirect:
+        return redirect_or_denied(request, redirect, redirect_field_name)
+    return None
 
 
 def check_permissions(request, app, redirect_field_name=REDIRECT_FIELD_NAME,
@@ -132,28 +135,9 @@ def check_permissions(request, app, redirect_field_name=REDIRECT_FIELD_NAME,
         if matched.rule_op == Rule.ANY:
             return (None, matched.is_forward, session)
         else:
-            if not request.user.is_authenticated():
-                LOGGER.debug("user is not authenticated")
-                return (_insert_url(request, redirect_field_name,
-                    login_url or django_settings.LOGIN_URL), False, session)
-            _, fail_func, defaults = settings.RULE_OPERATORS[matched.rule_op]
-            kwargs = defaults.copy()
-            kwargs.update(params)
-            LOGGER.debug("calling %s(user=%s, kwargs=%s) ...",
-                fail_func.__name__, request.user, kwargs)
-            redirect = fail_func(request, **kwargs)
-            LOGGER.debug("calling %s(user=%s, kwargs=%s) => %s",
-                fail_func.__name__, request.user, kwargs, redirect)
-            if redirect:
-                http_accepts = _get_accept_list(request)
-                if ('text/html' in http_accepts
-                    and isinstance(redirect, basestring)):
-                    return (_insert_url(
-                        request, redirect_field_name, redirect), False, session)
-                LOGGER.debug("Looks like an API call (Accept: '%s')"\
-                    " => PermissionDenied",
-                    request.META.get('HTTP_ACCEPT', '*/*'))
-                raise PermissionDenied
-            return (None, matched.is_forward, session)
+            response = fail_rule(request, matched, params, login_url=login_url,
+                redirect_field_name=redirect_field_name)
+            return (response,
+                matched.is_forward if response is None else False, session)
     LOGGER.debug("unmatched %s", request.path)
     raise PermissionDenied

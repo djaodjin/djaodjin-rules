@@ -1,4 +1,4 @@
-# Copyright (c) 2015, DjaoDjin inc.
+# Copyright (c) 2017, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,10 +26,12 @@
 Models for the rules application.
 """
 
-import datetime, logging
+import datetime, json, logging
+from itertools import izip
 
 from django.db import models
 from django.utils.timezone import utc
+from django.utils.module_loading import import_string
 
 from . import settings
 
@@ -162,4 +164,45 @@ class Rule(models.Model):
             return '%d/%s' % (self.rule_op, self.kwargs)
         return '%d' % self.rule_op
 
+    def get_full_page_path(self):
+        page_path = self.path
+        path_prefix = ""
+        if not page_path.startswith("/"):
+            page_path = "/" + page_path
+        if settings.PATH_PREFIX_CALLABLE:
+            path_prefix = import_string(settings.PATH_PREFIX_CALLABLE)()
+            if path_prefix and not path_prefix.startswith("/"):
+                path_prefix = "/" + path_prefix
+        return "%s%s" % (path_prefix, page_path)
 
+    def match(self, request_path_parts):
+        """
+        Returns the dictionnary with paramaters in the request path
+        or ``None`` if the Rule pattern does not match the request path.
+
+        Example::
+
+           Request path /profile/xia/ matched with /profile/:organization/
+           will return {"organization": "xia"}.
+
+           Request path /profile/xia/ matched with /billing/:organization/
+           will return ``None``.
+        """
+        params = None
+        page_path = self.get_full_page_path()
+        # Normalize to avoid issues with path starting or ending with '/':
+        pat_parts = [part for part in page_path.split('/') if part]
+        if len(request_path_parts) >= len(pat_parts):
+            # Only worth matching if the URL is longer than the pattern.
+            try:
+                params = json.loads(self.kwargs)
+            except ValueError:
+                params = {}
+            for part, pat_part in izip(request_path_parts, pat_parts):
+                if pat_part.startswith(':'):
+                    slug = pat_part[1:]
+                    if slug in params:
+                        params.update({slug: part})
+                elif part != pat_part:
+                    return None
+        return params
