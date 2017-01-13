@@ -64,12 +64,14 @@ class AppManager(models.Manager):
     def get_or_create(self, defaults=None, **kwargs):
         app, created = super(AppManager, self).get_or_create(
             defaults=defaults, **kwargs)
-        for rank_min_one, (path, rule_op, is_forward) \
-            in enumerate(settings.DEFAULT_RULES):
-            #pylint:disable=no-member
-            Rule.objects.db_manager(using=self._db).get_or_create(
-                app=app, rank=rank_min_one + 1,
-                path=path, rule_op=rule_op, is_forward=is_forward)
+        if created:
+            for rank_min_one, (path, rule_op, is_forward) \
+                in enumerate(settings.DEFAULT_RULES):
+                #pylint:disable=no-member
+                Rule.objects.db_manager(using=self._db).get_or_create(
+                    app=app, rank=rank_min_one + 1,
+                    defaults={'path':path, 'rule_op':rule_op,
+                        'is_forward': is_forward})
         return app, created
 
 
