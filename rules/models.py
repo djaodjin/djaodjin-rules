@@ -30,6 +30,7 @@ import datetime, json, logging
 from itertools import izip
 
 from django.db import models
+from django.db.models import Q
 from django.utils.timezone import utc
 from django.utils.module_loading import import_string
 
@@ -112,9 +113,23 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
     def printable_name(self): # XXX Organization full_name
         return unicode(self)
 
-    def get_rules(self):
+    def get_rules(self, prefixes=None):
+        """
+        Get a list of access rules ordered by rank. When the optional
+        *prefixes* parameter is specified, the list will be filtered
+        such that any access rules returned start with one prefix present
+        in the *prefixes* list.
+        """
+        args = []
+        if prefixes is not None:
+            for prefix in prefixes:
+                if len(args) == 0:
+                    args = [Q(path__startswith=prefix)]
+                else:
+                    args[0] |= Q(path__startswith=prefix)
+#            kwargs = {'path__startswith': prefixes}
         return Rule.objects.db_manager(using=self._state.db).filter(
-            app=self).order_by('rank')
+            *args, app=self).order_by('rank')
 
     def get_changes(self, update_fields):
         changes = {}

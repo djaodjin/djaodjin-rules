@@ -36,6 +36,13 @@ from .models import Rule
 LOGGER = logging.getLogger(__name__)
 
 
+class NoRuleMatch(RuntimeError):
+
+    def __init__(self, path):
+        super(NoRuleMatch, self).__init__(
+            u"No access rules triggered by path '%s'" % unicode(path))
+
+
 def _insert_url(request, redirect_field_name=REDIRECT_FIELD_NAME,
                 inserted_url=None):
     '''Redirects to the *inserted_url* before going to the orginal
@@ -61,7 +68,7 @@ def _get_accept_list(request):
     return [item.strip() for item in http_accept.split(',')]
 
 
-def find_rule(request, app):
+def find_rule(request, app, prefixes=None):
     """
     Returns a tuple mad of the rule that was matched and a dictionnary
     of parameters that where extracted from the URL (i.e. :slug).
@@ -74,7 +81,7 @@ def find_rule(request, app):
     params = {}
     request_path = request.path
     request_path_parts = [part for part in request_path.split('/') if part]
-    for rule in app.get_rules():
+    for rule in app.get_rules(prefixes=prefixes):
         LOGGER.debug("Match %s with %s ...",
             '/'.join(request_path_parts), rule.get_full_page_path())
         params = rule.match(request_path_parts)
@@ -94,8 +101,9 @@ def redirect_or_denied(request, inserted_url,
         and isinstance(inserted_url, basestring)):
         return _insert_url(request,
             redirect_field_name=redirect_field_name, inserted_url=inserted_url)
-    LOGGER.debug("Looks like an API call (Accept: '%s')"\
-        " => PermissionDenied", request.META.get('HTTP_ACCEPT', '*/*'))
+    LOGGER.debug("Looks like an API call or no inserted url"\
+        " (Accept: '%s', insert='%s') => PermissionDenied",
+        request.META.get('HTTP_ACCEPT', '*/*'), inserted_url)
     if descr is None:
         descr = ""
     raise PermissionDenied(descr)
@@ -109,7 +117,8 @@ def fail_rule(request, rule, params, redirect_field_name=REDIRECT_FIELD_NAME,
             login_url or django_settings.LOGIN_URL)
     _, fail_func, defaults = settings.RULE_OPERATORS[rule.rule_op]
     kwargs = defaults.copy()
-    kwargs.update(params)
+    if isinstance(params, dict):
+        kwargs.update(params)
     LOGGER.debug("calling %s(user=%s, kwargs=%s) ...",
         fail_func.__name__, request.user, kwargs)
     redirect = fail_func(request, **kwargs)
@@ -120,10 +129,14 @@ def fail_rule(request, rule, params, redirect_field_name=REDIRECT_FIELD_NAME,
     return None
 
 
-def check_permissions(request, app, redirect_field_name=REDIRECT_FIELD_NAME,
-                      login_url=None):
+def check_matched(request, app, prefixes=None,
+                  redirect_field_name=REDIRECT_FIELD_NAME, login_url=None):
+    """
+    Returns a tuple (response, forward, session) if the *request.path* can
+    be matched otherwise raises a NoRuleMatch exception.
+    """
     session = {}
-    matched, params = find_rule(request, app)
+    matched, params = find_rule(request, app, prefixes=prefixes)
     if matched:
         # We will need manager relations and subscriptions in
         # almost all cases, so let's just load all of it here.
@@ -140,4 +153,17 @@ def check_permissions(request, app, redirect_field_name=REDIRECT_FIELD_NAME,
             return (response,
                 matched.is_forward if response is None else False, session)
     LOGGER.debug("unmatched %s", request.path)
-    raise PermissionDenied
+    raise NoRuleMatch(request.path)
+
+
+def check_permissions(request, app, redirect_field_name=REDIRECT_FIELD_NAME,
+                      login_url=None):
+    """
+    Returns a tuple (response, forward, session) if the *request.path* can
+    be matched otherwise raises a PermissionDenied exception.
+    """
+    try:
+        return check_matched(request, app,
+            redirect_field_name=redirect_field_name, login_url=login_url)
+    except NoRuleMatch as err:
+        raise PermissionDenied(str(err))
