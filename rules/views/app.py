@@ -1,4 +1,4 @@
-# Copyright (c) 2016, DjaoDjin inc.
+# Copyright (c) 2017, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,7 @@ from django.contrib import messages
 from django.contrib.sites.requests import RequestSite
 from django.core.exceptions import FieldError
 from django.http import HttpResponse, SimpleCookie
+from django.utils import six
 from django.views.generic import UpdateView, TemplateView
 import requests
 from requests.exceptions import RequestException
@@ -40,6 +41,7 @@ from ..compat import get_model
 from ..mixins import AppMixin
 from ..models import App
 from ..perms import check_permissions as base_check_permissions
+from ..utils import JSONEncoder
 
 
 LOGGER = logging.getLogger(__name__)
@@ -76,12 +78,20 @@ class SessionProxyMixin(object):
             request, self.app,
             redirect_field_name=self.redirect_field_name,
             login_url=self.login_url)
+        if self.session:
+            # XXX Insert into self.request.session so we can use the same
+            #     code on self-hosted templates.
+            last_visited = self.session.get('last_visited', None)
+            if last_visited:
+                self.request.session.update({
+                    'last_visited': last_visited.isoformat()})
         return (redirect_url, is_forward)
 
     def get_context_data(self, **kwargs):
         context = super(SessionProxyMixin, self).get_context_data(**kwargs)
         line = "%s: %s" % (SESSION_COOKIE_NAME, self.session_cookie_string)
-        context.update({'forward_session': json.dumps(self.session, indent=2),
+        context.update({'forward_session': json.dumps(
+            self.session, indent=2, cls=JSONEncoder),
             'forward_session_cookie': '\\\n'.join(
             [line[i:i+48] for i in range(0, len(line), 48)])})
         return context
@@ -150,7 +160,7 @@ class SessionProxyMixin(object):
     def translate_request_args(self, request):
         requests_args = {'allow_redirects': False, 'headers': {}}
         cookies = SimpleCookie()
-        for key, value in request.COOKIES.items():
+        for key, value in six.iteritems(request.COOKIES):
             cookies[key] = value
         if self.app.forward_session:
             cookies[SESSION_COOKIE_NAME] = self.session_cookie_string
@@ -165,7 +175,7 @@ class SessionProxyMixin(object):
         # https://docs.djangoapp.com/en/dev/ref/request-response/\
         #    #django.http.HttpRequest.META
         headers = {}
-        for key, value in request.META.iteritems():
+        for key, value in six.iteritems(request.META):
             key_upper = key.upper()
             if key_upper.startswith('HTTP_'):
                 key_upper = key_upper[5:].replace('_', '-')
@@ -194,7 +204,7 @@ class SessionProxyMixin(object):
             if request.FILES:
                 requests_args['files'] = request.FILES
             data = {}
-            for key, val in request.POST.iteritems():
+            for key, val in six.iteritems(request.POST):
                 data.update({key:val})
             requests_args['data'] = data
         else:
@@ -204,7 +214,7 @@ class SessionProxyMixin(object):
 
         # If there's a content-length header from Django, it's probably
         # in all-caps and requests might not notice it, so just remove it.
-        for key in headers.keys():
+        for key in list(headers.keys()):
             if key.lower() == 'content-length':
                 del headers[key]
             elif key.lower() == 'content-type' and request.META.get(
@@ -278,7 +288,7 @@ class SessionProxyMixin(object):
             # what the length should be.
             'content-length',
         ])
-        for key, value in response.headers.iteritems():
+        for key, value in six.iteritems(response.headers):
             if key.lower() in excluded_headers:
                 continue
             proxy_response[key] = value

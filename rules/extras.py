@@ -1,4 +1,4 @@
-# Copyright (c) 2016, DjaoDjin inc.
+# Copyright (c) 2017, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,6 +24,7 @@
 
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
+from django.utils import six
 
 from .utils import get_app_model, get_current_app
 
@@ -60,7 +61,7 @@ class AppMixinBase(object):
                    'rules_api_generate_key', kwargs=url_kwargs),
                'app': reverse('rules_update', kwargs=url_kwargs)}}
         if 'urls' in context:
-            for key, val in urls.iteritems():
+            for key, val in six.iteritems(urls):
                 if key in context['urls']:
                     context['urls'][key].update(val)
                 else:

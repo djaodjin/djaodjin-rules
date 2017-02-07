@@ -1,4 +1,4 @@
-# Copyright (c) 2015, DjaoDjin inc.
+# Copyright (c) 2017, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -22,8 +22,9 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import json, urlparse
+import json
 
+from django.utils import six
 from rest_framework import serializers
 
 from .. import settings
@@ -46,7 +47,7 @@ class AppSerializer(serializers.ModelSerializer):
         """
         Prevent unsafe URLs
         """
-        parts = urlparse.urlparse(value)
+        parts = six.moves.urllib.parse.urlparse(value)
         if (not parts.netloc
             or parts.netloc.startswith('localhost')
             or parts.netloc.startswith('127.0.0.1')):
@@ -73,7 +74,8 @@ class RuleSerializer(serializers.ModelSerializer):
                 if len(parts) > 1:
                     params = json.loads(parts[1])
                     kwargs = {}
-                    for key, dft in settings.RULE_OPERATORS[rule_op][2].items():
+                    for key, dft in six.iteritems(
+                            settings.RULE_OPERATORS[rule_op][2]):
                         if key in params:
                             kwargs[key] = params[key]
                         else:
@@ -83,7 +85,7 @@ class RuleSerializer(serializers.ModelSerializer):
                     kwargs_encoded = ""
                 attrs['rule_op'] = rule_op
                 attrs['kwargs'] = kwargs_encoded
-            except ValueError, err:
+            except ValueError as err:
                 raise serializers.ValidationError(str(err))
         return super(RuleSerializer, self).validate(attrs)
 

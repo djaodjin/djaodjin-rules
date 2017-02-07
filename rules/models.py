@@ -25,12 +25,14 @@
 """
 Models for the rules application.
 """
+from __future__ import unicode_literals
 
 import datetime, json, logging
 from itertools import izip
 
 from django.db import models
 from django.db.models import Q
+from django.utils.encoding import python_2_unicode_compatible
 from django.utils.timezone import utc
 from django.utils.module_loading import import_string
 
@@ -40,6 +42,7 @@ from . import settings
 LOGGER = logging.getLogger(__name__)
 
 
+@python_2_unicode_compatible
 class Engagement(models.Model):
     """
     This model tracks engagement of a user with the website in order
@@ -56,8 +59,8 @@ class Engagement(models.Model):
     class Meta:
         unique_together = ('slug', 'user')
 
-    def __unicode__(self):
-        return '%s-%s' % (self.slug, unicode(self.user))
+    def __str__(self):
+        return "%s-%s" % (self.slug, self.user)
 
 
 class AppManager(models.Manager):
@@ -76,6 +79,7 @@ class AppManager(models.Manager):
         return app, created
 
 
+@python_2_unicode_compatible
 class BaseApp(models.Model): #pylint: disable=super-on-old-class
     """
     A ``App`` is used to select a database and a firewall profile.
@@ -107,11 +111,11 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
         swappable = 'RULES_APP_MODEL'
         abstract = True
 
-    def __unicode__(self): #pylint: disable=super-on-old-class
-        return unicode(self.slug)
+    def __str__(self): #pylint: disable=super-on-old-class
+        return self.slug
 
     def printable_name(self): # XXX Organization full_name
-        return unicode(self)
+        return str(self)
 
     def get_rules(self, prefixes=None):
         """
@@ -142,12 +146,14 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
         return changes
 
 
+@python_2_unicode_compatible
 class App(BaseApp):
 
-    def __unicode__(self): #pylint: disable=super-on-old-class
-        return unicode(self.slug)
+    def __str__(self): #pylint: disable=super-on-old-class
+        return self.slug
 
 
+@python_2_unicode_compatible
 class Rule(models.Model):
     """
     Rule to check in order to forward request, serve it locally
@@ -167,14 +173,15 @@ class Rule(models.Model):
         choices=settings.DB_RULE_OPERATORS, default=ANY)
     kwargs = models.CharField(max_length=255, default="")
     is_forward = models.BooleanField(default=True)
+    engaged = models.SlugField()
     rank = models.IntegerField()
     moved = models.BooleanField(default=False)
 
     class Meta:
         unique_together = (('app', 'rank', 'moved'), ('app', 'path'))
 
-    def __unicode__(self):
-        return unicode('%s/%s' % (self.app, self.path))
+    def __str__(self):
+        return "%s/%s" % (self.app, self.path)
 
     def get_allow(self):
         if self.kwargs:

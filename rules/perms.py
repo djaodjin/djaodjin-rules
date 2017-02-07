@@ -22,15 +22,19 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import logging, urlparse
+from __future__ import unicode_literals
+
+import logging
 
 from django.conf import settings as django_settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.core.exceptions import PermissionDenied
 from django.utils.module_loading import import_string
+from django.utils import six
 
 from . import settings
-from .models import Rule
+from .models import Engagement, Rule
+from .utils import datetime_or_now
 
 
 LOGGER = logging.getLogger(__name__)
@@ -40,7 +44,7 @@ class NoRuleMatch(RuntimeError):
 
     def __init__(self, path):
         super(NoRuleMatch, self).__init__(
-            u"No access rules triggered by path '%s'" % unicode(path))
+            "No access rules triggered by path '%s'" % path)
 
 
 def _insert_url(request, redirect_field_name=REDIRECT_FIELD_NAME,
@@ -52,8 +56,9 @@ def _insert_url(request, redirect_field_name=REDIRECT_FIELD_NAME,
     path = request.build_absolute_uri()
     # If the login url is the same scheme and net location then just
     # use the path as the "next" url.
-    login_scheme, login_netloc = urlparse.urlparse(inserted_url)[:2]
-    current_scheme, current_netloc = urlparse.urlparse(path)[:2]
+    login_scheme, login_netloc = six.moves.urllib.parse.urlparse(
+        inserted_url)[:2]
+    current_scheme, current_netloc = six.moves.urllib.parse.urlparse(path)[:2]
     if ((not login_scheme or login_scheme == current_scheme) and
         (not login_netloc or login_netloc == current_netloc)):
         path = request.get_full_path()
@@ -98,7 +103,7 @@ def redirect_or_denied(request, inserted_url,
                        redirect_field_name=REDIRECT_FIELD_NAME, descr=None):
     http_accepts = _get_accept_list(request)
     if ('text/html' in http_accepts
-        and isinstance(inserted_url, basestring)):
+        and isinstance(inserted_url, six.string_types)):
         return _insert_url(request,
             redirect_field_name=redirect_field_name, inserted_url=inserted_url)
     LOGGER.debug("Looks like an API call or no inserted url"\
@@ -129,6 +134,25 @@ def fail_rule(request, rule, params, redirect_field_name=REDIRECT_FIELD_NAME,
     return None
 
 
+def engaged(rule, request=None):
+    """
+    Returns the last time the page was visited
+    """
+    last_visited = None
+    if rule.engaged:
+        obj, created = Engagement.objects.get_or_create(
+            slug=rule.engaged, user=request.user,
+            defaults={'last_visited': datetime_or_now()})
+        if created:
+            LOGGER.info(
+                "initial '%s' engagement%s", rule.engaged,
+                (" on %s" % request.path) if request is not None else "",
+                extra={'event': 'initial-engagement', 'request': request})
+        else:
+            last_visited = obj.last_visited
+    return last_visited
+
+
 def check_matched(request, app, prefixes=None,
                   redirect_field_name=REDIRECT_FIELD_NAME, login_url=None):
     """
@@ -146,10 +170,16 @@ def check_matched(request, app, prefixes=None,
             serializer = serializer_class(request.user)
             session = serializer.data
         if matched.rule_op == Rule.ANY:
+            if request.user.is_authenticated():
+                last_visited = engaged(matched, request=request)
+                session.update({'last_visited': last_visited})
             return (None, matched.is_forward, session)
         else:
             response = fail_rule(request, matched, params, login_url=login_url,
                 redirect_field_name=redirect_field_name)
+            if not response:
+                last_visited = engaged(matched, request=request)
+                session.update({'last_visited': last_visited})
             return (response,
                 matched.is_forward if response is None else False, session)
     LOGGER.debug("unmatched %s", request.path)

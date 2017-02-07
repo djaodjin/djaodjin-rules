@@ -1,4 +1,4 @@
-# Copyright (c) 2016, DjaoDjin inc.
+# Copyright (c) 2017, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,6 @@ ACCOUNT_URL_KWARG         None                    Variable name used in url defi
 DEFAULT_APP_CALLABLE      None                    Function to get the default app.
 DEFAULT_APP_ID            SITE_ID                 Primary key to get the default app.
 DEFAULT_RULES             ('/', 0, False)         Rules used when creating a new account
-ENGAGED_TRIGGERS          []                      Triggers to record
 EXTRA_MIXIN               object                  Mixin to derive from
 PATH_PREFIX_CALLABLE      None                    Function to retrive the path prefix
 RULE_OPERATORS            ('', 'login_required')  Rules that can be used to decorate a URL.
@@ -62,6 +61,7 @@ from importlib import import_module
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.utils import six
 
 
 _SETTINGS = {
@@ -70,7 +70,6 @@ _SETTINGS = {
     'DEFAULT_APP_CALLABLE': None,
     'DEFAULT_APP_ID': getattr(settings, 'SITE_ID', 1),
     'DEFAULT_RULES': [('/', 0, False)],
-    'ENGAGED_TRIGGERS': tuple([]),
     'EXTRA_MIXIN': object,
     'PATH_PREFIX_CALLABLE': None,
     'RULE_OPERATORS': (
@@ -89,7 +88,7 @@ def _load_perms_func(path):
         return "Any", None, {}
     if callable(path):
         func = path
-    elif isinstance(path, basestring):
+    elif isinstance(path, six.string_types):
         dot_pos = path.rfind('.')
         module, attr = path[:dot_pos], path[dot_pos + 1:]
         try:
@@ -136,7 +135,6 @@ ACCOUNT_URL_KWARG = _SETTINGS.get('ACCOUNT_URL_KWARG')
 DEFAULT_APP_CALLABLE = _SETTINGS.get('DEFAULT_APP_CALLABLE')
 DEFAULT_APP_ID = _SETTINGS.get('DEFAULT_APP_ID')
 DEFAULT_RULES = _SETTINGS.get('DEFAULT_RULES')
-ENGAGED_TRIGGERS = _SETTINGS.get('ENGAGED_TRIGGERS')
 EXTRA_MIXIN = _SETTINGS.get('EXTRA_MIXIN')
 PATH_PREFIX_CALLABLE = _SETTINGS.get('PATH_PREFIX_CALLABLE')
 RULE_OPERATORS = tuple([_load_perms_func(item)

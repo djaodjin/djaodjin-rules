@@ -1,4 +1,4 @@
-# Copyright (c) 2016, DjaoDjin inc.
+# Copyright (c) 2017, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -22,7 +22,7 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import datetime, logging
+import datetime, json, logging
 
 from django.apps import apps as django_apps
 from django.core.exceptions import ImproperlyConfigured
@@ -31,6 +31,14 @@ from django.utils.timezone import utc
 
 
 LOGGER = logging.getLogger(__name__)
+
+
+class JSONEncoder(json.JSONEncoder):
+
+    def default(self, obj): #pylint: disable=method-hidden
+        if hasattr(obj, 'isoformat'):
+            return obj.isoformat()
+        return super(JSONEncoder, self).default(obj)
 
 
 def datetime_or_now(dtime_at=None):
