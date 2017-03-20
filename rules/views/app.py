@@ -329,6 +329,8 @@ class AppDashboardView(AppMixin, UpdateView):
                     queryset = cls.objects.filter(
                         organization=self.app.account, is_active=True)
                 except FieldError:
+                    # The following code means we do not support optional
+                    # ``organization`` foreign keys (i.e. ``null=True``).
                     try:
                         queryset = cls.objects.filter(
                             organization=self.app.account)

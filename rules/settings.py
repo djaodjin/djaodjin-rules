@@ -121,8 +121,11 @@ def _load_perms_func(path):
     if argspec.defaults:
         flags = len(argspec.args) - len(argspec.defaults)
     parms = {}
-    for arg in argspec.args[flags:]:
-        parms.update({arg: ""})
+    for idx2, arg in enumerate(argspec.args[flags:]):
+        if argspec.defaults[idx2] is None:
+            parms.update({arg: None})
+        else:
+            parms.update({arg: str(argspec.defaults[idx2])})
 
     return short_name, func, parms
 
