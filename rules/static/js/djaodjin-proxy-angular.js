@@ -235,14 +235,21 @@ ruleControllers.controller("RuleListCtrl",
     };
 
     $scope.submitEntryPoint = function(form) {
-        var entryPoint = $(form).find("[name='entry_point']");
-        $http.put(urls.rules_api_detail_url, {"entry_point": entryPoint.val()}
-           ).then(function success(result) {
-                showMessages(["Entry point updated."], "success");
-           },
-           function error(resp) {
-               showErrorMessages(resp);
-           });
+        var data = {};
+        var fields = angular.element(form).find("input, textarea, select");
+        for( var idx = 0; idx < fields.length; ++idx ) {
+            var field = angular.element(fields[idx]);
+            if( field.attr("name") && field.val() ) {
+                data[field.attr("name")] = field.val();
+            }
+        }
+        $http.put(urls.rules_api_detail_url, data).then(
+            function success(result) {
+                showMessages(["Update successful."], "success");
+            },
+            function error(resp) {
+                showErrorMessages(resp);
+            });
         return false;
     };
 
