@@ -28,7 +28,12 @@ Models for the rules application.
 from __future__ import unicode_literals
 
 import datetime, json, logging
-from itertools import izip
+try:
+    # Python 2
+    from itertools import izip
+except ImportError:
+    # Python 3
+    izip = zip
 
 from django.db import models
 from django.db.models import Q
