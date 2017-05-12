@@ -237,9 +237,20 @@ class SessionProxyMixin(object):
             # This of course results in the browser not sending the cookie
             # back to us later on.
             #pylint: disable=protected-access
-            set_cookie_lines \
-                = response.raw._original_response.msg.getallmatchingheaders(
-                'Set-Cookie')
+            if six.PY2:
+                set_cookie_lines \
+                    = response.raw._original_response.msg.getallmatchingheaders(
+                        'Set-Cookie')
+            else:
+                # We implement our own search here because
+                # ``getallmatchingheaders`` is broken in Python3
+                # (see https://bugs.python.org/issue5053)
+                set_cookie_lines = []
+                for line, data in six.iteritems(
+                        response.raw._original_response.msg):
+                    if line.lower() == 'set-cookie':
+                        set_cookie_lines.append(line + ': ' + data)
+
             set_cookies_cont = ''
             set_cookies = []
             for line in set_cookie_lines:
