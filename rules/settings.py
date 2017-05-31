@@ -41,7 +41,7 @@ DEFAULT_RULES             ('/', 0, False)         Rules used when creating a new
 EXTRA_MIXIN               object                  Mixin to derive from
 PATH_PREFIX_CALLABLE      None                    Function to retrive the path prefix
 RULE_OPERATORS            ('', 'login_required')  Rules that can be used to decorate a URL.
-SESSION_SERIALIZER        ``UserSerializer``      Serializer used to represent sessions.
+SESSION_SERIALIZER        ``UsernameSerializer``  Serializer used to represent sessions.
 ========================  ======================  =============
 
 To override defaults, add a RULES configuration block to your project
@@ -75,7 +75,7 @@ _SETTINGS = {
     'RULE_OPERATORS': (
         '',
         'django.contrib.auth.decorators.login_required'),
-    'SESSION_SERIALIZER': 'rules.api.serializers.UserSerializer'
+    'SESSION_SERIALIZER': 'rules.api.serializers.UsernameSerializer'
 }
 _SETTINGS.update(getattr(settings, 'RULES', {}))
 

@@ -28,7 +28,6 @@ from django.utils import six
 from rest_framework import serializers
 
 from .. import settings
-from ..compat import User
 from ..models import Rule, App
 
 #pylint: disable=no-init
@@ -90,8 +89,21 @@ class RuleSerializer(serializers.ModelSerializer):
         return super(RuleSerializer, self).validate(attrs)
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UsernameSerializer(serializers.Serializer):
+
+    username = serializers.SerializerMethodField()
+
     class Meta:
-        model = User
         fields = ('username',)
+        read_only_fields = ('username',)
+
+    def create(self, validated_data):
+        raise NotImplementedError()
+
+    def update(self, instance, validated_data):
+        raise NotImplementedError()
+
+    @staticmethod
+    def get_username(request):
+        return request.user.username
 

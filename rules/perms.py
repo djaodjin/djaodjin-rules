@@ -167,7 +167,7 @@ def check_matched(request, app, prefixes=None,
         if request.user.is_authenticated():
             #pylint: disable=no-member
             serializer_class = import_string(settings.SESSION_SERIALIZER)
-            serializer = serializer_class(request.user)
+            serializer = serializer_class(request)
             session = serializer.data
         if matched.rule_op == Rule.ANY:
             if request.user.is_authenticated():
