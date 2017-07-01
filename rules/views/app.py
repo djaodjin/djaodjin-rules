@@ -33,8 +33,8 @@ from django.utils import six
 from django.views.generic import UpdateView, TemplateView
 import requests
 from requests.exceptions import RequestException
-from deployutils.backends.encrypted_cookies import SessionStore
-from deployutils.settings import SESSION_COOKIE_NAME
+from deployutils.apps.django.backends.encrypted_cookies import SessionStore
+from deployutils.apps.django.settings import SESSION_COOKIE_NAME
 
 from .. import settings
 from ..compat import get_model
