@@ -71,6 +71,10 @@ class SessionProxyMixin(object):
             session_store = SessionStore(self.app.enc_key)
             self._session_cookie_string = session_store.prepare(
                 self.session, self.app.enc_key)
+            if six.PY3:
+                # Because we don't want Python3 to prefix our strings with b'.
+                self._session_cookie_string \
+                    = self._session_cookie_string.decode('ascii')
         return self._session_cookie_string
 
     def check_permissions(self, request):
