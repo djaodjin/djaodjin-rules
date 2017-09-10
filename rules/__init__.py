@@ -1,4 +1,4 @@
-# Copyright (c) 2016, DjaoDjin inc.
+# Copyright (c) 2017, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -27,4 +27,3 @@ PEP 386-compliant version number for the rules django app.
 """
 
 __version__ = '0.1.1-dev'
-

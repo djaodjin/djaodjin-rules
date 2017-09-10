@@ -40,9 +40,6 @@ class RulesMiddleware(CsrfViewMiddleware):
     Disables CSRF check if the HTTP request is forwarded.
     """
 
-    def __init__(self):
-        pass
-
     def process_view(self, request, callback, callback_args, callback_kwargs):
         view_class = getattr(request.resolver_match.func, 'view_class', None)
         if hasattr(view_class, 'conditional_forward'):

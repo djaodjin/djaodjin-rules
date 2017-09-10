@@ -51,7 +51,7 @@ class RuleMixin(AppMixin):
     lookup_url_kwarg = 'rule'
 
     def get_queryset(self):
-        return self.app.get_rules()
+        return self.model.objects.get_rules(self.app)
 
     def perform_create(self, serializer):
         # We don't compact ranks after DELETE

@@ -106,4 +106,3 @@ class UsernameSerializer(serializers.Serializer):
     @staticmethod
     def get_username(request):
         return request.user.username
-

@@ -27,24 +27,50 @@ Models for the rules application.
 """
 from __future__ import unicode_literals
 
-import datetime, json, logging
+import datetime, json, logging, string
 try:
     # Python 2
     from itertools import izip
 except ImportError:
     # Python 3
-    izip = zip
+    izip = zip # pylint:disable=invalid-name
 
+from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator, URLValidator
 from django.db import models
 from django.db.models import Q
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.timezone import utc
 from django.utils.module_loading import import_string
+from django.utils.translation import ugettext_lazy as _
 
 from . import settings
 
 
 LOGGER = logging.getLogger(__name__)
+
+
+SUBDOMAIN_RE = r'^[-a-zA-Z0-9_]+\Z'
+SUBDOMAIN_SLUG = RegexValidator(
+    SUBDOMAIN_RE,
+    _("Enter a valid 'slug' consisting of letters, numbers or hyphens."),
+    'invalid'
+)
+
+
+def domain_name_validator(value):
+    """
+    Validates that the given value contains no whitespaces to prevent common
+    typos.
+    """
+    if not value:
+        return
+    checks = ((s in value) for s in string.whitespace)
+    if any(checks):
+        raise ValidationError(
+            _("The domain name cannot contain any spaces or tabs."),
+            code='invalid',
+        )
 
 
 @python_2_unicode_compatible
@@ -96,10 +122,16 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
     the matching ``Organization``.
     """
 
-    # Most DNS provider limit subdomain length to 25 characters.
-    # XXX need to find actual regular expression.
-    slug = models.SlugField(max_length=25, unique=True,
-        help_text="unique subdomain of root site")
+    # Since most DNS provider limit subdomain length to 25 characters,
+    # we do here too.
+    slug = models.SlugField(unique=True, max_length=25,
+        validators=[SUBDOMAIN_SLUG],
+        help_text="unique identifier for the site (also serves as subdomain)")
+    domain = models.CharField(null=True, blank=True, max_length=100,
+        help_text='fully qualified domain name at which the site is available',
+        validators=[domain_name_validator, RegexValidator(
+            URLValidator.host_re,
+            "Enter a valid 'domain', ex: example.com", 'invalid')])
 
     account = models.ForeignKey(settings.ACCOUNT_MODEL, null=True)
 
@@ -122,24 +154,6 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
     def printable_name(self): # XXX Organization full_name
         return str(self)
 
-    def get_rules(self, prefixes=None):
-        """
-        Get a list of access rules ordered by rank. When the optional
-        *prefixes* parameter is specified, the list will be filtered
-        such that any access rules returned start with one prefix present
-        in the *prefixes* list.
-        """
-        args = []
-        if prefixes is not None:
-            for prefix in prefixes:
-                if len(args) == 0:
-                    args = [Q(path__startswith=prefix)]
-                else:
-                    args[0] |= Q(path__startswith=prefix)
-#            kwargs = {'path__startswith': prefixes}
-        return Rule.objects.db_manager(using=self._state.db).filter(
-            *args, app=self).order_by('rank')
-
     def get_changes(self, update_fields):
         changes = {}
         for field_name in ('entry_point', 'enc_key', 'forward_session'):
@@ -158,6 +172,28 @@ class App(BaseApp):
         return self.slug
 
 
+class RuleManager(models.Manager):
+
+    def get_rules(self, app, prefixes=None):
+        """
+        Get a list of access rules ordered by rank. When the optional
+        *prefixes* parameter is specified, the list will be filtered
+        such that any access rules returned start with one prefix present
+        in the *prefixes* list.
+        """
+        args = []
+        if prefixes is not None:
+            for prefix in prefixes:
+                if not args:
+                    args = [Q(path__startswith=prefix)]
+                else:
+                    args[0] |= Q(path__startswith=prefix)
+#            kwargs = {'path__startswith': prefixes}
+        #pylint:disable=protected-access
+        return self.db_manager(using=app._state.db).filter(
+            *args, app=app).order_by('rank')
+
+
 @python_2_unicode_compatible
 class Rule(models.Model):
     """
@@ -168,6 +204,8 @@ class Rule(models.Model):
 
     HOME = 'index'
     ANY = 0
+
+    objects = RuleManager()
 
     app = models.ForeignKey(settings.RULES_APP_MODEL)
     # XXX At first I wanted to use a URLField for validation but this only

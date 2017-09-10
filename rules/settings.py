@@ -110,7 +110,7 @@ def _load_perms_func(path):
     short_name = ""
     for line in func.__doc__.splitlines():
         short_name = line.strip()
-        if len(short_name) > 0:
+        if short_name:
             break
     if not short_name:
         raise ImproperlyConfigured(

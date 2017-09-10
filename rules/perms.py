@@ -86,7 +86,7 @@ def find_rule(request, app, prefixes=None):
     params = {}
     request_path = request.path
     request_path_parts = [part for part in request_path.split('/') if part]
-    for rule in app.get_rules(prefixes=prefixes):
+    for rule in Rule.objects.get_rules(app, prefixes=prefixes):
         LOGGER.debug("Match %s with %s ...",
             '/'.join(request_path_parts), rule.get_full_page_path())
         params = rule.match(request_path_parts)
