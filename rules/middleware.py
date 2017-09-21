@@ -43,10 +43,10 @@ class RulesMiddleware(CsrfViewMiddleware):
     def process_view(self, request, callback, callback_args, callback_kwargs):
         view_class = getattr(request.resolver_match.func, 'view_class', None)
         if hasattr(view_class, 'conditional_forward'):
-            app = get_current_app()
+            app = get_current_app(request)
             request.matched_rule, request.matched_params = find_rule(
                 request, app)
-            if (request.matched_rule.is_forward
+            if (request.matched_rule and request.matched_rule.is_forward
                 and request.method not in ('GET', 'HEAD', 'OPTIONS', 'TRACE')):
                 # We are forwarding the request so the CSRF is delegated
                 # to the application handling the forwarded request.

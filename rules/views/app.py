@@ -25,11 +25,12 @@
 import json, logging, re
 
 from django.contrib.auth import REDIRECT_FIELD_NAME
-from django.contrib import messages
 from django.contrib.sites.requests import RequestSite
 from django.core.exceptions import FieldError
 from django.http import HttpResponse, SimpleCookie
+from django.template.response import TemplateResponse
 from django.utils import six
+from django.utils.module_loading import import_string
 from django.views.generic import UpdateView, TemplateView
 import requests
 from requests.exceptions import RequestException
@@ -68,6 +69,13 @@ class SessionProxyMixin(object):
         added to the HTTP Cookie Headers.
         """
         if not hasattr(self, '_session_cookie_string'):
+            # This is the latest time we can populate the session
+            # since after that we need it to encrypt the cookie string.
+            if self.request.user.is_authenticated():
+                #pylint: disable=no-member
+                serializer_class = import_string(settings.SESSION_SERIALIZER)
+                serializer = serializer_class(self.request)
+                self.session.update(serializer.data)
             session_store = SessionStore(self.app.enc_key)
             self._session_cookie_string = session_store.prepare(
                 self.session, self.app.enc_key)
@@ -130,6 +138,16 @@ class SessionProxyMixin(object):
             return response
         return super(SessionProxyMixin, self).delete(request, *args, **kwargs)
 
+    def forward_error(self, err):
+        #pylint:disable=unused-argument
+        # XXX use err and
+        # content_types = request.META.get('HTTP_ACCEPT', [])
+        return TemplateResponse(
+            request=self.request,
+            template='rules/forward_error.html',
+            content_type='text/html',
+            status=503)
+
     def conditional_forward(self, request):
         response, forward = self.check_permissions(request)
         if response:
@@ -138,10 +156,7 @@ class SessionProxyMixin(object):
             try:
                 return self.fetch_remote_page()
             except RequestException as err:
-                content_types = request.META.get('HTTP_ACCEPT', [])
-                if 'text/html' in content_types:
-                    messages.error(
-                        request, 'Unable to forward request. %s' % err)
+                return self.forward_error(err)
         return None
 
     def fetch_remote_page(self):

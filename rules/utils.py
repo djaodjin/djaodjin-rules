@@ -64,13 +64,13 @@ def get_app_model():
 " that has not been installed" % settings.RULES_APP_MODEL)
 
 
-def get_current_app():
+def get_current_app(request=None):
     """
     Returns the default app for a site.
     """
     from . import settings
     if settings.DEFAULT_APP_CALLABLE:
-        app = import_string(settings.DEFAULT_APP_CALLABLE)()
+        app = import_string(settings.DEFAULT_APP_CALLABLE)(request=request)
         LOGGER.debug("rules.get_current_app: '%s'", app)
     else:
         app = get_app_model().objects.get(pk=settings.DEFAULT_APP_ID)

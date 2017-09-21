@@ -29,7 +29,6 @@ import logging
 from django.conf import settings as django_settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.core.exceptions import PermissionDenied
-from django.utils.module_loading import import_string
 from django.utils import six
 
 from . import settings
@@ -162,13 +161,6 @@ def check_matched(request, app, prefixes=None,
     session = {}
     matched, params = find_rule(request, app, prefixes=prefixes)
     if matched:
-        # We will need manager relations and subscriptions in
-        # almost all cases, so let's just load all of it here.
-        if request.user.is_authenticated():
-            #pylint: disable=no-member
-            serializer_class = import_string(settings.SESSION_SERIALIZER)
-            serializer = serializer_class(request)
-            session = serializer.data
         if matched.rule_op == Rule.ANY:
             if request.user.is_authenticated():
                 last_visited = engaged(matched, request=request)
