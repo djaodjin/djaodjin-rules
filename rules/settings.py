@@ -56,12 +56,11 @@ Example:
     }
 
 """
-import inspect
 from importlib import import_module
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.utils import six
+from django.utils import inspect, six
 
 
 _SETTINGS = {
@@ -116,16 +115,10 @@ def _load_perms_func(path):
         raise ImproperlyConfigured(
             '%s should have at least a one-line documentation' % path)
 
-    argspec = inspect.getargspec(func)
-    flags = len(argspec.args)
-    if argspec.defaults:
-        flags = len(argspec.args) - len(argspec.defaults)
     parms = {}
-    for idx2, arg in enumerate(argspec.args[flags:]):
-        if argspec.defaults[idx2] is None:
-            parms.update({arg: None})
-        else:
-            parms.update({arg: str(argspec.defaults[idx2])})
+    for arg in inspect.get_func_full_args(func):
+        if len(arg) > 1:
+            parms.update({arg[0]: arg[1]})
 
     return short_name, func, parms
 
