@@ -169,8 +169,14 @@ class SessionProxyMixin(object):
         """
         remoteurl = '%s%s' % (self.app.entry_point, self.request.path)
         requests_args = self.translate_request_args(self.request)
-        LOGGER.debug("%s %s with session %s, updated headers: %s",
-            self.request.method, remoteurl, self.session, requests_args)
+        if LOGGER.getEffectiveLevel() == logging.DEBUG:
+            LOGGER.debug("\"%s %s (Fwd to %s)\" with session %s,"\
+                " updated headers: %s",
+                self.request.method, self.request.path, self.app.entry_point,
+                self.session, requests_args)
+        else:
+            LOGGER.info("\"%s %s (Fwd to %s)\"", self.request.method,
+                self.request.path, self.app.entry_point)
         response = requests.request(
             self.request.method, remoteurl, **requests_args)
         return self.translate_response(response)
