@@ -74,7 +74,8 @@ class SessionProxyMixin(object):
             if self.request.user.is_authenticated():
                 #pylint: disable=no-member
                 serializer_class = import_string(settings.SESSION_SERIALIZER)
-                serializer = serializer_class(self.request)
+                serializer = serializer_class(self.request, context={
+                    'app': self.app, 'rule': self.rule})
                 self.session.update(serializer.data)
             session_store = SessionStore(self.app.enc_key)
             self._session_cookie_string = session_store.prepare(
@@ -86,7 +87,7 @@ class SessionProxyMixin(object):
         return self._session_cookie_string
 
     def check_permissions(self, request):
-        redirect_url, is_forward, self.session = base_check_permissions(
+        redirect_url, self.rule, self.session = base_check_permissions(
             request, self.app,
             redirect_field_name=self.redirect_field_name,
             login_url=self.login_url)
@@ -97,7 +98,7 @@ class SessionProxyMixin(object):
             if last_visited:
                 self.request.session.update({
                     'last_visited': last_visited.isoformat()})
-        return (redirect_url, is_forward)
+        return (redirect_url, self.rule.is_forward if self.rule else False)
 
     def get_context_data(self, **kwargs):
         context = super(SessionProxyMixin, self).get_context_data(**kwargs)
