@@ -177,11 +177,12 @@ class SessionProxyMixin(object):
                 self.session, requests_args)
         else:
             LOGGER.info("\"%s %s (Fwd to %s)\"", self.request.method,
-                self.request.path, self.app.entry_point)
+                self.request.path, self.app.entry_point, extra={
+                    'event': 'http_forward', 'fwd_to': self.app.entry_point,
+                    'request': self.request})
         response = requests.request(
             self.request.method, remoteurl, **requests_args)
         return self.translate_response(response)
-
 
     def translate_request_args(self, request):
         requests_args = {'allow_redirects': False, 'headers': {}}
