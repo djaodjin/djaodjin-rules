@@ -103,10 +103,13 @@ class SessionProxyMixin(object):
     def get_context_data(self, **kwargs):
         context = super(SessionProxyMixin, self).get_context_data(**kwargs)
         line = "%s: %s" % (SESSION_COOKIE_NAME, self.session_cookie_string)
-        context.update({'forward_session': json.dumps(
-            self.session, indent=2, cls=JSONEncoder),
+        context.update({
+            'forward_session': json.dumps(
+                self.session, indent=2, cls=JSONEncoder),
             'forward_session_cookie': '\\\n'.join(
-            [line[i:i+48] for i in range(0, len(line), 48)])})
+                [line[i:i+48] for i in range(0, len(line), 48)]),
+            'forward_url': '%s%s' % (self.app.entry_point, self.request.path),
+        })
         return context
 
     def get(self, request, *args, **kwargs):
