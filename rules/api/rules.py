@@ -22,10 +22,12 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from django.db.models import F, Q, Max
 from django.db import transaction
+from django.db.models import F, Q, Max
+from django.db.utils import IntegrityError
 from rest_framework.generics import (
     ListCreateAPIView, RetrieveUpdateDestroyAPIView)
+from rest_framework import serializers
 
 from .serializers import RuleSerializer
 from ..mixins import AppMixin
@@ -76,6 +78,16 @@ class RuleListAPIView(RuleMixin, ListCreateAPIView):
             request.data['path'] += '/'
         if not request.data['path'].startswith('/'):
             request.data['path'] = '/' + request.data['path']
+
+    def perform_create(self, serializer):
+        try:
+            return super(RuleListAPIView, self).perform_create(serializer)
+        except IntegrityError as err:
+            if 'uniq' in str(err).lower():
+                raise serializers.ValidationError({'detail':
+                    "Rule with path prefix '%s' already exists."
+                    % serializer.validated_data['path']})
+            raise
 
     def post(self, request, *args, **kwargs):
         self.check_path(request)
