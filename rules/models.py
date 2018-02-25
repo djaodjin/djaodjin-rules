@@ -1,4 +1,4 @@
-# Copyright (c) 2017, DjaoDjin inc.
+# Copyright (c) 2018, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,7 @@ except ImportError:
     izip = zip # pylint:disable=invalid-name
 
 from django.core.exceptions import ValidationError
+from django.core.mail import get_connection as get_connection_base
 from django.core.validators import RegexValidator, URLValidator
 from django.db import models
 from django.db.models import Q
@@ -121,6 +122,17 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
     The same ``slug`` will though indistincly pickup a ``App`` and/or
     the matching ``Organization``.
     """
+    USER_REGISTRATION = 0
+    PERSONAL_REGISTRATION = 1
+    TOGETHER_REGISTRATION = 2
+
+    REGISTRATION_TYPE = (
+        (USER_REGISTRATION, "User registration"),
+        (PERSONAL_REGISTRATION, "Personal registration"),
+        (TOGETHER_REGISTRATION, "User and organization registration"),
+    )
+
+    objects = AppManager()
 
     # Since most DNS provider limit subdomain length to 25 characters,
     # we do here too.
@@ -142,7 +154,9 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
        help_text='Encryption key used to sign proxyed requests')
     forward_session = models.BooleanField(default=True)
 
-    objects = AppManager()
+    # XXX Fields used to custom signup form
+    registration = models.PositiveSmallIntegerField(
+        choices=REGISTRATION_TYPE, default=USER_REGISTRATION)
 
     class Meta:
         swappable = 'RULES_APP_MODEL'
@@ -151,6 +165,7 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
     def __str__(self): #pylint: disable=super-on-old-class
         return self.slug
 
+    @property
     def printable_name(self): # XXX Organization full_name
         return str(self)
 
@@ -163,6 +178,15 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
                 changes[field_name] = {
                     'pre': pre_value, 'post': post_value}
         return changes
+
+    def get_connection(self):
+        #pylint:disable=no-self-use
+        kwargs = {}
+        return get_connection_base(**kwargs)
+
+    def get_from_email(self):
+        #pylint:disable=no-self-use
+        return settings.DEFAULT_FROM_EMAIL
 
 
 @python_2_unicode_compatible
