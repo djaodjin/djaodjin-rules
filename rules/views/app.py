@@ -143,12 +143,12 @@ class SessionProxyMixin(object):
         return super(SessionProxyMixin, self).delete(request, *args, **kwargs)
 
     def forward_error(self, err):
-        #pylint:disable=unused-argument
-        # XXX use err and
-        # content_types = request.META.get('HTTP_ACCEPT', [])
+        context = self.get_context_data()
+        context.update({'err': str(err)})
         return TemplateResponse(
             request=self.request,
             template='rules/forward_error.html',
+            context=context,
             content_type='text/html',
             status=503)
 

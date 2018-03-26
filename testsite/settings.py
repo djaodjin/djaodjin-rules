@@ -2,6 +2,9 @@
 
 import os.path
 
+from django.core.urlresolvers import reverse_lazy
+
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def load_config(confpath):
@@ -41,6 +44,39 @@ load_config(os.path.join(BASE_DIR, 'credentials'))
 DEBUG = True
 FEATURES_DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+
+ROOT_URLCONF = 'testsite.urls'
+
+# Python dotted path to the WSGI application used by Django's runserver.
+WSGI_APPLICATION = 'testsite.wsgi.application'
+
+INSTALLED_APPS = (
+    'debug_toolbar',
+    'debug_panel',
+    'django_extensions',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    # Uncomment the next line to enable the admin:
+    'django.contrib.admin',
+    # Uncomment the next line to enable admin documentation:
+    # 'django.contrib.admindocs',
+    'rest_framework',
+    'deployutils.apps.django',
+    'rules',
+    'testsite'
+)
+
+DEBUG_TOOLBAR_PATCH_SETTINGS = False
+DEBUG_TOOLBAR_CONFIG = {
+    'JQUERY_URL': '/static/vendor/jquery.js',
+    'SHOW_COLLAPSED': True,
+    'SHOW_TEMPLATE_CONTEXT': True,
+}
+
+INTERNAL_IPS = ('127.0.0.1', '::1')
 
 DATABASES = {
     'default': {
@@ -112,14 +148,10 @@ STATICFILES_FINDERS = (
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'django.contrib.auth.context_processors.auth',
-    'django.contrib.messages.context_processors.messages',
-)
-
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
 MIDDLEWARE_CLASSES = (
+    'debug_panel.middleware.DebugPanelMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -128,27 +160,30 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware'
 )
 
-ROOT_URLCONF = 'testsite.urls'
-
-# Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'testsite.wsgi.application'
-
-TEMPLATE_DIRS = ()
-
-INSTALLED_APPS = (
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    # Uncomment the next line to enable the admin:
-    'django.contrib.admin',
-    # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
-    'rest_framework',
-    'rules',
-    'testsite'
-)
+# Templates (Django 1.8+)
+# ----------------------
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': (os.path.join(BASE_DIR, 'testsite', 'templates'),
+                 os.path.join(BASE_DIR, 'rules', 'templates')),
+        'OPTIONS': {
+            'context_processors': [
+    'django.contrib.auth.context_processors.auth', # because of admin/
+    'django.template.context_processors.request',
+    'django.template.context_processors.media',
+            ],
+            'loaders': [
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader'],
+            'libraries': {},
+            'builtins': [
+                'deployutils.apps.django.templatetags.deployutils_prefixtags',
+                'deployutils.apps.django.templatetags.deployutils_extratags'
+            ]
+        }
+    }
+]
 
 LOGIN_REDIRECT_URL = '/profile/'
 
@@ -192,3 +227,8 @@ LOGGING = {
         }
     }
 }
+
+
+# Session settings
+# ----------------
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'

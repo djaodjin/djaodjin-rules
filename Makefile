@@ -29,6 +29,7 @@ $(srcDir)/credentials: $(srcDir)/testsite/etc/credentials
 initdb: install-conf
 	-rm -f $(srcDir)/db.sqlite
 	cd $(srcDir) && $(PYTHON) ./manage.py migrate $(RUNSYNCDB) --noinput
+	cd $(srcDir) && $(PYTHON) ./manage.py loaddata testsite/fixtures/test_data.json
 
 doc: install-conf
 	$(installDirs) docs

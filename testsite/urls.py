@@ -1,4 +1,4 @@
-# Copyright (c) 2015, DjaoDjin inc.
+# Copyright (c) 2018, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,8 +24,10 @@
 
 from django.conf.urls import include, url
 from django.views.generic import TemplateView
+import debug_toolbar
 
 urlpatterns = [
+    url(r'^__debug__/', include(debug_toolbar.urls)),
     url(r'^', include('django.contrib.auth.urls')),
     url(r'^', include('rules.urls')),
     url(r'^$', TemplateView.as_view(template_name='index.html')),
