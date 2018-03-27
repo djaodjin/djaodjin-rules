@@ -33,6 +33,7 @@ from django.utils import six
 from django.utils.module_loading import import_string
 from django.views.generic import UpdateView, TemplateView
 import requests
+import jwt
 from requests.exceptions import RequestException
 from deployutils.apps.django.backends.encrypted_cookies import SessionStore
 from deployutils.apps.django.settings import SESSION_COOKIE_NAME
@@ -85,6 +86,14 @@ class SessionProxyMixin(object):
                 self._session_cookie_string \
                     = self._session_cookie_string.decode('ascii')
         return self._session_cookie_string
+
+    def session_jwt_string(self):
+        """
+        Return the encrypted session information
+        encoded as a JWT token.
+        """
+        token = jwt.encode(self.session, self.app.enc_key, algorithm='HS256')
+        return token
 
     def check_permissions(self, request):
         redirect_url, self.rule, self.session = base_check_permissions(
@@ -192,8 +201,10 @@ class SessionProxyMixin(object):
         cookies = SimpleCookie()
         for key, value in six.iteritems(request.COOKIES):
             cookies[key] = value
-        if self.app.forward_session:
-            cookies[SESSION_COOKIE_NAME] = self.session_cookie_string
+        if self.app.forward_session and \
+            self.app.session_backend != self.app.JWT_SESSION_BACKEND:
+                cookies[SESSION_COOKIE_NAME] = self.session_cookie_string
+
         #pylint: disable=maybe-no-member
         # Something changed in `SimpleCookie.output` that creates an invalid
         # cookie string starting with a spacel or there are more strident
@@ -228,6 +239,11 @@ class SessionProxyMixin(object):
             headers.update({'X-REAL-IP': request.META.get('REMOTE_ADDR', None)})
         if 'COOKIE' not in headers:
             headers.update({'COOKIE': cookie_string})
+
+        if self.app.forward_session and \
+            self.app.session_backend == self.app.JWT_SESSION_BACKEND:
+            jwt_token = self.session_jwt_string()
+            headers.update({'Authorization: Bearer': jwt_token})
 
         if request.META.get(
                 'CONTENT_TYPE', '').startswith('multipart/form-data'):
