@@ -258,7 +258,7 @@ class SessionProxyMixin(object):
         if self.app.forward_session and \
             self.app.session_backend == self.app.JWT_SESSION_BACKEND:
             jwt_token = self.session_jwt_string
-            headers.update({'Authorization: Bearer': jwt_token})
+            headers.update({'AUTHORIZATION': 'Bearer %s' % jwt_token})
 
         if request.META.get(
                 'CONTENT_TYPE', '').startswith('multipart/form-data'):
