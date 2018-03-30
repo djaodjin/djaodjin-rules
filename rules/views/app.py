@@ -34,6 +34,7 @@ from django.utils.module_loading import import_string
 from django.views.generic import UpdateView, TemplateView
 import requests
 import jwt
+import pdb
 from requests.exceptions import RequestException
 from deployutils.apps.django.backends.encrypted_cookies import SessionStore
 from deployutils.apps.django.settings import SESSION_COOKIE_NAME
@@ -63,6 +64,15 @@ class SessionProxyMixin(object):
     redirect_field_name = REDIRECT_FIELD_NAME
     login_url = None
 
+    def serialize_username(self):
+        if self.request.user.is_authenticated():
+            #pylint: disable=no-member
+            serializer_class = import_string(settings.SESSION_SERIALIZER)
+            serializer = serializer_class(self.request, context={
+                'app': self.app, 'rule': self.rule})
+            self.session.update(serializer.data)
+
+
     @property
     def session_cookie_string(self):
         """
@@ -72,12 +82,7 @@ class SessionProxyMixin(object):
         if not hasattr(self, '_session_cookie_string'):
             # This is the latest time we can populate the session
             # since after that we need it to encrypt the cookie string.
-            if self.request.user.is_authenticated():
-                #pylint: disable=no-member
-                serializer_class = import_string(settings.SESSION_SERIALIZER)
-                serializer = serializer_class(self.request, context={
-                    'app': self.app, 'rule': self.rule})
-                self.session.update(serializer.data)
+            self.serialize_username()
             session_store = SessionStore(self.app.enc_key)
             self._session_cookie_string = session_store.prepare(
                 self.session, self.app.enc_key)
@@ -87,13 +92,20 @@ class SessionProxyMixin(object):
                     = self._session_cookie_string.decode('ascii')
         return self._session_cookie_string
 
+    @property
     def session_jwt_string(self):
         """
         Return the encrypted session information
         encoded as a JWT token.
         """
-        token = jwt.encode(self.session, self.app.enc_key, algorithm='HS256')
-        return token
+        if not hasattr(self, '_session_jwt_string'):
+            # This is the latest time we can populate the session
+            # since after that we need it to encrypt the cookie string.
+            self.serialize_username()
+            serialized = json.dumps(self.session, indent=2, cls=JSONEncoder)
+            self._session_jwt_string = jwt.encode(
+                {'payload': serialized}, self.app.enc_key)
+        return self._session_jwt_string
 
     def check_permissions(self, request):
         redirect_url, self.rule, self.session = base_check_permissions(
@@ -111,12 +123,15 @@ class SessionProxyMixin(object):
 
     def get_context_data(self, **kwargs):
         context = super(SessionProxyMixin, self).get_context_data(**kwargs)
-        line = "%s: %s" % (SESSION_COOKIE_NAME, self.session_cookie_string)
+        if self.app.session_backend == self.app.JWT_SESSION_BACKEND:
+            s = "%s: %s" % (SESSION_COOKIE_NAME, self.session_jwt_string)
+        else:
+            line = "%s: %s" % (SESSION_COOKIE_NAME, self.session_cookie_string)
+            s = '\\\n'.join( [line[i:i+48] for i in range(0, len(line), 48)])
         context.update({
             'forward_session': json.dumps(
                 self.session, indent=2, cls=JSONEncoder),
-            'forward_session_cookie': '\\\n'.join(
-                [line[i:i+48] for i in range(0, len(line), 48)]),
+            'forward_session_cookie': s,
             'forward_url': '%s%s' % (self.app.entry_point, self.request.path),
         })
         return context
@@ -242,7 +257,7 @@ class SessionProxyMixin(object):
 
         if self.app.forward_session and \
             self.app.session_backend == self.app.JWT_SESSION_BACKEND:
-            jwt_token = self.session_jwt_string()
+            jwt_token = self.session_jwt_string
             headers.update({'Authorization: Bearer': jwt_token})
 
         if request.META.get(
