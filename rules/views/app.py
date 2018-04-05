@@ -36,7 +36,8 @@ import requests
 import jwt
 import pdb
 from requests.exceptions import RequestException
-from deployutils.apps.django.backends.encrypted_cookies import SessionStore
+from deployutils.apps.django.backends.encrypted_cookies import SessionStore as CookieSessionStore
+from deployutils.apps.django.backends.jwt_session_store import SessionStore as JWTSessionStore
 from deployutils.apps.django.settings import SESSION_COOKIE_NAME
 
 from .. import settings
@@ -83,7 +84,7 @@ class SessionProxyMixin(object):
             # This is the latest time we can populate the session
             # since after that we need it to encrypt the cookie string.
             self.serialize_username()
-            session_store = SessionStore(self.app.enc_key)
+            session_store = CookieSessionStore(self.app.enc_key)
             self._session_cookie_string = session_store.prepare(
                 self.session, self.app.enc_key)
             if six.PY3:
@@ -102,9 +103,9 @@ class SessionProxyMixin(object):
             # This is the latest time we can populate the session
             # since after that we need it to encrypt the cookie string.
             self.serialize_username()
-            serialized = json.dumps(self.session, indent=2, cls=JSONEncoder)
-            self._session_jwt_string = jwt.encode(
-                {'payload': serialized}, self.app.enc_key)
+            session_store = JWTSessionStore(self.app.enc_key)
+            self._session_jwt_string = session_store.prepare(
+                self.session, self.app.enc_key)
         return self._session_jwt_string
 
     def check_permissions(self, request):
