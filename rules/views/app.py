@@ -33,8 +33,6 @@ from django.utils import six
 from django.utils.module_loading import import_string
 from django.views.generic import UpdateView, TemplateView
 import requests
-import jwt
-import pdb
 from requests.exceptions import RequestException
 from deployutils.apps.django.backends.encrypted_cookies import SessionStore as CookieSessionStore
 from deployutils.apps.django.backends.jwt_session_store import SessionStore as JWTSessionStore
