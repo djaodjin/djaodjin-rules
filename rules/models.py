@@ -132,6 +132,14 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
         (TOGETHER_REGISTRATION, "User and organization registration"),
     )
 
+    COOKIE_SESSION_BACKEND = 0
+    JWT_SESSION_BACKEND = 1
+
+    SESSION_BACKEND_TYPE = (
+        (COOKIE_SESSION_BACKEND, "Cookie based session backend"),
+        (JWT_SESSION_BACKEND, "JWT based session backend"),
+    )
+
     objects = AppManager()
 
     # Since most DNS provider limit subdomain length to 25 characters,
@@ -153,6 +161,8 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
     enc_key = models.TextField(max_length=480, verbose_name='Encryption Key',
        help_text='Encryption key used to sign proxyed requests')
     forward_session = models.BooleanField(default=True)
+    session_backend = models.PositiveSmallIntegerField(
+        choices=SESSION_BACKEND_TYPE, default=COOKIE_SESSION_BACKEND)
 
     # XXX Fields used to custom signup form
     registration = models.PositiveSmallIntegerField(

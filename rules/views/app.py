@@ -34,7 +34,8 @@ from django.utils.module_loading import import_string
 from django.views.generic import UpdateView, TemplateView
 import requests
 from requests.exceptions import RequestException
-from deployutils.apps.django.backends.encrypted_cookies import SessionStore
+from deployutils.apps.django.backends.encrypted_cookies import SessionStore as CookieSessionStore
+from deployutils.apps.django.backends.jwt_session_store import SessionStore as JWTSessionStore
 from deployutils.apps.django.settings import SESSION_COOKIE_NAME
 
 from .. import settings
@@ -62,6 +63,15 @@ class SessionProxyMixin(object):
     redirect_field_name = REDIRECT_FIELD_NAME
     login_url = None
 
+    def serialize_username(self):
+        if self.request.user.is_authenticated():
+            #pylint: disable=no-member
+            serializer_class = import_string(settings.SESSION_SERIALIZER)
+            serializer = serializer_class(self.request, context={
+                'app': self.app, 'rule': self.rule})
+            self.session.update(serializer.data)
+
+
     @property
     def session_cookie_string(self):
         """
@@ -71,13 +81,8 @@ class SessionProxyMixin(object):
         if not hasattr(self, '_session_cookie_string'):
             # This is the latest time we can populate the session
             # since after that we need it to encrypt the cookie string.
-            if self.request.user.is_authenticated():
-                #pylint: disable=no-member
-                serializer_class = import_string(settings.SESSION_SERIALIZER)
-                serializer = serializer_class(self.request, context={
-                    'app': self.app, 'rule': self.rule})
-                self.session.update(serializer.data)
-            session_store = SessionStore(self.app.enc_key)
+            self.serialize_username()
+            session_store = CookieSessionStore(self.app.enc_key)
             self._session_cookie_string = session_store.prepare(
                 self.session, self.app.enc_key)
             if six.PY3:
@@ -85,6 +90,21 @@ class SessionProxyMixin(object):
                 self._session_cookie_string \
                     = self._session_cookie_string.decode('ascii')
         return self._session_cookie_string
+
+    @property
+    def session_jwt_string(self):
+        """
+        Return the encrypted session information
+        encoded as a JWT token.
+        """
+        if not hasattr(self, '_session_jwt_string'):
+            # This is the latest time we can populate the session
+            # since after that we need it to encrypt the cookie string.
+            self.serialize_username()
+            session_store = JWTSessionStore(self.app.enc_key)
+            self._session_jwt_string = session_store.prepare(
+                self.session, self.app.enc_key)
+        return self._session_jwt_string
 
     def check_permissions(self, request):
         redirect_url, self.rule, self.session = base_check_permissions(
@@ -102,12 +122,15 @@ class SessionProxyMixin(object):
 
     def get_context_data(self, **kwargs):
         context = super(SessionProxyMixin, self).get_context_data(**kwargs)
-        line = "%s: %s" % (SESSION_COOKIE_NAME, self.session_cookie_string)
+        if self.app.session_backend == self.app.JWT_SESSION_BACKEND:
+            s = "%s: %s" % (SESSION_COOKIE_NAME, self.session_jwt_string)
+        else:
+            line = "%s: %s" % (SESSION_COOKIE_NAME, self.session_cookie_string)
+            s = '\\\n'.join( [line[i:i+48] for i in range(0, len(line), 48)])
         context.update({
             'forward_session': json.dumps(
                 self.session, indent=2, cls=JSONEncoder),
-            'forward_session_cookie': '\\\n'.join(
-                [line[i:i+48] for i in range(0, len(line), 48)]),
+            'forward_session_cookie': s,
             'forward_url': '%s%s' % (self.app.entry_point, self.request.path),
         })
         return context
@@ -192,8 +215,10 @@ class SessionProxyMixin(object):
         cookies = SimpleCookie()
         for key, value in six.iteritems(request.COOKIES):
             cookies[key] = value
-        if self.app.forward_session:
-            cookies[SESSION_COOKIE_NAME] = self.session_cookie_string
+        if self.app.forward_session and \
+            self.app.session_backend != self.app.JWT_SESSION_BACKEND:
+                cookies[SESSION_COOKIE_NAME] = self.session_cookie_string
+
         #pylint: disable=maybe-no-member
         # Something changed in `SimpleCookie.output` that creates an invalid
         # cookie string starting with a spacel or there are more strident
@@ -228,6 +253,11 @@ class SessionProxyMixin(object):
             headers.update({'X-REAL-IP': request.META.get('REMOTE_ADDR', None)})
         if 'COOKIE' not in headers:
             headers.update({'COOKIE': cookie_string})
+
+        if self.app.forward_session and \
+            self.app.session_backend == self.app.JWT_SESSION_BACKEND:
+            jwt_token = self.session_jwt_string
+            headers.update({'AUTHORIZATION': 'Bearer %s' % jwt_token})
 
         if request.META.get(
                 'CONTENT_TYPE', '').startswith('multipart/form-data'):
