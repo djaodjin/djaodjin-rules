@@ -83,7 +83,8 @@ class Engagement(models.Model):
     """
     slug = models.SlugField()
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, related_name='engagements')
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name='engagements')
     last_visited = models.DateTimeField(
         default=datetime.datetime(1971, 1, 1).replace(tzinfo=utc))
     # 1971 instead of 1970 to avoid Overflow exception in South.
@@ -153,7 +154,8 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
             URLValidator.host_re,
             "Enter a valid 'domain', ex: example.com", 'invalid')])
 
-    account = models.ForeignKey(settings.ACCOUNT_MODEL, null=True)
+    account = models.ForeignKey(settings.ACCOUNT_MODEL,
+        null=True, on_delete=models.CASCADE)
 
     # Fields for proxy features
     entry_point = models.URLField(max_length=100,
@@ -241,7 +243,8 @@ class Rule(models.Model):
 
     objects = RuleManager()
 
-    app = models.ForeignKey(settings.RULES_APP_MODEL)
+    app = models.ForeignKey(settings.RULES_APP_MODEL,
+        on_delete=models.CASCADE)
     # XXX At first I wanted to use a URLField for validation but this only
     #     works for URLs starting with a http/ftp protocol. What we really
     #     want here is a Path validator (including /).

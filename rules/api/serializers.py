@@ -1,4 +1,4 @@
-# Copyright (c) 2017, DjaoDjin inc.
+# Copyright (c) 2018, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -52,6 +52,18 @@ class AppSerializer(serializers.ModelSerializer):
             or parts.netloc.startswith('127.0.0.1')):
             raise serializers.ValidationError("Unsafe URLs are not allowed.")
         return value
+
+
+class AppKeySerializer(serializers.ModelSerializer):
+    """
+    Used when a secret key is generated.
+    """
+    enc_key = serializers.CharField()
+
+    class Meta:
+        model = App
+        fields = ('enc_key',)
+        read_only_fields = ('enc_key',)
 
 
 class RuleSerializer(serializers.ModelSerializer):

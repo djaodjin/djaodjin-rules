@@ -22,8 +22,6 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from . import settings
-
 #pylint: disable=invalid-name,no-name-in-module,unused-import,import-error
 
 try:
@@ -31,6 +29,15 @@ try:
     get_model = apps.get_model
 except ImportError: # django < 1.8
     from django.db.models.loading import get_model
+
+
+try:
+    from django.urls import NoReverseMatch, reverse, reverse_lazy
+except ImportError: # <= Django 1.10, Python<3.6
+    from django.core.urlresolvers import NoReverseMatch, reverse, reverse_lazy
+except ModuleNotFoundError: #pylint:disable=undefined-variable
+    # <= Django 1.10, Python>=3.6
+    from django.core.urlresolvers import NoReverseMatch, reverse, reverse_lazy
 
 
 def get_model_class(full_name, settings_meta):
@@ -51,17 +58,3 @@ def get_model_class(full_name, settings_meta):
             "%s refers to model '%s' that has not been installed"
             % (settings_meta, full_name))
     return model_class
-
-
-if isinstance(settings.ACCOUNT_MODEL, str):
-    Account = get_model_class(settings.ACCOUNT_MODEL, 'ACCOUNT_MODEL')
-else:
-    Account = settings.ACCOUNT_MODEL
-
-
-try:
-    from django.contrib.auth import get_user_model
-except ImportError: # django < 1.5
-    from django.contrib.auth.models import User
-else:
-    User = get_user_model()

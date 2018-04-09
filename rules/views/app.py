@@ -34,8 +34,10 @@ from django.utils.module_loading import import_string
 from django.views.generic import UpdateView, TemplateView
 import requests
 from requests.exceptions import RequestException
-from deployutils.apps.django.backends.encrypted_cookies import SessionStore as CookieSessionStore
-from deployutils.apps.django.backends.jwt_session_store import SessionStore as JWTSessionStore
+from deployutils.apps.django.backends.encrypted_cookies import (
+    SessionStore as CookieSessionStore)
+from deployutils.apps.django.backends.jwt_session_store import (
+    SessionStore as JWTSessionStore)
 from deployutils.apps.django.settings import SESSION_COOKIE_NAME
 
 from .. import settings
@@ -123,14 +125,16 @@ class SessionProxyMixin(object):
     def get_context_data(self, **kwargs):
         context = super(SessionProxyMixin, self).get_context_data(**kwargs)
         if self.app.session_backend == self.app.JWT_SESSION_BACKEND:
-            s = "%s: %s" % (SESSION_COOKIE_NAME, self.session_jwt_string)
+            forward_session_cookie = "%s: %s" % (
+                SESSION_COOKIE_NAME, self.session_jwt_string)
         else:
             line = "%s: %s" % (SESSION_COOKIE_NAME, self.session_cookie_string)
-            s = '\\\n'.join( [line[i:i+48] for i in range(0, len(line), 48)])
+            forward_session_cookie = '\\\n'.join(
+                [line[i:i+48] for i in range(0, len(line), 48)])
         context.update({
             'forward_session': json.dumps(
                 self.session, indent=2, cls=JSONEncoder),
-            'forward_session_cookie': s,
+            'forward_session_cookie': forward_session_cookie,
             'forward_url': '%s%s' % (self.app.entry_point, self.request.path),
         })
         return context
@@ -215,9 +219,9 @@ class SessionProxyMixin(object):
         cookies = SimpleCookie()
         for key, value in six.iteritems(request.COOKIES):
             cookies[key] = value
-        if self.app.forward_session and \
-            self.app.session_backend != self.app.JWT_SESSION_BACKEND:
-                cookies[SESSION_COOKIE_NAME] = self.session_cookie_string
+        if (self.app.forward_session and
+            self.app.session_backend != self.app.JWT_SESSION_BACKEND):
+            cookies[SESSION_COOKIE_NAME] = self.session_cookie_string
 
         #pylint: disable=maybe-no-member
         # Something changed in `SimpleCookie.output` that creates an invalid

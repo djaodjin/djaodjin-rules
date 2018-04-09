@@ -2,9 +2,6 @@
 
 import os.path
 
-from django.core.urlresolvers import reverse_lazy
-
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def load_config(confpath):
