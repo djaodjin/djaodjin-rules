@@ -123,6 +123,16 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
     The same ``slug`` will though indistincly pickup a ``App`` and/or
     the matching ``Organization``.
     """
+    NO_SESSION = 0
+    COOKIE_SESSION_BACKEND = 1
+    JWT_SESSION_BACKEND = 2
+
+    SESSION_BACKEND_TYPE = (
+        (NO_SESSION, "No session forwarded"),
+        (COOKIE_SESSION_BACKEND, "Cookie based session backend"),
+        (JWT_SESSION_BACKEND, "JWT based session backend"),
+    )
+
     USER_REGISTRATION = 0
     PERSONAL_REGISTRATION = 1
     TOGETHER_REGISTRATION = 2
@@ -131,14 +141,6 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
         (USER_REGISTRATION, "User registration"),
         (PERSONAL_REGISTRATION, "Personal registration"),
         (TOGETHER_REGISTRATION, "User and organization registration"),
-    )
-
-    COOKIE_SESSION_BACKEND = 0
-    JWT_SESSION_BACKEND = 1
-
-    SESSION_BACKEND_TYPE = (
-        (COOKIE_SESSION_BACKEND, "Cookie based session backend"),
-        (JWT_SESSION_BACKEND, "JWT based session backend"),
     )
 
     objects = AppManager()
@@ -162,7 +164,6 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
        help_text='Entry point to which requests will be redirected to')
     enc_key = models.TextField(max_length=480, verbose_name='Encryption Key',
        help_text='Encryption key used to sign proxyed requests')
-    forward_session = models.BooleanField(default=True)
     session_backend = models.PositiveSmallIntegerField(
         choices=SESSION_BACKEND_TYPE, default=COOKIE_SESSION_BACKEND)
 
@@ -183,12 +184,12 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
 
     def get_changes(self, update_fields):
         changes = {}
-        for field_name in ('entry_point', 'enc_key', 'forward_session'):
+        for field_name in ('domain', 'entry_point', 'enc_key',
+                           'session_backend', 'registration'):
             pre_value = getattr(self, field_name, None)
             post_value = update_fields.get(field_name, None)
             if post_value is not None and pre_value != post_value:
-                changes[field_name] = {
-                    'pre': pre_value, 'post': post_value}
+                changes[field_name] = {'pre': pre_value, 'post': post_value}
         return changes
 
     def get_connection(self):

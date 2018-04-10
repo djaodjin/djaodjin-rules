@@ -219,7 +219,7 @@ class SessionProxyMixin(object):
         cookies = SimpleCookie()
         for key, value in six.iteritems(request.COOKIES):
             cookies[key] = value
-        if (self.app.forward_session and
+        if (self.app.session_backend and
             self.app.session_backend != self.app.JWT_SESSION_BACKEND):
             cookies[SESSION_COOKIE_NAME] = self.session_cookie_string
 
@@ -258,7 +258,7 @@ class SessionProxyMixin(object):
         if 'COOKIE' not in headers:
             headers.update({'COOKIE': cookie_string})
 
-        if self.app.forward_session and \
+        if self.app.session_backend and \
             self.app.session_backend == self.app.JWT_SESSION_BACKEND:
             jwt_token = self.session_jwt_string
             headers.update({'AUTHORIZATION': 'Bearer %s' % jwt_token})
