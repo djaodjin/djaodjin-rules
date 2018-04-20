@@ -197,6 +197,9 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
         kwargs = {}
         return get_connection_base(**kwargs)
 
+    def get_implicit_create_on_none(self):
+        return self.registration in (self.PERSONAL_REGISTRATION,)
+
     def get_from_email(self):
         #pylint:disable=no-self-use
         return settings.DEFAULT_FROM_EMAIL
