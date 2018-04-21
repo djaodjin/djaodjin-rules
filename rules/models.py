@@ -136,11 +136,13 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
     USER_REGISTRATION = 0
     PERSONAL_REGISTRATION = 1
     TOGETHER_REGISTRATION = 2
+    IMPLICIT_REGISTRATION = 3
 
     REGISTRATION_TYPE = (
         (USER_REGISTRATION, "User registration"),
         (PERSONAL_REGISTRATION, "Personal registration"),
         (TOGETHER_REGISTRATION, "User and organization registration"),
+        (IMPLICIT_REGISTRATION, "User registration wth implicit billing"),
     )
 
     objects = AppManager()
@@ -198,7 +200,8 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
         return get_connection_base(**kwargs)
 
     def get_implicit_create_on_none(self):
-        return self.registration in (self.PERSONAL_REGISTRATION,)
+        return self.registration in (
+            self.PERSONAL_REGISTRATION, self.IMPLICIT_REGISTRATION)
 
     def get_from_email(self):
         #pylint:disable=no-self-use
