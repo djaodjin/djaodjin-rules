@@ -1,4 +1,4 @@
-# Copyright (c) 2017, DjaoDjin inc.
+# Copyright (c) 2018, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -139,16 +139,26 @@ def engaged(rule, request=None):
     """
     last_visited = None
     if rule.engaged:
-        obj, created = Engagement.objects.get_or_create(
-            slug=rule.engaged, user=request.user,
-            defaults={'last_visited': datetime_or_now()})
-        if created:
-            LOGGER.info(
-                "initial '%s' engagement%s", rule.engaged,
-                (" on %s" % request.path) if request is not None else "",
-                extra={'event': 'initial-engagement', 'request': request})
-        else:
-            last_visited = obj.last_visited
+        last_tags = []
+        datetime_stored = datetime_or_now()
+        for tag in rule.engaged.split(','):
+            obj, created = Engagement.objects.get_or_create(
+                slug=tag, user=request.user,
+                defaults={'last_visited': datetime_stored})
+            if created:
+                LOGGER.info(
+                    "initial '%s' engagement%s", tag,
+                    (" on %s" % request.path) if request is not None else "",
+                    extra={'event': 'initial-engagement', 'request': request})
+            elif last_visited:
+                last_tags += [tag]
+                last_visited = max(obj.last_visited, last_visited)
+            else:
+                last_tags += [tag]
+                last_visited = obj.last_visited
+        last_tags = ','.join(last_tags)
+        if last_tags and last_tags != rule.engaged:
+            last_visited = last_tags
     return last_visited
 
 
