@@ -260,7 +260,7 @@ class Rule(models.Model):
         choices=settings.DB_RULE_OPERATORS, default=ANY)
     kwargs = models.CharField(max_length=255, default="")
     is_forward = models.BooleanField(default=True)
-    engaged = models.SlugField()
+    engaged = models.CharField(max_length=50)
     rank = models.IntegerField()
     moved = models.BooleanField(default=False)
 

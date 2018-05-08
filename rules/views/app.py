@@ -118,8 +118,10 @@ class SessionProxyMixin(object):
             #     code on self-hosted templates.
             last_visited = self.session.get('last_visited', None)
             if last_visited:
+                if not isinstance(last_visited, six.string_types):
+                    last_visited = last_visited.isoformat()
                 self.request.session.update({
-                    'last_visited': last_visited.isoformat()})
+                    'last_visited': last_visited})
         return (redirect_url, self.rule.is_forward if self.rule else False)
 
     def get_context_data(self, **kwargs):
