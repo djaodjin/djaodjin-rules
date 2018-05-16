@@ -1,4 +1,4 @@
-# Copyright (c) 2017, DjaoDjin inc.
+# Copyright (c) 2018, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -87,7 +87,7 @@ class SessionProxyMixin(object):
             session_store = CookieSessionStore(self.app.enc_key)
             self._session_cookie_string = session_store.prepare(
                 self.session, self.app.enc_key)
-            if six.PY3:
+            if not isinstance(self._session_cookie_string, six.string_types):
                 # Because we don't want Python3 to prefix our strings with b'.
                 self._session_cookie_string \
                     = self._session_cookie_string.decode('ascii')
