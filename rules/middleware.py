@@ -27,6 +27,7 @@ from __future__ import unicode_literals
 import logging
 
 from django.middleware.csrf import CsrfViewMiddleware
+from rest_framework.authentication import get_authorization_header
 
 from .perms import find_rule
 from .utils import get_current_app
@@ -54,5 +55,15 @@ class RulesMiddleware(CsrfViewMiddleware):
                 request._dont_enforce_csrf_checks = True
                 LOGGER.debug("dont enforce csrf checks on %s %s",
                     request.method, request.path)
+
+        auth = get_authorization_header(request).split()
+        if auth and auth[0].lower() in [b'basic', b'bearer']:
+            # We need to support API calls from the command line.
+            #pylint:disable=protected-access
+            request._dont_enforce_csrf_checks = True
+            LOGGER.debug("dont enforce csrf checks on %s %s because"\
+                " we have an authorization header",
+                request.method, request.path)
+
         return super(RulesMiddleware, self).process_view(
             request, callback, callback_args, callback_kwargs)
