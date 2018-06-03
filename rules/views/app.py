@@ -41,7 +41,7 @@ from deployutils.apps.django.backends.jwt_session_store import (
 from deployutils.apps.django.settings import SESSION_COOKIE_NAME
 
 from .. import settings
-from ..compat import get_model
+from ..compat import get_model, is_authenticated
 from ..mixins import AppMixin
 from ..models import App
 from ..perms import check_permissions as base_check_permissions
@@ -66,7 +66,7 @@ class SessionProxyMixin(object):
     login_url = None
 
     def serialize_username(self):
-        if self.request.user.is_authenticated():
+        if is_authenticated(self.request):
             #pylint: disable=no-member
             serializer_class = import_string(settings.SESSION_SERIALIZER)
             serializer = serializer_class(self.request, context={

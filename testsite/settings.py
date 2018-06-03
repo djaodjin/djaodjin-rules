@@ -22,16 +22,13 @@ def load_config(confpath):
                     if look:
                         value = look.group(2) \
                             % {'LOCALSTATEDIR': BASE_DIR + '/var'}
-                        try:
-                            # Once Django 1.5 introduced ALLOWED_HOSTS (a tuple
-                            # definitely in the site.conf set), we had no choice
-                            # other than using eval. The {} are here to restrict
-                            # the globals and locals context eval has access to.
-                            # pylint: disable=eval-used
-                            setattr(sys.modules[__name__],
-                                    look.group(1).upper(), eval(value, {}, {}))
-                        except Exception:
-                            raise
+                        # Once Django 1.5 introduced ALLOWED_HOSTS (a tuple
+                        # definitely in the site.conf set), we had no choice
+                        # other than using eval. The {} are here to restrict
+                        # the globals and locals context eval has access to.
+                        # pylint: disable=eval-used
+                        setattr(sys.modules[__name__],
+                            look.group(1).upper(), eval(value, {}, {}))
                 line = conffile.readline()
     else:
         sys.stderr.write('warning: config file %s does not exist.\n' % confpath)
@@ -88,6 +85,8 @@ DATABASES = {
 
 REST_FRAMEWORK = {
     'PAGE_SIZE': 25,
+    'DEFAULT_PAGINATION_CLASS':
+        'rest_framework.pagination.PageNumberPagination',
 }
 
 # Local time zone for this installation. Choices can be found here:
@@ -147,7 +146,7 @@ STATICFILES_FINDERS = (
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
     'debug_panel.middleware.DebugPanelMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -156,6 +155,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware'
 )
+
+MIDDLEWARE_CLASSES = MIDDLEWARE
 
 # Templates (Django 1.8+)
 # ----------------------
@@ -182,7 +183,8 @@ TEMPLATES = [
     }
 ]
 
-LOGIN_REDIRECT_URL = '/profile/'
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = '/proxy/rules/'
 
 # Allow user to enter month in durationfield
 DURATIONFIELD_ALLOW_MONTHS = True

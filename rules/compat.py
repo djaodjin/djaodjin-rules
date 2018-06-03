@@ -1,4 +1,4 @@
-# Copyright (c) 2015, DjaoDjin inc.
+# Copyright (c) 2018, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -58,3 +58,9 @@ def get_model_class(full_name, settings_meta):
             "%s refers to model '%s' that has not been installed"
             % (settings_meta, full_name))
     return model_class
+
+
+def is_authenticated(request):
+    if callable(request.user.is_authenticated):
+        return request.user.is_authenticated()
+    return request.user.is_authenticated

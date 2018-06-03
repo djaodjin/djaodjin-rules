@@ -27,9 +27,9 @@ app.directive("dndList", function() {
             toUpdate = value;
         }, true);
 
-        // use jquery to make the element sortable (dnd). This is called
+        // use jquery-ui to make the element sortable (dnd). This is called
         // when the element is rendered
-        $(element[0]).sortable({
+        angular.element(element[0]).sortable({
             items: "tr",
             start: function (event, ui) {
                 // on start we define where the item is dragged from

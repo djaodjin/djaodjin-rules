@@ -28,7 +28,7 @@ import debug_toolbar
 
 urlpatterns = [
     url(r'^__debug__/', include(debug_toolbar.urls)),
+    url(r'^$', TemplateView.as_view(template_name='index.html')),
     url(r'^', include('django.contrib.auth.urls')),
     url(r'^', include('rules.urls')),
-    url(r'^$', TemplateView.as_view(template_name='index.html')),
 ]

@@ -1,6 +1,6 @@
-Django==1.9.9
-djangorestframework==3.7.0
-djaodjin-deployutils==0.4.7
+Django==1.11.13
+djangorestframework==3.8.2
+djaodjin-deployutils==0.5.2
 django-extensions==1.6.7
 django-debug-panel==0.8.3
 django-debug-toolbar==1.9.1

@@ -1,4 +1,4 @@
-# Copyright (c) 2016, DjaoDjin inc.
+# Copyright (c) 2018, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -25,6 +25,7 @@
 import logging
 
 from . import settings
+from .compat import is_authenticated
 from .models import Engagement
 from .utils import datetime_or_now
 from .extras import AppMixinBase
@@ -47,7 +48,7 @@ class EngagementMixin(object):
     def last_visited(self):
         if not hasattr(self, '_last_visited'):
             self._last_visited = None
-            if self.request.user.is_authenticated():
+            if is_authenticated(self.request):
                 engagement, created = Engagement.objects.get_or_create(
                     slug=self.engagement_trigger, user=self.request.user)
                 if created:

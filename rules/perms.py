@@ -32,6 +32,7 @@ from django.core.exceptions import PermissionDenied
 from django.utils import six
 
 from . import settings
+from .compat import is_authenticated
 from .models import Engagement, Rule
 from .utils import datetime_or_now
 
@@ -115,7 +116,7 @@ def redirect_or_denied(request, inserted_url,
 
 def fail_rule(request, rule, params, redirect_field_name=REDIRECT_FIELD_NAME,
               login_url=None):
-    if not request.user.is_authenticated():
+    if not is_authenticated(request):
         LOGGER.debug("user is not authenticated")
         return _insert_url(request, redirect_field_name,
             login_url or django_settings.LOGIN_URL)
@@ -172,7 +173,7 @@ def check_matched(request, app, prefixes=None,
     matched, params = find_rule(request, app, prefixes=prefixes)
     if matched:
         if matched.rule_op == Rule.ANY:
-            if request.user.is_authenticated():
+            if is_authenticated(request):
                 last_visited = engaged(matched, request=request)
                 session.update({'last_visited': last_visited})
             return (None, matched, session)

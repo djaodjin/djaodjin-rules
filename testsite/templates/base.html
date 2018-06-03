@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>SaaS Testsite</title>
-  <script type="text/javascript" src="/static/vendor/js/jquery.js"></script>
+  <script type="text/javascript" src="/static/vendor/jquery.js"></script>
   {% if csrf_token %}
   <meta name="csrf-token" content="{{csrf_token}}">
   <script type="text/javascript">
@@ -28,7 +28,7 @@
   <a href="/">Home</a>
   {% if request|is_authenticated %}
   | <a id="rules" href="/proxy/rules/">rules</a>
-  | <a id="authenticated-user" href="{{request|url_profile}}">{{request.user.username}}</a>
+  | <a id="authenticated-user" href="/users/">{{request.user.username}}</a>
   | <a href="/logout/">Sign Out</a>
   {% else %}
   | <a href="/login/">Sign In</a>

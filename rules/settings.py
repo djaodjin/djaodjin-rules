@@ -62,6 +62,8 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils import inspect, six
 
+from .compat import is_authenticated, reverse
+
 
 _SETTINGS = {
     'ACCOUNT_MODEL': getattr(settings, 'AUTH_USER_MODEL', None),
@@ -74,10 +76,19 @@ _SETTINGS = {
     'PATH_PREFIX_CALLABLE': None,
     'RULE_OPERATORS': (
         '',
-        'django.contrib.auth.decorators.login_required'),
+        'rules.settings.fail_authenticated'),
     'SESSION_SERIALIZER': 'rules.api.serializers.UsernameSerializer'
 }
 _SETTINGS.update(getattr(settings, 'RULES', {}))
+
+
+def fail_authenticated(request):
+    """
+    Authenticated
+    """
+    if not is_authenticated(request):
+        return reverse(settings.LOGIN_URL)
+    return False
 
 
 def _load_perms_func(path):

@@ -8,25 +8,44 @@
     "fields": {
         "app": 1,
         "rank": 1,
-        "path": "/",
-        "rule_op": 0,
-        "is_forward": true,
-        "engaged": "app"
+        "path": "/app",
+        "rule_op": 1,
+        "is_forward": false
     },
     "model": "rules.Rule", "pk": 1
 },
 {
     "fields": {
+        "app": 1,
+        "rank": 2,
+        "path": "/forward/",
+        "rule_op": 1,
+        "is_forward": true
+    },
+    "model": "rules.Rule", "pk": 2
+},
+{
+    "fields": {
+        "app": 1,
+        "rank": 3,
+        "path": "/",
+        "rule_op": 0,
+        "is_forward": false
+    },
+    "model": "rules.Rule", "pk": 3
+},
+{
+    "fields": {
       "date_joined": "2012-09-14T14:16:55-09:00",
       "email": "donny@localhost.localdomain",
-      "first_name": "Donny",
+      "first_name": "Alice",
       "is_active": true,
       "is_staff": true,
       "is_superuser": true,
       "last_login": "2012-09-14T14:57:48-09:00",
       "last_name": "Manager",
       "password": "pbkdf2_sha256$10000$z0MBiWn0Rlem$iZdC6uHomlE07qGK/TqfcfxNzKJtFp03c0JILF1frRc=",
-      "username": "donny"
+      "username": "alice"
     },
     "model": "auth.User", "pk": 1
 }]
