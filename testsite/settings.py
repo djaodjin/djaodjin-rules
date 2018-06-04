@@ -1,6 +1,6 @@
 # Django settings for testsite project.
 
-import os.path
+import logging, os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RUN_DIR = os.getcwd()
@@ -225,6 +225,11 @@ LOGGING = {
         }
     }
 }
+if logging.getLogger('gunicorn.error').handlers:
+    LOGGING['handlers']['logfile'].update({
+        'class':'logging.handlers.WatchedFileHandler',
+        'filename': os.path.join(RUN_DIR, 'testsite-app.log')
+    })
 
 
 # Session settings
