@@ -3,6 +3,7 @@
 import os.path
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RUN_DIR = os.getcwd()
 
 def load_config(confpath):
     '''
@@ -33,7 +34,8 @@ def load_config(confpath):
     else:
         sys.stderr.write('warning: config file %s does not exist.\n' % confpath)
 
-load_config(os.path.join(BASE_DIR, 'credentials'))
+load_config(
+    os.path.join(os.getenv('TESTSITE_CONFIG_DIR', RUN_DIR), 'credentials'))
 
 DEBUG = True
 FEATURES_DEBUG = True
@@ -75,7 +77,7 @@ INTERNAL_IPS = ('127.0.0.1', '::1')
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(os.getcwd(), 'db.sqlite'),
+        'NAME': os.path.join(RUN_DIR, 'db.sqlite'),
         'USER': '',
         'PASSWORD': '',
         'HOST': '',
