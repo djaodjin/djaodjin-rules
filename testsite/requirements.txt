@@ -1,6 +1,10 @@
+# djaodjin-rules
 Django==1.11.13
 djangorestframework==3.8.2
 djaodjin-deployutils==0.5.2
-django-extensions==1.6.7
-django-debug-panel==0.8.3
-django-debug-toolbar==1.9.1
+
+# testsite-only
+coverage==4.0.3
+django-extensions==2.0.6
+gunicorn==19.7.1
+whitenoise==3.3.0
