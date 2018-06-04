@@ -47,8 +47,6 @@ ROOT_URLCONF = 'testsite.urls'
 WSGI_APPLICATION = 'testsite.wsgi.application'
 
 INSTALLED_APPS = (
-    'debug_toolbar',
-    'debug_panel',
     'django_extensions',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -149,7 +147,6 @@ STATICFILES_FINDERS = (
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
 MIDDLEWARE = (
-    'debug_panel.middleware.DebugPanelMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
