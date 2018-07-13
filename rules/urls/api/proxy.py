@@ -34,7 +34,7 @@ from ...api.rules import RuleListAPIView, RuleDetailAPIView
 urlpatterns = [
     url(r'^proxy/key/',
         GenerateKeyAPIView.as_view(), name='rules_api_generate_key'),
-    url(r'^proxy/rules(?P<rule>\S+)',
+    url(r'^proxy/rules(?P<rule>\S+)$',
         RuleDetailAPIView.as_view(), name='rules_api_rule_detail'),
     url(r'^proxy/rules',
         RuleListAPIView.as_view(), name='rules_api_rule_list'),

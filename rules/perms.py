@@ -107,8 +107,9 @@ def redirect_or_denied(request, inserted_url,
         return _insert_url(request,
             redirect_field_name=redirect_field_name, inserted_url=inserted_url)
     LOGGER.debug("Looks like an API call or no inserted url"\
-        " (Accept: '%s', insert='%s') => PermissionDenied",
-        request.META.get('HTTP_ACCEPT', '*/*'), inserted_url)
+        " (Accept: '%s', insert='%s') => %s",
+        request.META.get('HTTP_ACCEPT', '*/*'), inserted_url,
+      ('PermissionDenied("%s")' % str(descr)) if descr else "PermissionDenied")
     if descr is None:
         descr = ""
     raise PermissionDenied(descr)
