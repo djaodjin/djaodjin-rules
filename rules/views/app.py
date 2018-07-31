@@ -26,7 +26,7 @@ import json, logging, re
 
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.sites.requests import RequestSite
-from django.core.exceptions import FieldError
+from django.core.exceptions import FieldError, SuspiciousOperation
 from django.http import HttpResponse, SimpleCookie
 from django.template.response import TemplateResponse
 from django.utils import six
@@ -47,8 +47,16 @@ from ..models import App
 from ..perms import check_permissions as base_check_permissions
 from ..utils import JSONEncoder
 
+#pylint:disable=import-error
+from django.utils.six.moves import http_cookies
+
 
 LOGGER = logging.getLogger(__name__)
+
+
+class DisallowedCookieName(SuspiciousOperation):
+    """Cookie header contains invalid value"""
+    pass
 
 
 class SessionProxyMixin(object):
@@ -141,35 +149,13 @@ class SessionProxyMixin(object):
         })
         return context
 
-    def get(self, request, *args, **kwargs):
+    def dispatch(self, request, *args, **kwargs):
         response = self.conditional_forward(request)
         if response:
             return response
-        return super(SessionProxyMixin, self).get(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        response = self.conditional_forward(request)
-        if response:
-            return response
-        return super(SessionProxyMixin, self).post(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        response = self.conditional_forward(request)
-        if response:
-            return response
-        return super(SessionProxyMixin, self).put(request, *args, **kwargs)
-
-    def patch(self, request, *args, **kwargs):
-        response = self.conditional_forward(request)
-        if response:
-            return response
-        return super(SessionProxyMixin, self).patch(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        response = self.conditional_forward(request)
-        if response:
-            return response
-        return super(SessionProxyMixin, self).delete(request, *args, **kwargs)
+        # If we get here, the request was forwarded and we got an exception
+        # or the request must be handled locally.
+        return super(SessionProxyMixin, self).dispatch(request, *args, **kwargs)
 
     def forward_error(self, err):
         context = self.get_context_data()
@@ -219,11 +205,16 @@ class SessionProxyMixin(object):
     def translate_request_args(self, request):
         requests_args = {'allow_redirects': False, 'headers': {}}
         cookies = SimpleCookie()
-        for key, value in six.iteritems(request.COOKIES):
-            cookies[key] = value
-        if (self.app.session_backend and
-            self.app.session_backend != self.app.JWT_SESSION_BACKEND):
-            cookies[SESSION_COOKIE_NAME] = self.session_cookie_string
+        try:
+            for key, value in six.iteritems(request.COOKIES):
+                cookies[key] = value
+            if (self.app.session_backend and
+                self.app.session_backend != self.app.JWT_SESSION_BACKEND):
+                cookies[SESSION_COOKIE_NAME] = self.session_cookie_string
+        except http_cookies.CookieError as err:
+            # Some is messing up with the 'Cookie' header. This sometimes
+            # happen with bots trying to set 'Max-Age' or other reserved words.
+            raise DisallowedCookieName(str(err))
 
         #pylint: disable=maybe-no-member
         # Something changed in `SimpleCookie.output` that creates an invalid
