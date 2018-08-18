@@ -1,4 +1,4 @@
-# Copyright (c) 2015, DjaoDjin inc.
+# Copyright (c) 2018, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,10 +28,16 @@ URLs for the resources API of rules.
 
 from django.conf.urls import url
 
+from ... import settings
 from ...api.keys import (AppUpdateAPIView, GenerateKeyAPIView)
 from ...api.rules import RuleListAPIView, RuleDetailAPIView
+from ...api.sessions import GetSessionDataAPIView
 
 urlpatterns = [
+    url(r'^proxy/sessions/(?P<user>%s)/?' % settings.USERNAME_PAT,
+        GetSessionDataAPIView.as_view(), name='rules_api_session_data'),
+    url(r'^proxy/sessions/?',
+        GetSessionDataAPIView.as_view(), name='rules_api_session_data_base'),
     url(r'^proxy/key/',
         GenerateKeyAPIView.as_view(), name='rules_api_generate_key'),
     url(r'^proxy/rules(?P<rule>\S+)$',

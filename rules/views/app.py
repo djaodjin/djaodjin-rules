@@ -30,22 +30,16 @@ from django.core.exceptions import FieldError, SuspiciousOperation
 from django.http import HttpResponse, SimpleCookie
 from django.template.response import TemplateResponse
 from django.utils import six
-from django.utils.module_loading import import_string
 from django.views.generic import UpdateView, TemplateView
 import requests
 from requests.exceptions import RequestException
-from deployutils.apps.django.backends.encrypted_cookies import (
-    SessionStore as CookieSessionStore)
-from deployutils.apps.django.backends.jwt_session_store import (
-    SessionStore as JWTSessionStore)
 from deployutils.apps.django.settings import SESSION_COOKIE_NAME
 
 from .. import settings
-from ..compat import get_model, is_authenticated
-from ..mixins import AppMixin
-from ..models import App
+from ..compat import get_model
+from ..mixins import AppMixin, SessionDataMixin
 from ..perms import check_permissions as base_check_permissions
-from ..utils import JSONEncoder
+from ..utils import JSONEncoder, get_app_model
 
 #pylint:disable=import-error
 from django.utils.six.moves import http_cookies
@@ -59,7 +53,7 @@ class DisallowedCookieName(SuspiciousOperation):
     pass
 
 
-class SessionProxyMixin(object):
+class SessionProxyMixin(SessionDataMixin):
     """
     Proxy to the application
 
@@ -72,49 +66,6 @@ class SessionProxyMixin(object):
 
     redirect_field_name = REDIRECT_FIELD_NAME
     login_url = None
-
-    def serialize_username(self):
-        if is_authenticated(self.request):
-            #pylint: disable=no-member
-            serializer_class = import_string(settings.SESSION_SERIALIZER)
-            serializer = serializer_class(self.request, context={
-                'app': self.app, 'rule': self.rule})
-            self.session.update(serializer.data)
-
-
-    @property
-    def session_cookie_string(self):
-        """
-        Return the encrypted session information
-        added to the HTTP Cookie Headers.
-        """
-        if not hasattr(self, '_session_cookie_string'):
-            # This is the latest time we can populate the session
-            # since after that we need it to encrypt the cookie string.
-            self.serialize_username()
-            session_store = CookieSessionStore(self.app.enc_key)
-            self._session_cookie_string = session_store.prepare(
-                self.session, self.app.enc_key)
-            if not isinstance(self._session_cookie_string, six.string_types):
-                # Because we don't want Python3 to prefix our strings with b'.
-                self._session_cookie_string \
-                    = self._session_cookie_string.decode('ascii')
-        return self._session_cookie_string
-
-    @property
-    def session_jwt_string(self):
-        """
-        Return the encrypted session information
-        encoded as a JWT token.
-        """
-        if not hasattr(self, '_session_jwt_string'):
-            # This is the latest time we can populate the session
-            # since after that we need it to encrypt the cookie string.
-            self.serialize_username()
-            session_store = JWTSessionStore(self.app.enc_key)
-            self._session_jwt_string = session_store.prepare(
-                self.session, self.app.enc_key)
-        return self._session_jwt_string
 
     def check_permissions(self, request):
         redirect_url, self.rule, self.session = base_check_permissions(
@@ -134,17 +85,10 @@ class SessionProxyMixin(object):
 
     def get_context_data(self, **kwargs):
         context = super(SessionProxyMixin, self).get_context_data(**kwargs)
-        if self.app.session_backend == self.app.JWT_SESSION_BACKEND:
-            forward_session_cookie = "%s: %s" % (
-                SESSION_COOKIE_NAME, self.session_jwt_string)
-        else:
-            line = "%s: %s" % (SESSION_COOKIE_NAME, self.session_cookie_string)
-            forward_session_cookie = '\\\n'.join(
-                [line[i:i+48] for i in range(0, len(line), 48)])
         context.update({
             'forward_session': json.dumps(
                 self.session, indent=2, cls=JSONEncoder),
-            'forward_session_cookie': forward_session_cookie,
+            'forward_session_cookie': self.forward_session_header,
             'forward_url': '%s%s' % (self.app.entry_point, self.request.path),
         })
         return context
@@ -374,7 +318,7 @@ class AppDashboardView(AppMixin, UpdateView):
     (i.e. entry point and encryption key).
     """
 
-    model = App
+    model = get_app_model()
     fields = ('entry_point',)
     template_name = 'rules/app_dashboard.html'
 

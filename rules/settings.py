@@ -81,6 +81,8 @@ _SETTINGS = {
 }
 _SETTINGS.update(getattr(settings, 'RULES', {}))
 
+USERNAME_PAT = r'[\w.@+-]+'
+
 
 def fail_authenticated(request):
     """

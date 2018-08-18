@@ -29,7 +29,7 @@ from rest_framework.generics import (UpdateAPIView,
     RetrieveUpdateDestroyAPIView)
 
 from ..mixins import AppMixin
-from ..models import App
+from ..utils import get_app_model
 from .serializers import AppSerializer, AppKeySerializer
 
 #pylint: disable=no-init
@@ -38,7 +38,7 @@ from .serializers import AppSerializer, AppKeySerializer
 
 class GenerateKeyAPIView(AppMixin, UpdateAPIView):
 
-    model = App
+    model = get_app_model()
     serializer_class = AppKeySerializer
 
     def update(self, request, *args, **kwargs):
@@ -52,7 +52,7 @@ class GenerateKeyAPIView(AppMixin, UpdateAPIView):
 
 class AppUpdateAPIView(AppMixin, RetrieveUpdateDestroyAPIView):
 
-    model = App
+    model = get_app_model()
     serializer_class = AppSerializer
 
     def get_object(self):

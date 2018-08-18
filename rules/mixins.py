@@ -24,6 +24,16 @@
 
 import logging
 
+from deployutils.apps.django.backends.encrypted_cookies import (
+    SessionStore as CookieSessionStore)
+from deployutils.apps.django.backends.jwt_session_store import (
+    SessionStore as JWTSessionStore)
+from deployutils.apps.django.settings import SESSION_COOKIE_NAME
+from django.contrib.auth import get_user_model
+from django.utils.module_loading import import_string
+from django.utils import six
+from rest_framework.generics import get_object_or_404
+
 from . import settings
 from .compat import is_authenticated
 from .models import Engagement
@@ -65,3 +75,105 @@ class EngagementMixin(object):
         context = super(EngagementMixin, self).get_context_data(**kwargs)
         context.update({'last_visited': self.last_visited})
         return context
+
+
+class SessionDataMixin(object):
+
+    @staticmethod
+    def serialize_request(request, app, rule):
+        if is_authenticated(request):
+            #pylint: disable=no-member
+            serializer_class = import_string(settings.SESSION_SERIALIZER)
+            serializer = serializer_class(request, context={
+                'app': app, 'rule': rule})
+            return serializer.data
+        return {}
+
+    @property
+    def session_cookie_string(self):
+        """
+        Return the encrypted session information
+        added to the HTTP Cookie Headers.
+        """
+        if not hasattr(self, '_session_cookie_string'):
+            self._session_cookie_string = self.get_session_cookie_string(
+                self.request, self.app, self.rule, self.session)
+        return self._session_cookie_string
+
+    def get_session_cookie_string(self, request, app, rule, session):
+        # This is the latest time we can populate the session
+        # since after that we need it to encrypt the cookie string.
+        session.update(self.serialize_request(request, app, rule))
+        session_store = CookieSessionStore(app.enc_key)
+        session_token = session_store.prepare(session, app.enc_key)
+        if not isinstance(session_token, six.string_types):
+            # Because we don't want Python3 to prefix our strings with b'.
+            session_token = session_token.decode('ascii')
+        return session_token
+
+    @property
+    def session_jwt_string(self):
+        """
+        Return the encrypted session information
+        encoded as a JWT token.
+        """
+        if not hasattr(self, '_session_jwt_string'):
+            self._session_jwt_string = self.get_session_jwt_string(
+                self.request, self.app, self.rule, self.session)
+        return self._session_jwt_string
+
+    def get_session_jwt_string(self, request, app, rule, session):
+        # This is the latest time we can populate the session
+        # since after that we need it to encrypt the cookie string.
+        session.update(self.serialize_request(request, app, rule))
+        session_store = JWTSessionStore(app.enc_key)
+        session_token = session_store.prepare(session, app.enc_key)
+        if not isinstance(session_token, six.string_types):
+            # Because we don't want Python3 to prefix our strings with b'.
+            #pylint:disable=redefined-variable-type
+            session_token = session_token.decode('ascii')
+        return session_token
+
+    @property
+    def forward_session_header(self):
+        if not hasattr(self, '_forward_session_header'):
+            if self.app.session_backend == self.app.JWT_SESSION_BACKEND:
+                self._forward_session_header = "%s: %s" % (
+                    SESSION_COOKIE_NAME, self.session_jwt_string)
+            else:
+                line = "%s: %s" % (SESSION_COOKIE_NAME,
+                    self.session_cookie_string)
+                self._forward_session_header = '\\\n'.join(
+                    [line[i:i+48] for i in range(0, len(line), 48)])
+        return self._forward_session_header
+
+    def get_forward_session_header(self, request, app, rule, session):
+        if app.session_backend == app.JWT_SESSION_BACKEND:
+            forward_session_header = ("Authorization: Bearer %s" %
+                self.get_session_jwt_string(request, app, rule, session))
+        else:
+            line = "Cookie: %s=%s" % (SESSION_COOKIE_NAME,
+                self.get_session_cookie_string(request, app, rule, session))
+            forward_session_header = '\\\n'.join(
+                [line[i:i+48] for i in range(0, len(line), 48)])
+        return forward_session_header
+
+
+class UserMixin(object):
+
+    user_field = 'username'
+    user_url_kwarg = 'user'
+
+    @property
+    def user(self):
+        if not hasattr(self, '_user'):
+            slug = self.kwargs.get(self.user_url_kwarg)
+            if getattr(self.request.user, self.user_field) == slug:
+                # Not only do we avoid one database query, we also
+                # make sure the user is the actual wrapper object.
+                self._user = self.request.user
+            else:
+                kwargs = {self.user_field: slug}
+                self._user = get_object_or_404(
+                    get_user_model().objects.all(), **kwargs)
+        return self._user

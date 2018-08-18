@@ -253,4 +253,30 @@ ruleControllers.controller("RuleListCtrl",
         return false;
     };
 
+    $scope.forward_session = "";
+    $scope.forward_session_header = "";
+    $scope.forward_url = "";
+
+    $scope.getSessionData = function(form) {
+        var data = {};
+        var fields = angular.element(form).find("input, textarea, select");
+        for( var idx = 0; idx < fields.length; ++idx ) {
+            var field = angular.element(fields[idx]);
+            if( field.attr("name") && field.val() ) {
+                data[field.attr("name")] = field.val();
+            }
+        }
+        console.log("getSessionData('",form,"') data=", data);
+        $http.get(urls.rules_api_session_data + "/" + data['username']).then(
+            function success(resp) {
+                $scope.forward_session = resp.data.forward_session;
+                $scope.forward_session_header = resp.data.forward_session_header;
+                $scope.forward_url = resp.data.forward_url;
+            },
+            function error(resp) {
+                showErrorMessages(resp);
+            });
+        return false;
+    };
+
 }]);

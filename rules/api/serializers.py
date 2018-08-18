@@ -28,17 +28,60 @@ from django.utils import six
 from rest_framework import serializers
 
 from .. import settings
-from ..models import Rule, App
+from ..models import Rule
+from ..utils import get_app_model
 
 #pylint: disable=no-init
 #pylint: disable=old-style-class
+
+class EnumField(serializers.Field):
+    """
+    Treat a ``PositiveSmallIntegerField`` as an enum.
+    """
+    choices = {}
+    inverted_choices = {}
+
+    def __init__(self, choices, *args, **kwargs):
+        self.choices = dict(choices)
+        self.inverted_choices = {
+            val: key for key, val in six.iteritems(self.choices)}
+        super(EnumField, self).__init__(*args, **kwargs)
+
+    def to_representation(self, obj):
+        if isinstance(obj, list):
+            result = [self.choices.get(item, None) for item in obj]
+        else:
+            result = self.choices.get(obj, None)
+        return result
+
+    def to_internal_value(self, data):
+        if isinstance(data, list):
+            result = [self.inverted_choices.get(item, None) for item in data]
+        else:
+            result = self.inverted_choices.get(data, None)
+        if result is None:
+            if not data:
+                raise serializers.ValidationError("This field cannot be blank.")
+            raise serializers.ValidationError(
+                "'%s' is not a valid choice. Expected one of %s." % (
+                data, [choice for choice in six.itervalues(self.choices)]))
+        return result
+
+
+class NoModelSerializer(serializers.Serializer):
+
+    def create(self, validated_data):
+        raise RuntimeError('`create()` should not be called.')
+
+    def update(self, instance, validated_data):
+        raise RuntimeError('`update()` should not be called.')
 
 
 class AppSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = App
-        fields = ('slug', 'entry_point', )
+        model = get_app_model()
+        fields = ('slug', 'entry_point', 'session_backend')
         read_only_fields = ('slug',)
 
     @staticmethod
@@ -61,7 +104,7 @@ class AppKeySerializer(serializers.ModelSerializer):
     enc_key = serializers.CharField()
 
     class Meta:
-        model = App
+        model = get_app_model()
         fields = ('enc_key',)
         read_only_fields = ('enc_key',)
 
@@ -101,19 +144,25 @@ class RuleSerializer(serializers.ModelSerializer):
         return super(RuleSerializer, self).validate(attrs)
 
 
-class UsernameSerializer(serializers.Serializer):
+class SessionDataSerializer(NoModelSerializer):
+
+    forward_session = serializers.CharField()
+    forward_session_header = serializers.CharField()
+    forward_url = serializers.CharField()
+
+    class Meta:
+        fields = ('forward_session', 'forward_session_header', 'forward_url')
+        read_only_fields = ('forward_session', 'forward_session_header',
+            'forward_url')
+
+
+class UsernameSerializer(NoModelSerializer):
 
     username = serializers.SerializerMethodField()
 
     class Meta:
         fields = ('username',)
         read_only_fields = ('username',)
-
-    def create(self, validated_data):
-        raise NotImplementedError()
-
-    def update(self, instance, validated_data):
-        raise NotImplementedError()
 
     @staticmethod
     def get_username(request):
