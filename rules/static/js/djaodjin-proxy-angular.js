@@ -266,7 +266,6 @@ ruleControllers.controller("RuleListCtrl",
                 data[field.attr("name")] = field.val();
             }
         }
-        console.log("getSessionData('",form,"') data=", data);
         $http.get(urls.rules_api_session_data + "/" + data['username']).then(
             function success(resp) {
                 $scope.forward_session = resp.data.forward_session;

@@ -60,10 +60,6 @@ class SessionProxyMixin(SessionDataMixin):
     Check permissions associated to the request and forwards request
     when appropriate.
     """
-    # Implementation Note:
-    # We cannot override ``dispatch()`` because djangorestframework happens
-    # to do user authentication there.
-
     redirect_field_name = REDIRECT_FIELD_NAME
     login_url = None
 
@@ -93,13 +89,58 @@ class SessionProxyMixin(SessionDataMixin):
         })
         return context
 
-    def dispatch(self, request, *args, **kwargs):
+# Implementation Note:
+# We cannot override ``dispatch()`` because djangorestframework happens
+# to do user authentication there. Also doing so prevent injection
+# of the edit tools.
+# On the other hand, we cannnot blindly override `get`, `post`, etc. either
+# because parents might not have implemented the method and it would result
+# in 500 errors when incorrect HTTP requests are generated on the end points.
+#   def dispatch(self, request, *args, **kwargs):
+#       response = self.conditional_forward(request)
+#       if response:
+#           return response
+#       # If we get here, the request was forwarded and we got an exception
+#       # or the request must be handled locally.
+#       return super(SessionProxyMixin, self).dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
         response = self.conditional_forward(request)
         if response:
             return response
-        # If we get here, the request was forwarded and we got an exception
-        # or the request must be handled locally.
-        return super(SessionProxyMixin, self).dispatch(request, *args, **kwargs)
+        return self.forward_to_parent(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        response = self.conditional_forward(request)
+        if response:
+            return response
+        return self.forward_to_parent(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        response = self.conditional_forward(request)
+        if response:
+            return response
+        return self.forward_to_parent(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        response = self.conditional_forward(request)
+        if response:
+            return response
+        return self.forward_to_parent(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        response = self.conditional_forward(request)
+        if response:
+            return response
+        return self.forward_to_parent(request, *args, **kwargs)
+
+    def forward_to_parent(self, request, *args, **kwargs):
+        if request.method.lower() in self.http_method_names:
+            handler = getattr(super(SessionProxyMixin, self),
+                request.method.lower(), self.http_method_not_allowed)
+        else:
+            handler = self.http_method_not_allowed
+        return handler(request, *args, **kwargs)
 
     def forward_error(self, err):
         context = self.get_context_data()
