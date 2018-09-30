@@ -112,7 +112,7 @@ class AppKeySerializer(serializers.ModelSerializer):
 class RuleSerializer(serializers.ModelSerializer):
     allow = serializers.CharField(required=False, source='get_allow')
     is_forward = serializers.BooleanField(required=False)
-    engaged = serializers.CharField(required=False)
+    engaged = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = Rule
