@@ -54,7 +54,7 @@ LOGGER = logging.getLogger(__name__)
 SUBDOMAIN_RE = r'^[-a-zA-Z0-9_]+\Z'
 SUBDOMAIN_SLUG = RegexValidator(
     SUBDOMAIN_RE,
-    _("Enter a valid 'slug' consisting of letters, numbers or hyphens."),
+    _("Enter a valid subdomain consisting of letters, digits or hyphens."),
     'invalid'
 )
 
