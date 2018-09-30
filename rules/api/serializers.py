@@ -115,7 +115,7 @@ class RuleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Rule
-        fields = ('rank', 'path', 'allow', 'is_forward', )
+        fields = ('rank', 'path', 'allow', 'is_forward', 'engaged')
 
     def validate(self, attrs):
         #pylint: disable=super-on-old-class

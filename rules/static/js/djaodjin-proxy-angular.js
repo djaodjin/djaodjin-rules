@@ -115,7 +115,8 @@ ruleServices.factory("Rule", ["Resource", "urls",
 var ruleControllers = angular.module("ruleControllers", []);
 
 ruleControllers.controller("RuleListCtrl",
-    ["$scope", "$http", "Rule", "urls", function($scope, $http, Rule, urls) {
+    ["$scope", "$http", "$timeout", "Rule", "urls",
+     function($scope, $http, $timeout, Rule, urls) {
     "use strict";
     $scope.params = {};
     $scope.itemsPerPage = 25; // Must match on the server-side.
@@ -187,6 +188,24 @@ ruleControllers.controller("RuleListCtrl",
        through the REST API. */
     $scope.updateAllow = function(rule) {
         $scope.save(rule);
+    };
+
+    $scope.editEngaged = function (idx){
+        $scope.engagedEditMode = Array.apply(
+            null, new Array($scope.rules.results.length)).map(function() {
+            return false;
+        });
+        $scope.engagedEditMode[idx] = true;
+        $timeout(function(){
+            angular.element("#input_description").focus();
+        }, 100);
+    };
+
+    $scope.saveEngaged = function(event, rule, idx){
+        if (event.which === 13 || event.type === "blur" ){
+            $scope.engagedEditMode[idx] = false;
+            $scope.save(rule);
+        }
     };
 
     $scope.saveOrder = function(startIndex, newIndex) {

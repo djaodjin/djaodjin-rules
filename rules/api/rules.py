@@ -41,7 +41,7 @@ class UpdateRuleSerializer(RuleSerializer):
 
     class Meta:
         model = Rule
-        fields = ('rank', 'path', 'allow', 'is_forward', )
+        fields = ('rank', 'path', 'allow', 'is_forward', 'engaged')
         read_only_fields = ('path',)
 
 
