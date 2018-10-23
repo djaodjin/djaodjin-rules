@@ -1,207 +1,174 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div ng-app="ruleApp">
-  <div  ng-controller="RuleListCtrl">
+<script type="text/x-template" id="rules-table">
+<div>
+  <h3>Access Rules</h3>
+      <div>
+        <table>
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Path</th>
+            <th>Access Rule</th>
+            <th>Forward</th>
+            <th></th>
+          </tr>
+        </thead>
+        <draggable
+            v-model="items.results"
+            @start="drag=true"
+            @end="drag=false"
+            @change="moved"
+            element="tbody"
+            :options="{draggable:'.item'}">
+          <tr v-for="(rule, index) in items.results" v-cloak :id="'rule-' + rule.rank" :key="rule.rank" class="item">
+            <td width="100">
+                [[rule.rank]]
+            </td>
+            <td>[[rule.path]]</td>
+            <td width="200">
+              <select name="rule" v-model="rule.allow" @change="update(rule)">
+                {% for rule in rules %}
+                <option value='{{rule.0|safe}}'>{{rule.1|safe}}</option>
+                {% endfor %}
+              </select>
+            </td>
+            <td width="100">
+              <input type="checkbox" name="is_forward"
+                     v-model="rule.is_forward"
+                     @change="update(rule)"
+                     :checked="rule.is_forward" />
+            </td>
+            <td width="100">
+              <button @click="remove(index)">remove</button>
+            </td>
+          </tr>
+            <tr slot="footer">
+            <td colspan="5">
+              <a href="#" @click.prevent="ruleModalOpen=true">Add...</a>
+            </td>
+          </tr>
+          </draggable>
+        </tbody>
+      </table>
+      </div>
+        <div v-show="itemsLoaded && totalItems > itemsPerPage">
+            <uiv-pagination v-model="params.page" :total-page="pageCount" @change="get" size="sm" />
+        </div>
+    <form @submit.prevent="create">
+        <modal v-model="ruleModalOpen" title="Path accessed...">
+                  <input id="id_new_rule_path"
+                         maxlength="255"
+                         name="new_rule_path" type="text"
+                         v-model="newRule.path" autofocus>
+                  <p class="help-block">Your path should end with '/'. If not it will be automatically added.</p>
+            <div slot="footer">
+                <button type="button" @click.prevent="ruleModalOpen=false">Cancel</button>
+                <button id="new-rule-submit" type="submit">Create</button>
+            </div>
+        </modal>
+    </form>
+    </div>
+</script>
+
+<div id="rule-list-container">
     <div>
-      <div>
-        <h2>Domain</h2>
-        <div>
-          <div>
-            <p>
-The site is available at {{site_available_at_url}}.
-            </p>
+      <h3>Domain</h3>
+        <p>
+The site is available at <a href="{{site_available_at_url}}">{{site_available_at_url}}</a>.
+        </p>
+    </div>
+    <rules-table></rules-table>
+    <div>
+      <h3>Web application</h3>
+      <p>
+          HTTP End Point
+      </p>
+          <div style="margin-bottom:50px;">
+            <form method="post" @submit.prevent="submitEntryPoint">
+              <input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
+                <div>
+                  <label for="">Entry point *</label>
+                  <input ref="entryPoint" maxlength="100" name="entry_point" type="text" value="{{form.instance.entry_point}}">
+                </div>
+                <div>
+                  <label for="">Session encoding *</label>
+                  <select ref="sessionBackend" name="session_backend" value="{{form.instance.session_backend}}">
+                    <option value="0"{% if form.instance.session_backend == 0 %} selected{% endif %}>No session forwarded</option>
+                    <option value="1"{% if form.instance.session_backend == 1 %} selected{% endif %}>Cookie-based session backend</option>
+                    <option value="2"{% if form.instance.session_backend == 2 %} selected{% endif %}>JWT-based session backend</option>
+                  </select>
+                </div>
+                <div>
+                  <div style="height:25px;"></div>
+                  <button @click.prevent="openKeyModal">Generate Key</button>
+                </div>
+            <button type="submit">Update</button>
+            </form>
           </div>
-        </div>
-      </div>
-      <div>
-        <h2>Access Rules</h2>
-        <div>
-          <table>
-            <thead>
-                <tr>
-                    <th>Rank</th>
-                    <th>Path</th>
-                    <th>Access Rule</th>
-                    <th>Forward</th>
-                    <th>Engage tags</th>
-                    <th>Delete</th>
-                </tr>
-            </thead>
-            <tbody dnd-list="rules">
-                <tr ng-repeat="rule in rules.results" id="rule-[[rule.rank]]">
-                    <td width="100">
-                        <div>Drag&amp;Drop</div>
-                    </td>
-                    <td>[[rule.path]]</td>
-                    <td width="200">
-                        <select name="rule"
-                                ng-model="rule.allow"
-                                ng-change="updateAllow(rule)">
-                            {% for rule in rules %}
-                            <option value="{{rule.0}}">{{rule.1}}</option>
-                            {% endfor %}
-                        </select>
-                    </td>
-                    <td width="100">
-                        <input type="checkbox" name="is_forward"
-                               ng-model="rule.is_forward"
-                               ng-change="updateForward(rule)"
-                               ng-checked="rule.is_forward" />
-                    </td>
-                    <td>
-                      <input type="text" ng-model="rule.engaged"
-                             ng-blur="saveEngaged($event, rule, $index)">
-                    </td>
-                    <td width="100">
-                        <button ng-click="remove($index)">Delete</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="6">
-                        <a id="add-rule" href="#" data-toggle="modal" data-target="#new-rule">Add ...</a>
-                    </td>
-                </tr>
-            </tbody>
-          </table>
-          <!-- modal dialog for Adding a rule -->
-          <div id="new-rule" class="modal fade" tabindex="-1" role="dialog"
-               aria-labelledby="Add Access Rule" aria-hidden="true">
-              <div>
-                  <div>
-                      <div>
-                          <button type="button" class="close"
-                                  data-dismiss="modal" aria-hidden="true">&times;</button>
-                          <h4>Path accessed ...</h4>
-                      </div>
-                      <div>
-                          <div id="div_id_new_rule_path">
-                              <div>
-                                  <input id="id_new_rule_path"
-                                         maxlength="255"
-                                         name="new_rule_path" type="text"
-                                         ng-model="newRule.path">
-                                  <p>Your path should end with '/'. If not it will be automatically added.</p>
-                              </div>
-                          </div>
-                      </div>
-                      <div>
-                          <button type="button"
-                                  data-dismiss="modal">Cancel</button>
-                          <button id="new-rule-submit" ng-click="create()"
-                                  type="button"
-                                  data-dismiss="modal">Create</button>
-                      </div>
-                  </div>
+        <modal v-model="modalOpen" title="Encrypted Session Key">
+            <div>
+                  <input name="key" maxlength="32" type="text" disabled
+                         v-model="sessionKey"
+                         value="Generating..." />
               </div>
-          </div>
-        </div>
-        <!-- end of modal dialog for Adding a rule -->
-      </div>
-      <div>
-          <h2>Web application</h2>
-          <div>
-              <label>Entry point *</label>
-              <form id="entry-point-form" method="post" ng-submit="submitEntryPoint('#entry-point-form')">
-                  <input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
-                  <div
-                      <div>
-                          <div>
-                              <input id="id_entry_point" maxlength="100" name="entry_point" type="text" value="{{form.instance.entry_point}}">
-                              <span>
-                                  <button type="submit">Update</button>
-                              </span>
-                          </div>
-                      </div>
-                  </div>
-                  <div>
-                      <button id="generate-key-btn" data-toggle="modal" data-target="#generate-key">Generate Key</button>
-                  </div>
-              </form>
-          </div>
-          <!-- modal dialog for Encrypted Session Key -->
-          <div id="generate-key" class="modal fade"
-               tabindex="-1" role="dialog"
-               aria-labelledby="Encrypted Session Key" aria-hidden="true">
               <div>
-                  <div>
-                      <div>
-                          <button type="button" class="close"
-                                  data-dismiss="modal" aria-hidden="true">&times;</button>
-                          <h4>Encrypted Session Key</h4>
-                      </div>
-                      <div>
-                          <div>
-                              <div>
-                                  <input name="key" maxlength="32" type="text" disabled
-                                         value="Generating ..." />
-                              </div>
-                          </div>
-                          <div>
-                              <p>
+                <p>
 This is the AES key used to encrypt the session cookie passed
 to your application when a request was authorized.
-                              </p>
-                              <p>
+                </p>
+                <p>
 The key will only be displayed once. Keep it secure.
-                              </p>
-                          </div>
-                      </div>
-                      <div>
-                          <button id="regenerate-key"
-                                  type="button" ng-click="generateKey('#generate-key')">Generate</button>
-                          <button type="button"
-                                  data-dismiss="modal">OK</button>
-                      </div>
-                  </div>
+                </p>
               </div>
-          </div>
-          <!-- end of modal dialog for Encrypted Session Key -->
+            <div slot="footer">
+                <button id="regenerate-key" type="button" @click="generateKey">Generate</button>
+                <button type="button" @click.prevent="modalOpen=false">OK</button>
+            </div>
+        </modal>
+    </div><!-- /Web Application -->
+    <div>
+      <h3>Testing</h3>
+      <p>
+Enter a username and check the token that will be passed to your backend
+service.
+      </p>
+      <form id="token-form" method="post" @submit.prevent="getSessionData">
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
+        <input v-model="testUsername" maxlength="100" name="username" type="text">
+        <button type="submit">Check</button>
+      </form>
+      <div>
+          <dl id="session-data">
+            <dt>Session Data</dt>
+            <dd>
+              <pre class="code"><code>[[forward_session]]</code></pre>
+            </dd>
+          </dl>
+          <dl id="session-header">
+            <dt>As HTTP Header</dt>
+            <dd>
+              <pre class="code"><code>[[forward_session_header]]</code></pre>
+            </dd>
+          </dl>
+          <dl>
+            <dt>Forwarding requests to</dt>
+            <dd>
+              <pre class="code"><code>[[forward_url]]</code></pre>
+            </dd>
+          </dl>
       </div>
-    </div>
-  </div>
+    </div><!-- /testing tokens -->
 </div>
 {% endblock %}
 
 {% block bodyscripts %}
 {{ block.super }}
-<script type="text/javascript" charset="utf-8" src="/static/vendor/jquery-ui.js"></script>
-<script type="text/javascript" charset="utf-8" src="/static/vendor/angular.js"></script>
-<script type="text/javascript" charset="utf-8" src="/static/vendor/angular-touch.js"></script>
-<script type="text/javascript" charset="utf-8" src="/static/vendor/angular-animate.js"></script>
-<script type="text/javascript" charset="utf-8" src="/static/vendor/angular-resource.js"></script>
-<script type="text/javascript" charset="utf-8" src="/static/vendor/angular-route.js"></script>
-<script type="text/javascript" charset="utf-8" src="/static/vendor/angular-dragdrop.js"></script>
-<script type="text/javascript" charset="utf-8" src="/static/vendor/ui-bootstrap-tpls.js"></script>
 <script type="text/javascript" charset="utf-8" src="/static/js/djaodjin-resources.js"></script>
-<script type="text/javascript" charset="utf-8" src="/static/js/djaodjin-proxy-angular.js"></script>
-<script type="text/javascript">
-/**
-Implementation Note #1:
-  Not including a list of dependent modules (2nd parameter to `module`)
-  "re-opens" the module for additional configuration.
-Implementation Note #2:
-  Pasting this code in $(document).ready will lead to a $injector/unpr
-  error in Angularjs.
-*/
-var app = angular.module('ruleApp');
-app.config(['$interpolateProvider', '$httpProvider',
-    function($interpolateProvider, $httpProvider) {
-      $httpProvider.defaults.headers.common['X-CSRFToken'] = '{{csrf_token}}';
-      /* Makes it easier to separate between django and angularjs templates */
-      $interpolateProvider.startSymbol('[[');
-      $interpolateProvider.endSymbol(']]');
-}]);
-app.constant('urls', {
-    rules_api_rule_url: "{{ urls.rules.api_rules }}",
-    rules_api_detail_url: "{{ urls.rules.api_detail }}",
-    rules_api_generate_key: "{{ urls.rules.api_generate_key }}",
-});
-
-$(document).ready(function() {
-    $('#new-rule').on('shown.bs.modal', function(){
-      $('#id_new_rule_path').focus();
-    });
-});
-</script>
+<script type="text/javascript" charset="utf-8" src="/static/vendor/Sortable.js"></script>
+<script type="text/javascript" charset="utf-8" src="/static/vendor/vue.js"></script>
+<script type="text/javascript" charset="utf-8" src="/static/vendor/uiv.min.js"></script>
+<script type="text/javascript" charset="utf-8" src="/static/vendor/vuedraggable.js"></script>
+<script type="text/javascript" charset="utf-8" src="/static/js/djaodjin-rules-vue.js"></script>
 {% endblock %}
