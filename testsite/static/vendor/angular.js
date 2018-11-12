@@ -1578,6 +1578,7 @@ function encodeUriSegment(val) {
   return encodeUriQuery(val, true).
              replace(/%26/gi, '&').
              replace(/%3D/gi, '=').
+             replace(/%2F/gi, '/'). // <--- Added this line (https://github.com/angular/angular.js/issues/1388)
              replace(/%2B/gi, '+');
 }
 
