@@ -73,11 +73,19 @@ var paginationMixin = {
     }
 }
 
-Vue.component('rules-table', {
-    template: '#rules-table',
+if($('#rules-table').length > 0){
+var rtable = new Vue({
+    el: "#rules-table",
+//    template: '#rules-table',
     data: function(){
         return {
-            url: djaodjinSettings.urls.rules_api_rule_url,
+            url: djaodjinSettings.urls.rules.api_rules,
+            itemsLoaded: false,
+            items: {
+                results: [],
+                count: 0
+            },
+            params: {},
             ruleModalOpen: false,
             newRule: {
                 path: '',
@@ -160,11 +168,18 @@ Vue.component('rules-table', {
         this.get();
     }
 });
+}
 
 if($('#rule-list-container').length > 0){
 var app = new Vue({
     el: "#rule-list-container",
     data: {
+        itemsLoaded: false,
+        items: {
+            results: [],
+            count: 0
+        },
+
         modalOpen: false,
         sessionKey: 'Generating...',
         testUsername: '',
@@ -181,7 +196,7 @@ var app = new Vue({
             }
             $.ajax({
                 method: 'PUT',
-                url: djaodjinSettings.urls.rules_api_detail_url,
+                url: djaodjinSettings.urls.rules.api_detail,
                 contentType: 'application/json',
                 data: JSON.stringify(data),
             }).done(function (resp) {
@@ -192,7 +207,7 @@ var app = new Vue({
         },
         getSessionData: function(){
             var vm = this;
-            var url = djaodjinSettings.urls.rules_api_session_data + "/" + vm.testUsername;
+            var url = djaodjinSettings.urls.rules.api_session_data + "/" + vm.testUsername;
             $.ajax({
                 method: 'GET',
                 url: url,
@@ -212,7 +227,7 @@ var app = new Vue({
             var vm = this;
             $.ajax({
                 method: 'PUT',
-                url: djaodjinSettings.urls.rules_api_generate_key,
+                url: djaodjinSettings.urls.rules.api_generate_key,
             }).done(function (resp) {
                 vm.sessionKey = resp.enc_key;
             }).fail(function(resp){

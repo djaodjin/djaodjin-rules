@@ -5,6 +5,9 @@ import logging, os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RUN_DIR = os.getcwd()
 
+#JS_FRAMEWORK = 'angularjs'
+JS_FRAMEWORK = 'vuejs'
+
 def load_config(confpath):
     '''
     Given a path to a file, parse its lines in ini-like format, and then
@@ -169,6 +172,7 @@ TEMPLATES = [
     'django.contrib.auth.context_processors.auth', # because of admin/
     'django.template.context_processors.request',
     'django.template.context_processors.media',
+    'testsite.context_processors.js_framework'
             ],
             'loaders': [
                 'django.template.loaders.filesystem.Loader',

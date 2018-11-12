@@ -22,13 +22,7 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from django.conf.urls import include, url
-from django.views.generic import TemplateView
+from django.conf import settings
 
-
-urlpatterns = [
-    url(r'^favicon.ico$', TemplateView.as_view(template_name='index.html')),
-    url(r'^$', TemplateView.as_view(template_name='index.html')),
-    url(r'^', include('django.contrib.auth.urls')),
-    url(r'^', include('rules.urls')),
-]
+def js_framework(request):#pylint:disable=unused-argument
+    return {'VUEJS': settings.JS_FRAMEWORK == 'vuejs'}
