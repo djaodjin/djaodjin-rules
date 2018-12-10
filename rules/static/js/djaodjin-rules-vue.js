@@ -18,6 +18,12 @@ Vue.mixin({
 
 Vue.use(uiv, {prefix: 'uiv'});
 
+Vue.directive('sortable', {
+  inserted: function (el, binding) {
+    new Sortable(el, binding.value || {})
+  }
+})
+
 var itemListMixin = {
     data: function(){
         return this.getInitData();
@@ -76,7 +82,6 @@ var paginationMixin = {
 if($('#rules-table').length > 0){
 var rtable = new Vue({
     el: "#rules-table",
-//    template: '#rules-table',
     data: function(){
         return {
             url: djaodjinSettings.urls.rules.api_rules,
@@ -92,7 +97,7 @@ var rtable = new Vue({
                 rank: 0,
                 is_forward: false,
             },
-            drag: false,
+            edit_description: [],
         }
     },
     mixins: [
@@ -102,7 +107,10 @@ var rtable = new Vue({
     methods: {
         moved: function(e){
             var vm = this;
-            var pos = [{oldpos: e.moved.oldIndex+1, newpos: e.moved.newIndex+1}];
+            // updating local order
+            vm.items.results.splice(e.newIndex, 0,
+                vm.items.results.splice(e.oldIndex, 1)[0]);
+            var pos = [{oldpos: e.oldIndex+1, newpos: e.newIndex+1}];
             $.ajax({
                 method: 'PATCH',
                 url: vm.url,
@@ -162,7 +170,25 @@ var rtable = new Vue({
             }).fail(function(resp){
                 showErrorMessages(resp);
             });
-        }
+        },
+        editDescription: function(idx){
+            var vm = this;
+            vm.edit_description = Array.apply(
+                null, new Array(vm.items.results.length)).map(function() {
+                return false;
+            });
+            vm.$set(vm.edit_description, idx, true)
+            // at this point the input is rendered and visible
+            vm.$nextTick(function(){
+                vm.$refs.edit_description_input[idx].focus();
+            });
+        },
+        saveDescription: function(coupon, idx, event){
+            if (event.which === 13 || event.type === "blur" ){
+                this.$set(this.edit_description, idx, false)
+                this.update(this.items.results[idx])
+            }
+        },
     },
     mounted: function(){
         this.get();
