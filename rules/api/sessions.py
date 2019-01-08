@@ -48,14 +48,16 @@ class GetSessionDataAPIView(SessionDataMixin, AppMixin, UserMixin,
 
     .. code-block:: http
 
-        GET /api/proxy/sessions/xia HTTP/1.1
+        GET /api/proxy/sessions/xia/ HTTP/1.1
 
     responds
 
     .. code-block:: json
 
         {
-          "slug": "cowork"
+          "forward_session": "{username: xia}",
+          "forward_session_header": "Authorization: XXX",
+          "forward_url": "http://localhost:8001/"
         }
     """
     serializer_class = SessionDataSerializer

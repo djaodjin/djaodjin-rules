@@ -21,10 +21,12 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+from __future__ import unicode_literals
 
 import json
 
 from django.utils import six
+from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 
 from .. import settings
@@ -101,18 +103,22 @@ class AppKeySerializer(serializers.ModelSerializer):
     """
     Used when a secret key is generated.
     """
-    enc_key = serializers.CharField()
+    enc_key = serializers.CharField(read_only=True,
+        help_text=_("Key used to decrypt the encoded session information."))
 
     class Meta:
         model = get_app_model()
         fields = ('enc_key',)
-        read_only_fields = ('enc_key',)
 
 
 class RuleSerializer(serializers.ModelSerializer):
-    allow = serializers.CharField(required=False, source='get_allow')
-    is_forward = serializers.BooleanField(required=False)
-    engaged = serializers.CharField(required=False, allow_blank=True)
+
+    allow = serializers.CharField(required=False, source='get_allow',
+        help_text=_("Method applied to grant or deny access"))
+    is_forward = serializers.BooleanField(required=False,
+        help_text=_("When access is granted, should the request be forwarded"))
+    engaged = serializers.CharField(required=False, allow_blank=True,
+        help_text=_("Tags to check if it is the first time a user engages"))
 
     class Meta:
         model = Rule
@@ -137,7 +143,7 @@ class RuleSerializer(serializers.ModelSerializer):
                             kwargs[key] = dft
                     kwargs_encoded = json.dumps(kwargs)
                 else:
-                    kwargs_encoded = ""
+                    kwargs_encoded = "".encode('utf-8')
                 attrs['rule_op'] = rule_op
                 attrs['kwargs'] = kwargs_encoded
             except ValueError as err:
@@ -147,9 +153,12 @@ class RuleSerializer(serializers.ModelSerializer):
 
 class SessionDataSerializer(NoModelSerializer):
 
-    forward_session = serializers.CharField()
-    forward_session_header = serializers.CharField()
-    forward_url = serializers.CharField()
+    forward_session = serializers.CharField(
+        help_text=_("The session being forwarded"))
+    forward_session_header = serializers.CharField(
+        help_text=_("The HTTP header that encodes the session"))
+    forward_url = serializers.CharField(
+        help_text=_("The URL end point where the request is forwarded"))
 
     class Meta:
         fields = ('forward_session', 'forward_session_header', 'forward_url')

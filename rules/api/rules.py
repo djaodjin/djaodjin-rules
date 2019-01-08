@@ -1,4 +1,4 @@
-# Copyright (c) 2015, DjaoDjin inc.
+# Copyright (c) 2019, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -68,7 +68,34 @@ class RuleMixin(AppMixin):
 
 
 class RuleListAPIView(RuleMixin, ListCreateAPIView):
+    """
+    Queries a page (``PAGE_SIZE`` records) of ``Rule``.
 
+    **Examples
+
+    .. code-block:: http
+
+        GET /api/proxy/rules/ HTTP/1.1
+
+    responds
+
+    .. code-block:: json
+
+        {
+            "count": 1,
+            "next": null,
+            "previous": null,
+            "results": [
+                {
+                    "rank": 0,
+                    "path": "/",
+                    "allow": "authenticated",
+                    "is_forward": true,
+                    "engaged": ""
+                }
+            ]
+        }
+    """
     def get_queryset(self):
         return super(RuleListAPIView, self).get_queryset().order_by('rank')
 
@@ -92,6 +119,25 @@ class RuleListAPIView(RuleMixin, ListCreateAPIView):
             raise
 
     def post(self, request, *args, **kwargs):
+        """
+        Creates a new ``Rule``.
+
+        **Examples
+
+        .. code-block:: http
+
+            POST /api/proxy/rules/ HTTP/1.1
+
+        .. code-block:: json
+
+            {
+                "rank": 0,
+                "path": "/",
+                "allow": "authenticated",
+                "is_forward": true,
+                "engaged": ""
+            }
+        """
         self.check_path(request)
         return self.create(request, *args, **kwargs)
 
@@ -125,5 +171,71 @@ class RuleListAPIView(RuleMixin, ListCreateAPIView):
 
 
 class RuleDetailAPIView(RuleMixin, RetrieveUpdateDestroyAPIView):
+    """
+    Retrieves details on a ``Rule``.
 
+    **Examples
+
+    .. code-block:: http
+
+        GET /api/proxy/rules/app/ HTTP/1.1
+
+    responds
+
+    .. code-block:: json
+
+        {
+            "rank": 0,
+            "path": "/app/",
+            "allow": "authenticated",
+            "is_forward": true,
+            "engaged": ""
+        }
+    """
     serializer_class = UpdateRuleSerializer
+
+    def put(self, request, *args, **kwargs):
+        """
+        Updates a ``Rule``.
+
+        **Examples
+
+        .. code-block:: http
+
+            PUT /api/proxy/rules/app/ HTTP/1.1
+
+        .. code-block:: json
+
+            {
+                "rank": 0,
+                "path": "/app/",
+                "allow": "authenticated",
+                "is_forward": true,
+                "engaged": ""
+            }
+
+        responds
+
+        .. code-block:: json
+
+            {
+                "rank": 0,
+                "path": "/app/",
+                "allow": "authenticated",
+                "is_forward": true,
+                "engaged": ""
+            }
+        """
+        return super(RuleDetailAPIView, self).put(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        """
+        Deletes a ``Rule``.
+
+        **Examples
+
+        .. code-block:: http
+
+            DELETE /api/proxy/rules/app/ HTTP/1.1
+        """
+        return super(RuleDetailAPIView, self).delete(request, *args, **kwargs)

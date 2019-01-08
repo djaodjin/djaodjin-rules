@@ -220,7 +220,7 @@ ruleControllers.controller("RuleListCtrl",
 
     $scope.generateKey = function(modal) {
         var keyInput = $(modal).find("[name='key']");
-        $http.put(settings.urls.urls.rules.api_generate_key).then(
+        $http.put(settings.urls.rules.api_generate_key).then(
            function success(result) {
                keyInput.val(result.data.enc_key);
            },
@@ -285,7 +285,7 @@ ruleControllers.controller("RuleListCtrl",
                 data[field.attr("name")] = field.val();
             }
         }
-        $http.get(settings.urls.rules_api_session_data + "/" + data['username']).then(
+        $http.get(settings.urls.rules.api_session_data + "/" + data['username']).then(
             function success(resp) {
                 $scope.forward_session = resp.data.forward_session;
                 $scope.forward_session_header = resp.data.forward_session_header;

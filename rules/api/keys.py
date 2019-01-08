@@ -26,7 +26,7 @@ from random import choice
 
 from rest_framework.response import Response
 from rest_framework.generics import (UpdateAPIView,
-    RetrieveUpdateDestroyAPIView)
+    RetrieveUpdateAPIView)
 
 from ..mixins import AppMixin
 from ..utils import get_app_model
@@ -37,7 +37,25 @@ from .serializers import AppSerializer, AppKeySerializer
 
 
 class GenerateKeyAPIView(AppMixin, UpdateAPIView):
+    """
+    Rotates the key used to encode the session information forwarded
+    to the application entry point.
 
+    **Examples
+
+    .. code-block:: http
+
+        PUT /api/proxy/key/ HTTP/1.1
+
+    responds
+
+    .. code-block:: json
+
+        {
+          "enc_key": "********",
+        }
+    """
+    # XXX change to POST
     model = get_app_model()
     serializer_class = AppKeySerializer
 
@@ -50,10 +68,64 @@ class GenerateKeyAPIView(AppMixin, UpdateAPIView):
         return Response(AppKeySerializer().to_representation(self.object))
 
 
-class AppUpdateAPIView(AppMixin, RetrieveUpdateDestroyAPIView):
+class AppUpdateAPIView(AppMixin, RetrieveUpdateAPIView):
+    """
+    Returns the URL endpoint to which requests passing the access rules
+    are forwarded to, and the format in which the session information
+    is encoded.
 
+    When running tests, you can retrieve the actual session information
+    for a specific user through the `/proxy/sessions/{user}/` API call.
+
+    **Examples
+
+    .. code-block:: http
+
+        GET /api/proxy/ HTTP/1.1
+
+    responds
+
+    .. code-block:: json
+
+        {
+          "slug": "cowork",
+          "entry_point": "http://localhost:8001/",
+          "session_backend": 1
+        }
+    """
     model = get_app_model()
     serializer_class = AppSerializer
 
     def get_object(self):
         return self.app
+
+    def put(self, request, *args, **kwargs):
+        """
+        Updates the URL endpoint to which requests passing the access rules
+        are forwarded to and/or the format in which the session information
+        is encoded.
+
+        **Examples
+
+        .. code-block:: http
+
+            PUT /api/proxy/ HTTP/1.1
+
+        .. code-block:: json
+
+            {
+              "entry_point": "http://localhost:8001/",
+              "session_backend": 1
+            }
+
+        responds
+
+        .. code-block:: json
+
+            {
+              "slug": "cowork",
+              "entry_point": "http://localhost:8001/",
+              "session_backend": 1
+            }
+        """
+        return super(AppUpdateAPIView, self).put(request, *args, **kwargs)

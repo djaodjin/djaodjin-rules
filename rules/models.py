@@ -151,23 +151,26 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
     # we do here too.
     slug = models.SlugField(unique=True, max_length=25,
         validators=[SUBDOMAIN_SLUG],
-        help_text="unique identifier for the site (also serves as subdomain)")
+        help_text=_(
+            "unique identifier for the site (also serves as subdomain)"))
     domain = models.CharField(null=True, blank=True, max_length=100,
-        help_text='fully qualified domain name at which the site is available',
         validators=[domain_name_validator, RegexValidator(
             URLValidator.host_re,
-            "Enter a valid 'domain', ex: example.com", 'invalid')])
+            "Enter a valid 'domain', ex: example.com", 'invalid')],
+        help_text=_(
+            "fully qualified domain name at which the site is available"))
 
     account = models.ForeignKey(settings.ACCOUNT_MODEL,
         null=True, on_delete=models.CASCADE)
 
     # Fields for proxy features
     entry_point = models.URLField(max_length=100,
-       help_text='Entry point to which requests will be redirected to')
+       help_text=_("Entry point to which requests will be redirected to"))
     enc_key = models.TextField(max_length=480, verbose_name='Encryption Key',
-       help_text='Encryption key used to sign proxyed requests')
+       help_text=_("Encryption key used to sign proxyed requests"))
     session_backend = models.PositiveSmallIntegerField(
-        choices=SESSION_BACKEND_TYPE, default=COOKIE_SESSION_BACKEND)
+        choices=SESSION_BACKEND_TYPE, default=COOKIE_SESSION_BACKEND,
+       help_text=_("Format to encode session in the forwarded HTTP request"))
 
     # XXX Fields used to custom signup form
     registration = models.PositiveSmallIntegerField(
@@ -255,13 +258,19 @@ class Rule(models.Model):
     # XXX At first I wanted to use a URLField for validation but this only
     #     works for URLs starting with a http/ftp protocol. What we really
     #     want here is a Path validator (including /).
-    path = models.CharField(max_length=255)
+    path = models.CharField(max_length=255,
+        help_text=_("OpenAPI path against which requests are matched"))
     rule_op = models.PositiveSmallIntegerField(
-        choices=settings.DB_RULE_OPERATORS, default=ANY)
-    kwargs = models.CharField(max_length=255, default="")
-    is_forward = models.BooleanField(default=True)
-    engaged = models.CharField(max_length=50)
-    rank = models.IntegerField()
+        choices=settings.DB_RULE_OPERATORS, default=ANY,
+        help_text=_("Method applied to grant or deny access"))
+    kwargs = models.CharField(max_length=255, default="",
+        help_text=_("Arguments to pass to the method to grant or deny access"))
+    is_forward = models.BooleanField(default=True,
+        help_text=_("When access is granted, should the request be forwarded"))
+    engaged = models.CharField(max_length=50,
+        help_text=_("Tags to check if it is the first time a user engages"))
+    rank = models.IntegerField(
+        help_text=_("Determines the order in which rules are considered"))
     moved = models.BooleanField(default=False)
 
     class Meta:
