@@ -2,6 +2,7 @@
 Django==1.11.18
 djangorestframework==3.8.2
 djaodjin-deployutils==0.5.8
+requests==2.21.0
 
 # testsite-only
 coverage==4.0.3

@@ -1,4 +1,4 @@
-# Copyright (c) 2018, DjaoDjin inc.
+# Copyright (c) 2019, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -125,7 +125,7 @@ class RuleSerializer(serializers.ModelSerializer):
         fields = ('rank', 'path', 'allow', 'is_forward', 'engaged')
 
     def validate(self, attrs):
-        #pylint: disable=super-on-old-class
+        #pylint: disable=super-on-old-class,redefined-variable-type
         if 'get_allow' in attrs:
             parts = attrs.get('get_allow').split('/')
             try:
@@ -143,7 +143,7 @@ class RuleSerializer(serializers.ModelSerializer):
                             kwargs[key] = dft
                     kwargs_encoded = json.dumps(kwargs)
                 else:
-                    kwargs_encoded = "".encode('utf-8')
+                    kwargs_encoded = ""
                 attrs['rule_op'] = rule_op
                 attrs['kwargs'] = kwargs_encoded
             except ValueError as err:
