@@ -1,4 +1,4 @@
-# Copyright (c) 2018, DjaoDjin inc.
+# Copyright (c) 2019, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,7 @@ Models for the rules application.
 """
 from __future__ import unicode_literals
 
-import datetime, json, logging, string
+import datetime, json, logging
 try:
     # Python 2
     from itertools import izip
@@ -35,9 +35,8 @@ except ImportError:
     # Python 3
     izip = zip # pylint:disable=invalid-name
 
-from django.core.exceptions import ValidationError
 from django.core.mail import get_connection as get_connection_base
-from django.core.validators import RegexValidator, URLValidator
+from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Q
 from django.utils.encoding import python_2_unicode_compatible
@@ -57,21 +56,6 @@ SUBDOMAIN_SLUG = RegexValidator(
     _("Enter a valid subdomain consisting of letters, digits or hyphens."),
     'invalid'
 )
-
-
-def domain_name_validator(value):
-    """
-    Validates that the given value contains no whitespaces to prevent common
-    typos.
-    """
-    if not value:
-        return
-    checks = ((s in value) for s in string.whitespace)
-    if any(checks):
-        raise ValidationError(
-            _("The domain name cannot contain any spaces or tabs."),
-            code='invalid',
-        )
 
 
 @python_2_unicode_compatible
@@ -153,12 +137,6 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
         validators=[SUBDOMAIN_SLUG],
         help_text=_(
             "unique identifier for the site (also serves as subdomain)"))
-    domain = models.CharField(null=True, blank=True, max_length=100,
-        validators=[domain_name_validator, RegexValidator(
-            URLValidator.host_re,
-            "Enter a valid 'domain', ex: example.com", 'invalid')],
-        help_text=_(
-            "fully qualified domain name at which the site is available"))
 
     account = models.ForeignKey(settings.ACCOUNT_MODEL,
         null=True, on_delete=models.CASCADE)
@@ -189,7 +167,7 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
 
     def get_changes(self, update_fields):
         changes = {}
-        for field_name in ('domain', 'entry_point', 'enc_key',
+        for field_name in ('entry_point', 'enc_key',
                            'session_backend', 'registration'):
             pre_value = getattr(self, field_name, None)
             post_value = update_fields.get(field_name, None)

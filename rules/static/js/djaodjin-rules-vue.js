@@ -1,23 +1,3 @@
-function csrfSafeMethod(method) {
-    // these HTTP methods do not require CSRF protection
-    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-}
-$.ajaxSetup({
-    cache: false,
-    crossDomain: false, // obviates need for sameOrigin test
-    beforeSend: function(xhr, settings) {
-        if (!csrfSafeMethod(settings.type)) {
-            xhr.setRequestHeader("X-CSRFToken", djaodjinSettings.csrf);
-        }
-    }
-});
-
-Vue.mixin({
-    delimiters: ['[[',']]'],
-});
-
-Vue.use(uiv, {prefix: 'uiv'});
-
 Vue.directive('sortable', {
   inserted: function (el, binding) {
     new Sortable(el, binding.value || {})

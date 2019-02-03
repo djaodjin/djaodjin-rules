@@ -61,7 +61,6 @@
     var djaodjinSettings = {
       urls: {% if urls %}{{urls|to_json}}{% else %}{}{% endif %},
       itemsPerPage: {% if items_per_page %}{{items_per_page}}{% else %}25{% endif %},
-      csrf: '{{csrf_token}}',
     }
   </script>
   <script type="text/javascript" charset="utf-8" src="/static/js/djaodjin-resources.js"></script>
@@ -70,6 +69,12 @@
   <script type="text/javascript" charset="utf-8" src="/static/vendor/uiv.min.js"></script>
   <script type="text/javascript" charset="utf-8" src="/static/vendor/vue-sortable.js"></script>
   <script type="text/javascript" charset="utf-8" src="/static/js/djaodjin-rules-vue.js"></script>
+  <script type="text/javascript" charset="utf-8">
+Vue.mixin({
+    delimiters: ['[[',']]'],
+});
+Vue.use(uiv, {prefix: 'uiv'});
+  </script>
   {% else %}
   <script type="text/javascript" charset="utf-8" src="/static/vendor/jquery-ui.js"></script>
   <script type="text/javascript" charset="utf-8" src="/static/vendor/angular.js"></script>

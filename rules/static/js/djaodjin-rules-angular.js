@@ -235,24 +235,6 @@ ruleControllers.controller("RuleListCtrl",
         $scope.generateKey("#generate-key");
     });
 
-    $scope.submitDomain = function () {
-        var element = $(this);
-        $.ajax({ type: "PUT",
-           url: settings.urls.rules.api_detail,
-           data: JSON.stringify({
-               "domain": element.find("[name='domain']").val()}),
-           datatype: "json",
-           contentType: "application/json; charset=utf-8",
-           success: function(result) {
-                showMessages(["Domain updated."], "success");
-           },
-           error: function(resp) {
-               showErrorMessages(resp);
-           }
-        });
-        return false;
-    };
-
     $scope.submitEntryPoint = function(form) {
         var data = {};
         var fields = angular.element(form).find("input, textarea, select");

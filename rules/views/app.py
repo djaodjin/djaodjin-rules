@@ -397,5 +397,9 @@ class AppDashboardView(AppMixin, UpdateView):
                     rules += [(identifier, descr)]
             else:
                 rules += [(str(idx), short_name)]
-        context.update({'rules': rules, 'organization': self.app.account})
+        context.update({
+            'site_available_at_url': self.request.build_absolute_uri('/'),
+            'organization': self.app.account,
+            'rules': rules
+        })
         return context
