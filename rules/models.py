@@ -134,8 +134,7 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
     # Since most DNS provider limit subdomain length to 25 characters,
     # we do here too.
     slug = models.SlugField(unique=True, max_length=25,
-        validators=[SUBDOMAIN_SLUG],
-        help_text=_(
+        validators=[SUBDOMAIN_SLUG], help_text=_(
             "unique identifier for the site (also serves as subdomain)"))
 
     account = models.ForeignKey(settings.ACCOUNT_MODEL,
