@@ -143,7 +143,7 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
     # Fields for proxy features
     entry_point = models.URLField(max_length=100, null=True,
         help_text=_("Entry point to which requests will be redirected to"))
-    enc_key = models.TextField(max_length=480, null=True,
+    enc_key = models.TextField(max_length=480, default="",
         verbose_name='Encryption Key',
         help_text=_("Encryption key used to sign proxyed requests"))
     session_backend = models.PositiveSmallIntegerField(
