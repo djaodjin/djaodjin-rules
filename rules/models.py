@@ -129,6 +129,16 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
         (IMPLICIT_REGISTRATION, "User registration wth implicit billing"),
     )
 
+    AUTH_ENABLED = 0
+    AUTH_LOGIN_ONLY = 1
+    AUTH_DISABLED = 2
+
+    AUTH_TYPE = (
+        (AUTH_ENABLED, "Authentication enabled"),
+        (AUTH_LOGIN_ONLY, "Authentication login only"),
+        (AUTH_DISABLED, "Authentication disabled"),
+    )
+
     objects = AppManager()
 
     # Since most DNS provider limit subdomain length to 25 characters,
@@ -153,6 +163,9 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
     # XXX Fields used to custom signup form
     registration = models.PositiveSmallIntegerField(
         choices=REGISTRATION_TYPE, default=USER_REGISTRATION)
+
+    authentication = models.PositiveSmallIntegerField(
+        choices=AUTH_TYPE, default=AUTH_ENABLED)
 
     class Meta:
         swappable = 'RULES_APP_MODEL'
