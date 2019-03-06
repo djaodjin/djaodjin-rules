@@ -81,9 +81,14 @@ class NoModelSerializer(serializers.Serializer):
 
 class AppSerializer(serializers.ModelSerializer):
 
+    authentication = EnumField(
+        choices=get_app_model().AUTH_TYPE, required=False,
+        help_text=_("Restricted authentication and registration"))
+
     class Meta:
         model = get_app_model()
-        fields = ('slug', 'entry_point', 'session_backend')
+        fields = ('slug', 'entry_point', 'session_backend', 'authentication',
+            'welcome_email')
         read_only_fields = ('slug',)
 
     @staticmethod

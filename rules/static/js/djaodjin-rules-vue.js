@@ -180,13 +180,6 @@ if($('#rule-list-container').length > 0){
 var app = new Vue({
     el: "#rule-list-container",
     data: {
-        itemsLoaded: false,
-        items: {
-            results: [],
-            count: 0
-        },
-
-        modalOpen: false,
         sessionKey: 'Generating...',
         testUsername: '',
         forward_session: '',
@@ -194,20 +187,15 @@ var app = new Vue({
         forward_url: '',
     },
     methods: {
-        submitEntryPoint: function(){
+        generateKey: function(){
             var vm = this;
-            var data = {
-                entry_point: vm.$refs.entryPoint.value,
-                session_backend: vm.$refs.sessionBackend.value,
-            }
             $.ajax({
                 method: 'PUT',
-                url: djaodjinSettings.urls.rules.api_detail,
-                contentType: 'application/json',
-                data: JSON.stringify(data),
+                url: djaodjinSettings.urls.rules.api_generate_key,
             }).done(function (resp) {
-                showMessages(["Update successful."], "success");
+                vm.sessionKey = resp.enc_key;
             }).fail(function(resp){
+                vm.sessionKey = "ERROR";
                 showErrorMessages(resp);
             });
         },
@@ -225,19 +213,24 @@ var app = new Vue({
                 showErrorMessages(resp);
             });
         },
-        openKeyModal: function(){
-            this.generateKey();
-            this.modalOpen = true;
-        },
-        generateKey: function(){
+        update: function(submitEntryPoint) {
             var vm = this;
+            var data = {
+                authentication: vm.$refs.authentication.value,
+                welcome_email: vm.$refs.welcomeEmail.checked,
+                session_backend: vm.$refs.sessionBackend.value,
+            }
+            if( submitEntryPoint ) {
+                data['entry_point'] = vm.$refs.entryPoint.value;
+            }
             $.ajax({
                 method: 'PUT',
-                url: djaodjinSettings.urls.rules.api_generate_key,
+                url: djaodjinSettings.urls.rules.api_detail,
+                contentType: 'application/json',
+                data: JSON.stringify(data),
             }).done(function (resp) {
-                vm.sessionKey = resp.enc_key;
+                showMessages(["Update successful."], "success");
             }).fail(function(resp){
-                vm.sessionKey = "ERROR";
                 showErrorMessages(resp);
             });
         },

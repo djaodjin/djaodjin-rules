@@ -134,9 +134,9 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
     AUTH_DISABLED = 2
 
     AUTH_TYPE = (
-        (AUTH_ENABLED, "Authentication enabled"),
-        (AUTH_LOGIN_ONLY, "Authentication login only"),
-        (AUTH_DISABLED, "Authentication disabled"),
+        (AUTH_ENABLED, "enabled"),
+        (AUTH_LOGIN_ONLY, "login-only"),
+        (AUTH_DISABLED, "disabled"),
     )
 
     objects = AppManager()
@@ -166,6 +166,8 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
 
     authentication = models.PositiveSmallIntegerField(
         choices=AUTH_TYPE, default=AUTH_ENABLED)
+    welcome_email = models.BooleanField(default=True,
+        help_text=_("Send a welcome e-mail to newly registered users"))
 
     class Meta:
         swappable = 'RULES_APP_MODEL'
@@ -181,7 +183,8 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
     def get_changes(self, update_fields):
         changes = {}
         for field_name in ('entry_point', 'enc_key',
-                           'session_backend', 'registration'):
+                           'session_backend', 'registration',
+                           'authentication', 'welcome_email'):
             pre_value = getattr(self, field_name, None)
             post_value = update_fields.get(field_name, None)
             if post_value is not None and pre_value != post_value:
