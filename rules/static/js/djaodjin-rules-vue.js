@@ -174,7 +174,13 @@ var rtable = new Vue({
         this.get();
     }
 });
-}
+
+$('#new-rule').on('shown.bs.modal', function(){
+    var self = $(this);
+    self.find('[name="new_rule_path"]').focus();
+});
+
+} // $('#rules-table').length > 0
 
 if($('#rule-list-container').length > 0){
 var app = new Vue({
