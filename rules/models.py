@@ -167,6 +167,8 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
     authentication = models.PositiveSmallIntegerField(
         choices=AUTH_TYPE, default=AUTH_ENABLED)
 
+    show_edit_tools = models.BooleanField(default=True)
+
     class Meta:
         swappable = 'RULES_APP_MODEL'
         abstract = True
