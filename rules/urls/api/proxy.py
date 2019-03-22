@@ -31,13 +31,13 @@ from django.conf.urls import url
 from ... import settings
 from ...api.keys import (AppUpdateAPIView, GenerateKeyAPIView)
 from ...api.rules import RuleListAPIView, RuleDetailAPIView
-from ...api.sessions import GetSessionDataAPIView
+from ...api.sessions import GetSessionAPIView, GetSessionDetailAPIView
 
 urlpatterns = [
     url(r'^proxy/sessions/(?P<user>%s)/?' % settings.USERNAME_PAT,
-        GetSessionDataAPIView.as_view(), name='rules_api_session_data'),
+        GetSessionDetailAPIView.as_view(), name='rules_api_session_data'),
     url(r'^proxy/sessions/?',
-        GetSessionDataAPIView.as_view(), name='rules_api_session_data_base'),
+        GetSessionAPIView.as_view(), name='rules_api_session_data_base'),
     url(r'^proxy/key/',
         GenerateKeyAPIView.as_view(), name='rules_api_generate_key'),
     url(r'^proxy/rules(?P<rule>\S+)$',

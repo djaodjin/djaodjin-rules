@@ -25,7 +25,7 @@
 import json
 
 from rest_framework.response import Response
-from rest_framework.generics import RetrieveAPIView
+from rest_framework.generics import GenericAPIView, RetrieveAPIView
 
 from ..mixins import AppMixin, SessionDataMixin, UserMixin
 from ..utils import JSONEncoder
@@ -38,11 +38,18 @@ class GetSessionDataRequest(object):
         self.user = user
 
 
-class GetSessionDataAPIView(SessionDataMixin, AppMixin, UserMixin,
+class GetSessionAPIView(GenericAPIView):
+    # So far this is just a dummy used in `reverse` to get a base url.
+    pass
+
+
+class GetSessionDetailAPIView(SessionDataMixin, AppMixin, UserMixin,
                             RetrieveAPIView):
     """
     Returns a session data for a user as it will be passed to the backend
     service.
+
+    **Tags: rbac
 
     **Examples
 

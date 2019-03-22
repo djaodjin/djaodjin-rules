@@ -71,6 +71,8 @@ class RuleListAPIView(RuleMixin, ListCreateAPIView):
     """
     Queries a page (``PAGE_SIZE`` records) of ``Rule``.
 
+    **Tags: rbac
+
     **Examples
 
     .. code-block:: http
@@ -122,6 +124,8 @@ class RuleListAPIView(RuleMixin, ListCreateAPIView):
         """
         Creates a new ``Rule``.
 
+        **Tags: rbac
+
         **Examples
 
         .. code-block:: http
@@ -148,6 +152,8 @@ class RuleListAPIView(RuleMixin, ListCreateAPIView):
         When receiving a request like [{u'newpos': 1, u'oldpos': 3}],
         it will move the rule at position 3 to position 1, updating all
         rules ranks in-between.
+
+        **Tags: rbac
         """
         with transaction.atomic():
             for move in request.data:
@@ -174,6 +180,8 @@ class RuleDetailAPIView(RuleMixin, RetrieveUpdateDestroyAPIView):
     """
     Retrieves details on a ``Rule``.
 
+    **Tags: rbac
+
     **Examples
 
     .. code-block:: http
@@ -197,6 +205,8 @@ class RuleDetailAPIView(RuleMixin, RetrieveUpdateDestroyAPIView):
     def put(self, request, *args, **kwargs):
         """
         Updates a ``Rule``.
+
+        **Tags: rbac
 
         **Examples
 
@@ -231,6 +241,8 @@ class RuleDetailAPIView(RuleMixin, RetrieveUpdateDestroyAPIView):
     def delete(self, request, *args, **kwargs):
         """
         Deletes a ``Rule``.
+
+        **Tags: rbac
 
         **Examples
 

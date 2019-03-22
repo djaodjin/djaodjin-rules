@@ -41,6 +41,8 @@ class GenerateKeyAPIView(AppMixin, UpdateAPIView):
     Rotates the key used to encode the session information forwarded
     to the application entry point.
 
+    **Tags: rbac
+
     **Examples
 
     .. code-block:: http
@@ -77,6 +79,8 @@ class AppUpdateAPIView(AppMixin, RetrieveUpdateAPIView):
     When running tests, you can retrieve the actual session information
     for a specific user through the `/proxy/sessions/{user}/` API call.
 
+    **Tags: rbac
+
     **Examples
 
     .. code-block:: http
@@ -104,6 +108,8 @@ class AppUpdateAPIView(AppMixin, RetrieveUpdateAPIView):
         Updates the URL endpoint to which requests passing the access rules
         are forwarded to and/or the format in which the session information
         is encoded.
+
+        **Tags: rbac
 
         **Examples
 
