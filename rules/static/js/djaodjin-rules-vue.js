@@ -186,7 +186,7 @@ if($('#rule-list-container').length > 0){
 var app = new Vue({
     el: "#rule-list-container",
     data: {
-        sessionKey: 'Generating...',
+        sessionKey: gettext('Generating...'),
         testUsername: '',
         forward_session: '',
         forward_session_header: '',
@@ -235,7 +235,7 @@ var app = new Vue({
                 contentType: 'application/json',
                 data: JSON.stringify(data),
             }).done(function (resp) {
-                showMessages(["Update successful."], "success");
+                showMessages([gettext("Update successful.")], "success");
             }).fail(function(resp){
                 showErrorMessages(resp);
             });
