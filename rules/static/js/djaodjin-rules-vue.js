@@ -201,7 +201,7 @@ var app = new Vue({
             }).done(function (resp) {
                 vm.sessionKey = resp.enc_key;
             }).fail(function(resp){
-                vm.sessionKey = "ERROR";
+                vm.sessionKey = gettext("ERROR");
                 showErrorMessages(resp);
             });
         },

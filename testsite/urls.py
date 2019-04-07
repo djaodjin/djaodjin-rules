@@ -23,10 +23,12 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from django.conf.urls import include, url
+from django.views.i18n import JavaScriptCatalog
 from django.views.generic import TemplateView
 
 
 urlpatterns = [
+    url(r'^jsi18n/$', JavaScriptCatalog.as_view(), name='javascript-catalog'),
     url(r'^favicon.ico$', TemplateView.as_view(template_name='index.html')),
     url(r'^$', TemplateView.as_view(template_name='index.html')),
     url(r'^', include('django.contrib.auth.urls')),
