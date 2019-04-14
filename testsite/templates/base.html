@@ -4,6 +4,7 @@
   <title>Rules Testsite</title>
   <script type="text/javascript" src="/static/vendor/jquery.js"></script>
   {% if csrf_token %}
+  <script type="text/javascript" src="/jsi18n/"></script>
   <meta name="csrf-token" content="{{csrf_token}}">
   <script type="text/javascript">
     function csrfSafeMethod(method) {

@@ -186,7 +186,7 @@ if($('#rule-list-container').length > 0){
 var app = new Vue({
     el: "#rule-list-container",
     data: {
-        sessionKey: 'Generating...',
+        sessionKey: gettext('Generating...'),
         testUsername: '',
         forward_session: '',
         forward_session_header: '',
@@ -201,7 +201,7 @@ var app = new Vue({
             }).done(function (resp) {
                 vm.sessionKey = resp.enc_key;
             }).fail(function(resp){
-                vm.sessionKey = "ERROR";
+                vm.sessionKey = gettext("ERROR");
                 showErrorMessages(resp);
             });
         },
@@ -235,7 +235,7 @@ var app = new Vue({
                 contentType: 'application/json',
                 data: JSON.stringify(data),
             }).done(function (resp) {
-                showMessages(["Update successful."], "success");
+                showMessages([gettext("Update successful.")], "success");
             }).fail(function(resp){
                 showErrorMessages(resp);
             });
