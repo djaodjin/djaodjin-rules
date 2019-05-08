@@ -22,14 +22,15 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import F, Q, Max
 from django.db.utils import IntegrityError
 from rest_framework.generics import (
-    ListCreateAPIView, RetrieveUpdateDestroyAPIView)
+    ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView)
 from rest_framework import serializers
 
-from .serializers import RuleSerializer
+from .serializers import RuleSerializer, UserEngagementSerializer
 from ..mixins import AppMixin
 from ..models import Rule
 
@@ -251,3 +252,12 @@ class RuleDetailAPIView(RuleMixin, RetrieveUpdateDestroyAPIView):
             DELETE /api/proxy/rules/app/ HTTP/1.1
         """
         return super(RuleDetailAPIView, self).delete(request, *args, **kwargs)
+
+
+class UserEngagementAPIView(ListAPIView):
+
+    serializer_class = UserEngagementSerializer
+
+    def get_queryset(self):
+        User = get_user_model()
+        return User.objects.order_by('-last_login').prefetch_related('engagements')

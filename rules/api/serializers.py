@@ -25,6 +25,7 @@ from __future__ import unicode_literals
 
 import json
 
+from django.contrib.auth import get_user_model
 from django.utils import six
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
@@ -182,3 +183,19 @@ class UsernameSerializer(NoModelSerializer):
     @staticmethod
     def get_username(request):
         return request.user.username
+
+
+class UserEngagementSerializer(serializers.ModelSerializer):
+
+    engagements = serializers.SerializerMethodField()
+
+    class Meta:
+        model = get_user_model()
+        fields = ('username', 'engagements')
+
+    def get_engagements(self, obj):
+        engs = obj.engagements.all()
+        user_tags = []
+        for eng in engs:
+            user_tags.append(eng.slug)
+        return user_tags
