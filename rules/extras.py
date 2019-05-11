@@ -61,6 +61,8 @@ class AppMixinBase(object):
                    'rules_api_generate_key', kwargs=url_kwargs),
                'api_session_data': reverse(
                    'rules_api_session_data_base', kwargs=url_kwargs),
+               'api_engagement': reverse('rules_api_rules_engagement',
+                    kwargs=url_kwargs),
                'app': reverse('rules_update', kwargs=url_kwargs)}}
         if 'urls' in context:
             for key, val in six.iteritems(urls):

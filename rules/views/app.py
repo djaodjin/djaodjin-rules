@@ -403,3 +403,7 @@ class AppDashboardView(AppMixin, UpdateView):
             'rules': rules
         })
         return context
+
+
+class UserEngagementView(AppMixin, TemplateView):
+    template_name = 'rules/user_engagement.html'

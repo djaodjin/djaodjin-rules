@@ -197,5 +197,6 @@ class UserEngagementSerializer(serializers.ModelSerializer):
         engs = obj.engagements.all()
         user_tags = []
         for eng in engs:
-            user_tags.append(eng.slug)
-        return user_tags
+            if eng.slug and not eng.slug.isspace():
+                user_tags.append(eng.slug.strip())
+        return list(set(user_tags))
