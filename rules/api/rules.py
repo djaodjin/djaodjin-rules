@@ -24,15 +24,16 @@
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from django.db.models import F, Q, Max
+from django.db.models import F, Q, Max, Count
 from django.db.utils import IntegrityError
-from rest_framework.generics import (
+from rest_framework.generics import (GenericAPIView,
     ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView)
+from rest_framework.response import Response
 from rest_framework import serializers
 
 from .serializers import RuleSerializer, UserEngagementSerializer
 from ..mixins import AppMixin
-from ..models import Rule
+from ..models import Rule, Engagement
 
 #pylint: disable=no-init
 #pylint: disable=old-style-class
@@ -261,3 +262,10 @@ class UserEngagementAPIView(ListAPIView):
     def get_queryset(self):
         User = get_user_model()
         return User.objects.order_by('-last_login').prefetch_related('engagements')
+
+
+class EngagementAPIView(GenericAPIView):
+
+    def get(self, request, *args, **kwargs):
+        values = Engagement.objects.values('slug').annotate(count=Count('slug'))
+        return Response(values)
