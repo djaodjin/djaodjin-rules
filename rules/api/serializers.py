@@ -209,3 +209,4 @@ class EngagementSerializer(serializers.Serializer):
 
 class EngagementsSerializer(serializers.Serializer):
     engagements = EngagementSerializer(many=True)
+    active_users = serializers.IntegerField()

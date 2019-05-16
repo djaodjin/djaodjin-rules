@@ -22,10 +22,13 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import datetime
+
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import F, Q, Max, Count
 from django.db.utils import IntegrityError
+from django.utils.timezone import utc
 from rest_framework.generics import (GenericAPIView,
     ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView)
 from rest_framework.response import Response
@@ -35,6 +38,7 @@ from .serializers import (RuleSerializer, UserEngagementSerializer,
     EngagementsSerializer)
 from ..mixins import AppMixin
 from ..models import Rule, Engagement
+from ..utils import parse_tz
 
 #pylint: disable=no-init
 #pylint: disable=old-style-class
@@ -270,5 +274,22 @@ class EngagementAPIView(GenericAPIView):
     serializer_class = EngagementsSerializer
 
     def get(self, request, *args, **kwargs):
-        values = Engagement.objects.values('slug').annotate(count=Count('slug'))
-        return Response(self.get_serializer({'engagements': values}).data)
+        engs = Engagement.objects.values('slug').annotate(count=Count('slug'))
+        yest_dt = datetime.date.today() - datetime.timedelta(1)
+        yest_start = datetime.datetime(year=yest_dt.year, month=yest_dt.month,
+            day=yest_dt.day)
+        yest_end = yest_start.replace(hour=23, minute=59, second=59,
+            # https://stackoverflow.com/a/34593058/1491475
+            microsecond=999999)
+        timezone = self.request.GET.get('timezone')
+        tz_ob = parse_tz(timezone)
+        if not tz_ob:
+            tz_ob = utc
+        yest_start = tz_ob.localize(yest_start)
+        yest_end = tz_ob.localize(yest_end)
+        users = get_user_model().objects.filter(
+            last_login__gt=yest_start, last_login__lt=yest_end).count()
+
+        return Response(self.get_serializer({
+            'engagements': engs,
+            'active_users': users}).data)
