@@ -200,3 +200,12 @@ class UserEngagementSerializer(serializers.ModelSerializer):
             if eng.slug and not eng.slug.isspace():
                 user_tags.append(eng.slug.strip())
         return list(set(user_tags))
+
+
+class EngagementSerializer(serializers.Serializer):
+    slug = serializers.CharField()
+    count = serializers.IntegerField()
+
+
+class EngagementsSerializer(serializers.Serializer):
+    engagements = EngagementSerializer(many=True)

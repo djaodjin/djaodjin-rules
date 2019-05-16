@@ -406,4 +406,4 @@ class AppDashboardView(AppMixin, UpdateView):
 
 
 class UserEngagementView(AppMixin, TemplateView):
-    template_name = 'rules/user_engagement.html'
+    template_name = 'rules/engagement.html'

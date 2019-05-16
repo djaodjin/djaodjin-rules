@@ -31,7 +31,8 @@ from rest_framework.generics import (GenericAPIView,
 from rest_framework.response import Response
 from rest_framework import serializers
 
-from .serializers import RuleSerializer, UserEngagementSerializer
+from .serializers import (RuleSerializer, UserEngagementSerializer,
+    EngagementsSerializer)
 from ..mixins import AppMixin
 from ..models import Rule, Engagement
 
@@ -266,6 +267,8 @@ class UserEngagementAPIView(ListAPIView):
 
 class EngagementAPIView(GenericAPIView):
 
+    serializer_class = EngagementsSerializer
+
     def get(self, request, *args, **kwargs):
         values = Engagement.objects.values('slug').annotate(count=Count('slug'))
-        return Response(values)
+        return Response(self.get_serializer({'engagements': values}).data)

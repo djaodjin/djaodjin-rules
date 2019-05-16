@@ -41,7 +41,7 @@ urlpatterns = [
         GetSessionAPIView.as_view(), name='rules_api_session_data_base'),
     url(r'^proxy/key/',
         GenerateKeyAPIView.as_view(), name='rules_api_generate_key'),
-    url(r'^proxy/engagement/user/',
+    url(r'^proxy/engagement/users/',
         UserEngagementAPIView.as_view(), name='rules_api_user_engagement'),
     url(r'^proxy/engagement/',
         EngagementAPIView.as_view(), name='rules_api_engagement'),
