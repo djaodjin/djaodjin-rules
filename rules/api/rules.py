@@ -274,7 +274,10 @@ class EngagementAPIView(GenericAPIView):
     serializer_class = EngagementsSerializer
 
     def get(self, request, *args, **kwargs):
-        engs = Engagement.objects.values('slug').annotate(count=Count('slug'))
+        # https://docs.djangoproject.com/en/2.2/topics/db/aggregation/
+        # #interaction-with-default-ordering-or-order-by
+        engs = Engagement.objects.values('slug').annotate(
+            count=Count('slug')).order_by('slug')
         yest_dt = datetime.date.today() - datetime.timedelta(1)
         yest_start = datetime.datetime(year=yest_dt.year, month=yest_dt.month,
             day=yest_dt.day)
