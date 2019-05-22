@@ -248,7 +248,7 @@ if($('#user-engagement-container').length > 0){
 var app = new Vue({
     el: "#user-engagement-container",
     data: {
-        url: djaodjinSettings.urls.rules.api_engagement,
+        url: djaodjinSettings.urls.rules.api_user_engagement,
     },
     mixins: [
         itemListMixin,
