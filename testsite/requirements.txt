@@ -1,6 +1,6 @@
 # djaodjin-rules
 Django==1.11.20
-djangorestframework==3.8.2
+djangorestframework==3.9.1
 djaodjin-deployutils==0.5.8
 requests==2.21.0
 
