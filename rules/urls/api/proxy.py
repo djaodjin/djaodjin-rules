@@ -30,7 +30,8 @@ from django.conf.urls import url
 
 from ... import settings
 from ...api.keys import (AppUpdateAPIView, GenerateKeyAPIView)
-from ...api.rules import RuleListAPIView, RuleDetailAPIView
+from ...api.rules import (RuleListAPIView, RuleDetailAPIView,
+    UserEngagementAPIView, EngagementAPIView)
 from ...api.sessions import GetSessionAPIView, GetSessionDetailAPIView
 
 urlpatterns = [
@@ -40,6 +41,10 @@ urlpatterns = [
         GetSessionAPIView.as_view(), name='rules_api_session_data_base'),
     url(r'^proxy/key/',
         GenerateKeyAPIView.as_view(), name='rules_api_generate_key'),
+    url(r'^proxy/engagement/users/',
+        UserEngagementAPIView.as_view(), name='rules_api_user_engagement'),
+    url(r'^proxy/engagement/',
+        EngagementAPIView.as_view(), name='rules_api_engagement'),
     url(r'^proxy/rules(?P<rule>\S+)$',
         RuleDetailAPIView.as_view(), name='rules_api_rule_detail'),
     url(r'^proxy/rules',

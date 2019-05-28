@@ -243,3 +243,27 @@ var app = new Vue({
     },
 })
 }
+
+if($('#user-engagement-container').length > 0){
+var app = new Vue({
+    el: "#user-engagement-container",
+    data: {
+        url: djaodjinSettings.urls.rules.api_user_engagement,
+    },
+    mixins: [
+        itemListMixin,
+    ],
+    computed: {
+        tags: function(){
+            var tags = [];
+            this.items.results.forEach(function(e){
+                tags = [...new Set([...tags, ...e.engagements])];
+            });
+            return tags;
+        }
+    },
+    mounted: function(){
+        this.get();
+    },
+});
+}

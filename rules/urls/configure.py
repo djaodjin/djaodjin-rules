@@ -24,9 +24,11 @@
 
 from django.conf.urls import url
 
-from ..views.app import AppDashboardView
+from ..views.app import AppDashboardView, UserEngagementView
 
 urlpatterns = [
+    url(r'^proxy/engagement/',
+        UserEngagementView.as_view(), name='rules_user_engagement'),
     url(r'^proxy/rules/',
         AppDashboardView.as_view(), name='rules_update'),
 ]

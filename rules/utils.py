@@ -28,6 +28,8 @@ from django.apps import apps as django_apps
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.module_loading import import_string
 from django.utils.timezone import utc
+from pytz import timezone, UnknownTimeZoneError
+from pytz.tzinfo import DstTzInfo
 
 
 LOGGER = logging.getLogger(__name__)
@@ -75,3 +77,14 @@ def get_current_app(request=None):
     else:
         app = get_app_model().objects.get(pk=settings.DEFAULT_APP_ID)
     return app
+
+
+def parse_tz(tzone):
+    if issubclass(type(tzone), DstTzInfo):
+        return tzone
+    if tzone:
+        try:
+            return timezone(tzone)
+        except UnknownTimeZoneError:
+            pass
+    return None
