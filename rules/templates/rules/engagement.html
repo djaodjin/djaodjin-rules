@@ -22,4 +22,13 @@
         </table>
     </div>
 </div>
+<div id="engagement-daily-users-container">
+    <div>
+      <h3>Engagement widget</h3>
+    </div>
+    <div v-show="itemLoaded">
+        <div>Daily active users: [[item.activeUsers]]</div>
+        <div>Engagement data: [[item.engagements]]</div>
+    </div>
+</div>
 {% endblock %}
