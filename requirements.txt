@@ -1,4 +1,4 @@
 Django>=1.9
 djangorestframework>=3.7.0
-djaodjin-deployutils>=0.5.3
+djaodjin-deployutils>=0.5.10
 requests>=2.21.0

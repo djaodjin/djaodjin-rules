@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="user-engagement-container">
+    <div>
+      <h3>User engagement</h3>
+    </div>
+    <div>
+        <table>
+            <thead>
+                <th></th>
+                <th v-for="tag in tags">[[tag]]</th>
+            </thead>
+            <tbody>
+                <tr v-for="row in items.results">
+                    <td>[[row.username]]</td>
+                    <td v-for="tag in tags">
+                        [[row.engagements.indexOf(tag) >= 0 ? 'engaged' : 'not engaged']]
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
