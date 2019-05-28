@@ -29,6 +29,7 @@
   <a href="/">Home</a>
   {% if request|is_authenticated %}
   | <a id="rules" href="/proxy/rules/">rules</a>
+  | <a id="engagements" href="/proxy/engagement/">engagement</a>
   | <a id="authenticated-user" href="/users/">{{request.user.username}}</a>
   | <a href="/logout/">Sign Out</a>
   {% else %}
