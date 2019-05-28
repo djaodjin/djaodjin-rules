@@ -38,7 +38,7 @@ from .serializers import (RuleSerializer, UserEngagementSerializer,
     EngagementsSerializer)
 from ..mixins import AppMixin
 from ..models import Rule, Engagement
-from ..utils import parse_tz
+from ..utils import parse_tz, datetime_or_now
 
 #pylint: disable=no-init
 #pylint: disable=old-style-class
@@ -278,7 +278,7 @@ class EngagementAPIView(GenericAPIView):
         # #interaction-with-default-ordering-or-order-by
         engs = Engagement.objects.values('slug').annotate(
             count=Count('slug')).order_by('slug')
-        yest_dt = datetime.date.today() - datetime.timedelta(1)
+        yest_dt = datetime_or_now() - datetime.timedelta(1)
         yest_start = datetime.datetime(year=yest_dt.year, month=yest_dt.month,
             day=yest_dt.day)
         yest_end = yest_start.replace(hour=23, minute=59, second=59,
