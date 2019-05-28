@@ -27,7 +27,7 @@ Models for the rules application.
 """
 from __future__ import unicode_literals
 
-import datetime, json, logging
+import datetime, json, logging, re
 try:
     # Python 2
     from itertools import izip
@@ -313,8 +313,9 @@ class Rule(models.Model):
             except ValueError:
                 params = {}
             for part, pat_part in izip(request_path_parts, pat_parts):
-                if pat_part.startswith(':'):
-                    slug = pat_part[1:]
+                look = re.match(r'^:(\S+)|\{\S+\}$', pat_part)
+                if look:
+                    slug = look.group(1)
                     if slug in params:
                         params.update({slug: part})
                 elif part != pat_part:
