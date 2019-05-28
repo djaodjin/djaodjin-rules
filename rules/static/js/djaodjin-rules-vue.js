@@ -257,11 +257,11 @@ var app = new Vue({
         tags: function(){
             var tags = [];
             this.items.results.forEach(function(e){
-                tags = tags.concat(e.engagements);
+                tags = tags.concat(e.engagements).filter(function(value, index, self){
+                    return self.indexOf(value) === index;
+                });
             });
-            return tags.filter(function(value, index, self){
-                return self.indexOf(value) === index;
-            });
+            return tags;
         }
     },
     mounted: function(){
