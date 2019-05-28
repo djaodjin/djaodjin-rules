@@ -257,9 +257,11 @@ var app = new Vue({
         tags: function(){
             var tags = [];
             this.items.results.forEach(function(e){
-                tags = [...new Set([...tags, ...e.engagements])];
+                tags = tags.concat(e.engagements);
             });
-            return tags;
+            return tags.filter(function(value, index, self){
+                return self.indexOf(value) === index;
+            });
         }
     },
     mounted: function(){
