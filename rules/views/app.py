@@ -196,6 +196,11 @@ class SessionProxyMixin(SessionDataMixin):
             if (self.app.session_backend and
                 self.app.session_backend != self.app.JWT_SESSION_BACKEND):
                 cookies[SESSION_COOKIE_NAME] = self.session_cookie_string
+            else:
+                # Cookies, as opposed to Authorization header have multiple
+                # purposes, so we keep the SESSION_COOKIE_NAME (if exists)
+                # regardless of the backend used to transport the proxy session.
+                pass
         except http_cookies.CookieError as err:
             # Some is messing up with the 'Cookie' header. This sometimes
             # happen with bots trying to set 'Max-Age' or other reserved words.
@@ -216,6 +221,11 @@ class SessionProxyMixin(SessionDataMixin):
             key_upper = key.upper()
             if key_upper.startswith('HTTP_'):
                 key_upper = key_upper[5:].replace('_', '-')
+                if key_upper == 'AUTHORIZATION':
+                    # We donot want to inadvertently forward the credentials
+                    # to connect to the proxy when the session backend is
+                    # using cookies.
+                    pass
                 if key_upper == 'COOKIE':
                     headers[key_upper] = cookie_string
                 else:
@@ -403,7 +413,3 @@ class AppDashboardView(AppMixin, UpdateView):
             'rules': rules
         })
         return context
-
-
-class UserEngagementView(AppMixin, TemplateView):
-    template_name = 'rules/engagement.html'
