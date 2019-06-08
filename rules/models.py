@@ -165,7 +165,7 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
         choices=REGISTRATION_TYPE, default=USER_REGISTRATION)
 
     authentication = models.PositiveSmallIntegerField(
-        choices=AUTH_TYPE, default=AUTH_ENABLED)
+        choices=AUTH_TYPE, default=AUTH_LOGIN_ONLY)
     welcome_email = models.BooleanField(default=True,
         help_text=_("Send a welcome e-mail to newly registered users"))
 
