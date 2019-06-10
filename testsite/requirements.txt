@@ -1,5 +1,5 @@
 # djaodjin-rules
-Django==1.11.20
+Django==1.11.21
 djangorestframework==3.9.4
 djaodjin-deployutils==0.5.10
 requests==2.22.0
