@@ -293,9 +293,9 @@ var app = new Vue({
 });
 }
 
-if($('#engagement-daily-users-container').length > 0){
+if($('#engagement-users-container').length > 0){
 new Vue({
-    el: "#engagement-daily-users-container",
+    el: "#engagement-users-container",
     mixins: [itemMixin],
     data: function(){
         return {

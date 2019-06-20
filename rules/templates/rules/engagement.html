@@ -2,10 +2,9 @@
 
 {% block content %}
 <div id="user-engagement-container">
-    <div>
+  <div>
       <h3>User engagement</h3>
-    </div>
-    <div>
+      <div>
         <table>
             <thead>
                 <th></th>
@@ -20,15 +19,14 @@
                 </tr>
             </tbody>
         </table>
-    </div>
-</div>
-<div id="engagement-daily-users-container">
-    <div>
-      <h3>Engagement widget</h3>
-    </div>
+      </div>
+  </div>
+  <div>
+    <h3>Engagement widget</h3>
     <div v-show="itemLoaded">
         <div>Daily active users: [[item.activeUsers]]</div>
         <div>Engagement data: [[item.engagements]]</div>
     </div>
+  </div>
 </div>
 {% endblock %}
