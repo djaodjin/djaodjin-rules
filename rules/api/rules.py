@@ -77,6 +77,8 @@ class RuleMixin(AppMixin):
 
 class RuleListAPIView(RuleMixin, ListCreateAPIView):
     """
+    Lists access rules
+
     Queries a page (``PAGE_SIZE`` records) of ``Rule``.
 
     **Tags: rbac
@@ -130,7 +132,7 @@ class RuleListAPIView(RuleMixin, ListCreateAPIView):
 
     def post(self, request, *args, **kwargs):
         """
-        Creates a new ``Rule``.
+        Creates an access rule
 
         **Tags: rbac
 
@@ -155,7 +157,7 @@ class RuleListAPIView(RuleMixin, ListCreateAPIView):
 
     def patch(self, request, *args, **kwargs):
         """
-        Update the rank of rules.
+        Updates order of rules
 
         When receiving a request like [{u'newpos': 1, u'oldpos': 3}],
         it will move the rule at position 3 to position 1, updating all
@@ -186,7 +188,7 @@ class RuleListAPIView(RuleMixin, ListCreateAPIView):
 
 class RuleDetailAPIView(RuleMixin, RetrieveUpdateDestroyAPIView):
     """
-    Retrieves details on a ``Rule``.
+    Retrieves an access rule
 
     **Tags: rbac
 
@@ -212,7 +214,7 @@ class RuleDetailAPIView(RuleMixin, RetrieveUpdateDestroyAPIView):
 
     def put(self, request, *args, **kwargs):
         """
-        Updates a ``Rule``.
+        Updates an access rule
 
         **Tags: rbac
 
@@ -248,7 +250,7 @@ class RuleDetailAPIView(RuleMixin, RetrieveUpdateDestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         """
-        Deletes a ``Rule``.
+        Deletes an access rule
 
         **Tags: rbac
 
@@ -271,7 +273,26 @@ class UserEngagementAPIView(ListAPIView):
 
 
 class EngagementAPIView(GenericAPIView):
+    """
+    Retrieves users engagement
 
+    **Tags: rbac
+
+    **Examples
+
+    .. code-block:: http
+
+        GET proxy/engagement/users/ HTTP/1.1
+
+    responds
+
+    .. code-block:: json
+
+        {
+            "active_users": 10,
+            "engagements": []
+        }
+    """
     serializer_class = EngagementsSerializer
 
     def get(self, request, *args, **kwargs):

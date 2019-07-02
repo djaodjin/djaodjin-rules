@@ -38,6 +38,8 @@ from .serializers import AppSerializer, AppKeySerializer
 
 class GenerateKeyAPIView(AppMixin, UpdateAPIView):
     """
+    Rotates session encoding key
+
     Rotates the key used to encode the session information forwarded
     to the application entry point.
 
@@ -105,6 +107,8 @@ class AppUpdateAPIView(AppMixin, RetrieveUpdateAPIView):
 
     def put(self, request, *args, **kwargs):
         """
+        Updates forward end-point
+
         Updates the URL endpoint to which requests passing the access rules
         are forwarded to and/or the format in which the session information
         is encoded.

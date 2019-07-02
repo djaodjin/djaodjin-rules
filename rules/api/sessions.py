@@ -46,6 +46,8 @@ class GetSessionAPIView(GenericAPIView):
 class GetSessionDetailAPIView(SessionDataMixin, AppMixin, UserMixin,
                             RetrieveAPIView):
     """
+    Retrieves example session
+
     Returns a session data for a user as it will be passed to the backend
     service.
 
