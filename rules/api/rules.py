@@ -159,7 +159,7 @@ class RuleListAPIView(RuleMixin, ListCreateAPIView):
         """
         Updates order of rules
 
-        When receiving a request like [{u'newpos': 1, u'oldpos': 3}],
+        When receiving a request like [{'newpos': 1, 'oldpos': 3}],
         it will move the rule at position 3 to position 1, updating all
         rules ranks in-between.
 
@@ -273,29 +273,30 @@ class UserEngagementAPIView(ListAPIView):
 
 
 class EngagementAPIView(GenericAPIView):
-    """
-    Retrieves users engagement
 
-    **Tags: rbac
-
-    **Examples
-
-    .. code-block:: http
-
-        GET proxy/engagement/users/ HTTP/1.1
-
-    responds
-
-    .. code-block:: json
-
-        {
-            "active_users": 10,
-            "engagements": []
-        }
-    """
     serializer_class = EngagementsSerializer
 
     def get(self, request, *args, **kwargs):
+        """
+        Retrieves users engagement
+
+        **Tags: rbac
+
+        **Examples
+
+        .. code-block:: http
+
+            GET proxy/engagement/users/ HTTP/1.1
+
+        responds
+
+        .. code-block:: json
+
+            {
+                "active_users": 10,
+                "engagements": []
+            }
+        """
         # https://docs.djangoproject.com/en/2.2/topics/db/aggregation/
         # #interaction-with-default-ordering-or-order-by
         engs = Engagement.objects.values('slug').annotate(
