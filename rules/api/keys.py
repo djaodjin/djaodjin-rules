@@ -56,7 +56,7 @@ class GenerateKeyAPIView(AppMixin, UpdateAPIView):
     .. code-block:: json
 
         {
-          "enc_key": "********",
+          "enc_key": "********"
         }
     """
     # XXX change to POST

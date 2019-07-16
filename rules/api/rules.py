@@ -87,7 +87,7 @@ class RuleListAPIView(RuleMixin, ListCreateAPIView):
 
     .. code-block:: http
 
-        GET /api/proxy/rules/ HTTP/1.1
+        GET /api/proxy/rules HTTP/1.1
 
     responds
 
@@ -103,7 +103,7 @@ class RuleListAPIView(RuleMixin, ListCreateAPIView):
                     "path": "/",
                     "allow": "authenticated",
                     "is_forward": true,
-                    "engaged": ""
+                    "engaged": "app"
                 }
             ]
         }
@@ -159,11 +159,26 @@ class RuleListAPIView(RuleMixin, ListCreateAPIView):
         """
         Updates order of rules
 
-        When receiving a request like [{u'newpos': 1, u'oldpos': 3}],
+        When receiving a request like [{"newpos": 1, "oldpos": 3}],
         it will move the rule at position 3 to position 1, updating all
         rules ranks in-between.
 
         **Tags: rbac
+
+        **Examples
+
+        .. code-block:: http
+
+            POST /api/proxy/rules/ HTTP/1.1
+
+        .. code-block:: json
+
+            [
+              {
+                "newpos": 1,
+                "oldpos": 3
+               }
+            ]
         """
         with transaction.atomic():
             for move in request.data:
@@ -264,17 +279,8 @@ class RuleDetailAPIView(RuleMixin, RetrieveUpdateDestroyAPIView):
 
 
 class UserEngagementAPIView(ListAPIView):
-
-    serializer_class = UserEngagementSerializer
-
-    def get_queryset(self):
-        User = get_user_model()
-        return User.objects.order_by('-last_login').prefetch_related('engagements')
-
-
-class EngagementAPIView(GenericAPIView):
     """
-    Retrieves users engagement
+    Retrieves engagement metrics
 
     **Tags: rbac
 
@@ -282,20 +288,61 @@ class EngagementAPIView(GenericAPIView):
 
     .. code-block:: http
 
-        GET proxy/engagement/users/ HTTP/1.1
+        GET /api/proxy/engagement/users/ HTTP/1.1
 
     responds
 
     .. code-block:: json
 
         {
-            "active_users": 10,
-            "engagements": []
+            "count": 2,
+            "next": null,
+            "previous": null,
+            "results": [
+              {
+                "username": "alice",
+                "engagements": ["app", "profile"]
+              },
+              {
+                "username": "kenneth",
+                "engagements": ["app", "billing"]
+              }
+            ]
         }
     """
+    serializer_class = UserEngagementSerializer
+
+    def get_queryset(self):
+        User = get_user_model()
+        return User.objects.order_by('-last_login').prefetch_related(
+            'engagements')
+
+
+class EngagementAPIView(GenericAPIView):
+
     serializer_class = EngagementsSerializer
 
     def get(self, request, *args, **kwargs):
+        """
+        Retrieves users engagement
+
+        **Tags: rbac
+
+        **Examples
+
+        .. code-block:: http
+
+            GET proxy/engagement/users/ HTTP/1.1
+
+        responds
+
+        .. code-block:: json
+
+            {
+                "active_users": 10,
+                "engagements": []
+            }
+        """
         # https://docs.djangoproject.com/en/2.2/topics/db/aggregation/
         # #interaction-with-default-ordering-or-order-by
         engs = Engagement.objects.values('slug').annotate(
