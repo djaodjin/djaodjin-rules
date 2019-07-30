@@ -210,7 +210,7 @@ ruleControllers.controller("RuleListCtrl",
 
     $scope.saveOrder = function(startIndex, newIndex) {
         $http.patch(settings.urls.rules.api_rules,
-            [{oldpos: startIndex, newpos: newIndex}]).then(
+            {"updates":[{oldpos: startIndex, newpos: newIndex}]}).then(
             function success(resp) {
                 $scope.rules = resp.data;
             }, function(resp) { // error

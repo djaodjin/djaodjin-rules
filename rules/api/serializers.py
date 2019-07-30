@@ -157,6 +157,19 @@ class RuleSerializer(serializers.ModelSerializer):
         return super(RuleSerializer, self).validate(attrs)
 
 
+class RuleRankSerializer(NoModelSerializer):
+
+    oldpos = serializers.IntegerField(
+        help_text=_("old rank for a rule in the list of rules"))
+    newpos = serializers.IntegerField(
+        help_text=_("new rank for the rule in the list of rules"))
+
+
+class RuleRankUpdateSerializer(NoModelSerializer):
+
+    updates = RuleRankSerializer(many=True)
+
+
 class SessionDataSerializer(NoModelSerializer):
 
     forward_session = serializers.CharField(

@@ -35,8 +35,9 @@ from rest_framework.generics import (GenericAPIView,
 from rest_framework.response import Response
 from rest_framework import serializers
 
-from .serializers import (RuleSerializer, UserEngagementSerializer,
-    EngagementsSerializer)
+from .serializers import (RuleSerializer, RuleRankUpdateSerializer,
+    UserEngagementSerializer, EngagementsSerializer)
+from ..docs import swagger_auto_schema
 from ..mixins import AppMixin
 from ..models import Rule, Engagement
 from ..utils import parse_tz, datetime_or_now
@@ -155,6 +156,7 @@ class RuleListAPIView(RuleMixin, ListCreateAPIView):
         self.check_path(request)
         return self.create(request, *args, **kwargs)
 
+    @swagger_auto_schema(request_body=RuleRankUpdateSerializer)
     def patch(self, request, *args, **kwargs):
         """
         Updates order of rules
@@ -173,31 +175,37 @@ class RuleListAPIView(RuleMixin, ListCreateAPIView):
 
         .. code-block:: json
 
-            [
+            {"updates": [
               {
                 "newpos": 1,
                 "oldpos": 3
                }
-            ]
+            ]}
         """
+        serializer = RuleRankUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         with transaction.atomic():
-            for move in request.data:
-                oldpos = move['oldpos']
-                newpos = move['newpos']
-                queryset = self.get_queryset()
-                updated = queryset.get(rank=oldpos)
-                if newpos < oldpos:
-                    queryset.filter(Q(rank__gte=newpos)
-                                    & Q(rank__lt=oldpos)).update(
-                        rank=F('rank') + 1, moved=True)
-                else:
-                    queryset.filter(Q(rank__lte=newpos)
-                                    & Q(rank__gt=oldpos)).update(
-                        rank=F('rank') - 1, moved=True)
-                updated.rank = newpos
-                updated.moved = True
-                updated.save(update_fields=['rank', 'moved'])
-                queryset.filter(moved=True).update(moved=False)
+            for move in serializer.validated_data['updates']:
+                try:
+                    oldrank = move['oldpos']
+                    newrank = move['newpos']
+                    queryset = self.get_queryset()
+                    updated = queryset.get(rank=oldrank)
+                    if newrank < oldrank:
+                        queryset.filter(Q(rank__gte=newrank)
+                                        & Q(rank__lt=oldrank)).update(
+                            rank=F('rank') + 1, moved=True)
+                    else:
+                        queryset.filter(Q(rank__lte=newrank)
+                                        & Q(rank__gt=oldrank)).update(
+                            rank=F('rank') - 1, moved=True)
+                    updated.rank = newrank
+                    updated.moved = True
+                    updated.save(update_fields=['rank', 'moved'])
+                    queryset.filter(moved=True).update(moved=False)
+                except Rule.DoesNotExist:
+                    LOGGER.info("unable to move rule with rank=%d to rank=%d",
+                        oldrank, newrank)
         return self.get(request, *args, **kwargs)
 
 

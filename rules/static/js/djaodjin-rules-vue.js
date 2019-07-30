@@ -110,17 +110,20 @@ var rtable = new Vue({
     methods: {
         moved: function(e){
             var vm = this;
-            // updating local order
-            vm.items.results.splice(e.newIndex, 0,
-                vm.items.results.splice(e.oldIndex, 1)[0]);
-            var pos = [{oldpos: e.oldIndex+1, newpos: e.newIndex+1}];
+            var oldRank = vm.items.results[e.oldIndex].rank;
+            var newRank = vm.items.results[e.newIndex].rank;
+            var pos = [{oldpos: oldRank, newpos: newRank}];
             $.ajax({
                 method: 'PATCH',
                 url: vm.url,
                 contentType: 'application/json',
-                data: JSON.stringify(pos),
+                data: JSON.stringify({"updates": pos}),
             }).done(function (resp) {
-                vm.items = resp;
+// XXX The following does not update the rules as would be expected.
+//     As a workaround, we call get() here.
+//                vm.items = resp;
+//                vm.itemsLoaded = true;
+                vm.get();
             }).fail(function(resp){
                 showErrorMessages(resp);
             });
