@@ -4,6 +4,16 @@ Vue.directive('sortable', {
   }
 })
 
+function isFunction(f){
+    // https://stackoverflow.com/a/7356528/1491475
+    return f && {}.toString.call(f) === '[object Function]';
+}
+
+function isObject(o){
+    // https://stackoverflow.com/a/46663081/1491475
+    return o instanceof Object && o.constructor === Object
+}
+
 var DATE_FORMAT = 'MMM DD, YYYY';
 
 function handleRequestError(resp){
