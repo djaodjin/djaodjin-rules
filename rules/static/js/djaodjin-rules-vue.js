@@ -4,63 +4,93 @@ Vue.directive('sortable', {
   }
 })
 
-function isFunction(f){
-    // https://stackoverflow.com/a/7356528/1491475
-    return f && {}.toString.call(f) === '[object Function]';
-}
-
-function isObject(o){
-    // https://stackoverflow.com/a/46663081/1491475
-    return o instanceof Object && o.constructor === Object
-}
-
 var DATE_FORMAT = 'MMM DD, YYYY';
 
-function handleRequestError(resp){
-    showErrorMessages(resp);
-}
 
 var httpRequestMixin = {
     // basically a wrapper around jQuery ajax functions
     methods: {
+        _isFunction: function (func){
+            // https://stackoverflow.com/a/7356528/1491475
+            return func && {}.toString.call(func) === '[object Function]';
+        },
+
+        _isObject: function (obj) {
+            // https://stackoverflow.com/a/46663081/1491475
+            return obj instanceof Object && obj.constructor === Object
+        },
+
+        _getAuthToken: function() {
+            return null; // XXX NotYetImplemented
+        },
+
+        _csrfSafeMethod: function(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        },
+
+        _getCSRFToken: function() {
+            var vm = this;
+            // Look first for an input node in the HTML page, i.e.
+            // <input type="hidden" name="csrfmiddlewaretoken"
+            //     value="{{csrf_token}}">
+            var crsfNode = vm.$el.querySelector("[name='csrfmiddlewaretoken']");
+            if( crsfNode ) {
+                return crsfNode.value;
+            }
+            // Then look for a CSRF token in the meta tags, i.e.
+            // <meta name="csrf-token" content="{{csrf_token}}">
+            var metas = document.getElementsByTagName('meta');
+            for( var i = 0; i < metas.length; i++) {
+                if (metas[i].getAttribute("name") == "csrf-token") {
+                    return metas[i].getAttribute("content");
+                }
+            }
+            return "";
+        },
+
         /** This method generates a GET HTTP request to `url` with a query
             string built of a `queryParams` dictionnary.
+
             It supports the following prototypes:
+
             - reqGet(url, successCallback)
             - reqGet(url, queryParams, successCallback)
             - reqGet(url, queryParams, successCallback, failureCallback)
             - reqGet(url, successCallback, failureCallback)
+
             `queryParams` when it is specified is a dictionnary
             of (key, value) pairs that is converted to an HTTP
             query string.
+
             `successCallback` and `failureCallback` must be Javascript
             functions (i.e. instance of type `Function`).
         */
         reqGet: function(url, arg, arg2, arg3){
             var vm = this;
             var queryParams, successCallback;
-            var failureCallback = handleRequestError;
+            var failureCallback = showErrorMessages;
             if(typeof url != 'string') throw 'url should be a string';
-            if(isFunction(arg)){
+            if(vm._isFunction(arg)){
                 // We are parsing reqGet(url, successCallback)
                 // or reqGet(url, successCallback, errorCallback).
                 successCallback = arg;
-                if(isFunction(arg2)){
+                if(vm._isFunction(arg2)){
                     // We are parsing reqGet(url, successCallback, errorCallback)
                     failureCallback = arg2;
                 } else if( arg2 !== undefined ) {
                     throw 'arg2 should be a failureCallback function';
                 }
-            } else if(isObject(arg)){
+            } else if(vm._isObject(arg)){
                 // We are parsing
                 // reqGet(url, queryParams, successCallback)
                 // or reqGet(url, queryParams, successCallback, errorCallback).
                 queryParams = arg;
-                if(isFunction(arg2)){
+                if(vm._isFunction(arg2)){
                     // We are parsing reqGet(url, queryParams, successCallback)
                     // or reqGet(url, queryParams, successCallback, errorCallback).
                     successCallback = arg2;
-                    if(isFunction(arg3)){
+                    if(vm._isFunction(arg3)){
                         // We are parsing reqGet(url, queryParams, successCallback, errorCallback)
                         failureCallback = arg3;
                     } else if( arg3 !== undefined ){
@@ -73,49 +103,69 @@ var httpRequestMixin = {
                 throw 'arg should be a queryParams Object or a successCallback function';
             }
             return $.ajax({
+                method: 'GET',
                 url: url,
+                beforeSend: function(xhr, settings) {
+                    var authToken = vm._getAuthToken();
+                    if( authToken ) {
+                        xhr.setRequestHeader("Authorization",
+                            "Bearer " + authToken);
+                    } else {
+                        if( !vm._csrfSafeMethod(settings.type) ) {
+                            var csrfToken = vm._getCSRFToken();
+                            if( csrfToken ) {
+                                xhr.setRequestHeader("X-CSRFToken", csrfToken);
+                            }
+                        }
+                    }
+                },
                 data: queryParams,
                 traditional: true,
-            }).done(successCallback).fail(failureCallback);
+                cache: false,       // force requested pages not to be cached
+           }).done(successCallback).fail(failureCallback);
         },
         /** This method generates a POST HTTP request to `url` with
             contentType 'application/json'.
+
             It supports the following prototypes:
+
             - reqPOST(url, data)
             - reqPOST(url, data, successCallback)
             - reqPOST(url, data, successCallback, failureCallback)
             - reqPOST(url, successCallback)
             - reqPOST(url, successCallback, failureCallback)
+
             `data` when it is specified is a dictionnary of (key, value) pairs
             that is passed as a JSON encoded body.
+
             `successCallback` and `failureCallback` must be Javascript
             functions (i.e. instance of type `Function`).
         */
         reqPost: function(url, arg, arg2, arg3){
             var vm = this;
             var data, successCallback;
-            var failureCallback = handleRequestError;
+            var failureCallback = showErrorMessages;
             if(typeof url != 'string') throw 'url should be a string';
-            if(isFunction(arg)){
+            if(vm._isFunction(arg)){
                 // We are parsing reqPost(url, successCallback)
                 // or reqPost(url, successCallback, errorCallback).
                 successCallback = arg;
-                if(isFunction(arg2)){
+                if(vm._isFunction(arg2)){
                     // We are parsing reqPost(url, successCallback, errorCallback)
                     failureCallback = arg2;
                 } else if (arg2 !== undefined){
                     throw 'arg2 should be a failureCallback function';
                 }
-            } else if(isObject(arg)){
+            } else if(vm._isObject(arg)){
                 // We are parsing reqPost(url, data)
                 // or reqPost(url, data, successCallback)
                 // or reqPost(url, data, successCallback, errorCallback).
                 data = arg;
-                if(isFunction(arg2)){
+                if(vm._isFunction(arg2)){
                     // We are parsing reqPost(url, data, successCallback)
                     // or reqPost(url, data, successCallback, errorCallback).
                     successCallback = arg2;
-                    if(isFunction(arg3)){
+                    if(vm._isFunction(arg3)){
                         // We are parsing reqPost(url, data, successCallback, errorCallback)
                         failureCallback = arg3;
                     } else if (arg3 !== undefined){
@@ -127,52 +177,69 @@ var httpRequestMixin = {
             } else if (arg !== undefined){
                 throw 'arg should be a data Object or a successCallback function';
             }
-
             return $.ajax({
+                method: 'POST',
                 url: url,
+                beforeSend: function(xhr, settings) {
+                    var authToken = vm._getAuthToken();
+                    if( authToken ) {
+                        xhr.setRequestHeader("Authorization",
+                            "Bearer " + authToken);
+                    } else {
+                        if( !vm._csrfSafeMethod(settings.type) ) {
+                            var csrfToken = vm._getCSRFToken();
+                            if( csrfToken ) {
+                                xhr.setRequestHeader("X-CSRFToken", csrfToken);
+                            }
+                        }
+                    }
+                },
                 contentType: 'application/json',
                 data: JSON.stringify(data),
-                method: 'POST',
             }).done(successCallback).fail(failureCallback);
         },
         /** This method generates a PUT HTTP request to `url` with
             contentType 'application/json'.
+
             It supports the following prototypes:
+
             - reqPUT(url, data)
             - reqPUT(url, data, successCallback)
             - reqPUT(url, data, successCallback, failureCallback)
             - reqPUT(url, successCallback)
             - reqPUT(url, successCallback, failureCallback)
+
             `data` when it is specified is a dictionnary of (key, value) pairs
             that is passed as a JSON encoded body.
+
             `successCallback` and `failureCallback` must be Javascript
             functions (i.e. instance of type `Function`).
         */
         reqPut: function(url, arg, arg2, arg3){
             var vm = this;
             var data, successCallback;
-            var failureCallback = handleRequestError;
+            var failureCallback = showErrorMessages;
             if(typeof url != 'string') throw 'url should be a string';
-            if(isFunction(arg)){
+            if(vm._isFunction(arg)){
                 // We are parsing reqPut(url, successCallback)
                 // or reqPut(url, successCallback, errorCallback).
                 successCallback = arg;
-                if(isFunction(arg2)){
+                if(vm._isFunction(arg2)){
                     // We are parsing reqPut(url, successCallback, errorCallback)
                     failureCallback = arg2;
                 } else if (arg2 !== undefined){
                     throw 'arg2 should be a failureCallback function';
                 }
-            } else if(isObject(arg)){
+            } else if(vm._isObject(arg)){
                 // We are parsing reqPut(url, data)
                 // or reqPut(url, data, successCallback)
                 // or reqPut(url, data, successCallback, errorCallback).
                 data = arg;
-                if(isFunction(arg2)){
+                if(vm._isFunction(arg2)){
                     // We are parsing reqPut(url, data, successCallback)
                     // or reqPut(url, data, successCallback, errorCallback).
                     successCallback = arg2;
-                    if(isFunction(arg3)){
+                    if(vm._isFunction(arg3)){
                         // We are parsing reqPut(url, data, successCallback, errorCallback)
                         failureCallback = arg3;
                     } else if (arg3 !== undefined){
@@ -186,50 +253,68 @@ var httpRequestMixin = {
             }
 
             return $.ajax({
+                method: 'PUT',
                 url: url,
+                beforeSend: function(xhr, settings) {
+                    var authToken = vm._getAuthToken();
+                    if( authToken ) {
+                        xhr.setRequestHeader("Authorization",
+                            "Bearer " + authToken);
+                    } else {
+                        if( !vm._csrfSafeMethod(settings.type) ) {
+                            var csrfToken = vm._getCSRFToken();
+                            if( csrfToken ) {
+                                xhr.setRequestHeader("X-CSRFToken", csrfToken);
+                            }
+                        }
+                    }
+                },
                 contentType: 'application/json',
                 data: JSON.stringify(data),
-                method: 'PUT',
             }).done(successCallback).fail(failureCallback);
         },
         /** This method generates a PATCH HTTP request to `url` with
             contentType 'application/json'.
+
             It supports the following prototypes:
+
             - reqPATCH(url, data)
             - reqPATCH(url, data, successCallback)
             - reqPATCH(url, data, successCallback, failureCallback)
             - reqPATCH(url, successCallback)
             - reqPATCH(url, successCallback, failureCallback)
+
             `data` when it is specified is a dictionnary of (key, value) pairs
             that is passed as a JSON encoded body.
+
             `successCallback` and `failureCallback` must be Javascript
             functions (i.e. instance of type `Function`).
         */
         reqPatch: function(url, arg, arg2, arg3){
             var vm = this;
             var data, successCallback;
-            var failureCallback = handleRequestError;
+            var failureCallback = showErrorMessages;
             if(typeof url != 'string') throw 'url should be a string';
-            if(isFunction(arg)){
+            if(vm._isFunction(arg)){
                 // We are parsing reqPatch(url, successCallback)
                 // or reqPatch(url, successCallback, errorCallback).
                 successCallback = arg;
-                if(isFunction(arg2)){
+                if(vm._isFunction(arg2)){
                     // We are parsing reqPatch(url, successCallback, errorCallback)
                     failureCallback = arg2;
                 } else if (arg2 !== undefined){
                     throw 'arg2 should be a failureCallback function';
                 }
-            } else if(isObject(arg)){
+            } else if(vm._isObject(arg)){
                 // We are parsing reqPatch(url, data)
                 // or reqPatch(url, data, successCallback)
                 // or reqPatch(url, data, successCallback, errorCallback).
                 data = arg;
-                if(isFunction(arg2)){
+                if(vm._isFunction(arg2)){
                     // We are parsing reqPatch(url, data, successCallback)
                     // or reqPatch(url, data, successCallback, errorCallback).
                     successCallback = arg2;
-                    if(isFunction(arg3)){
+                    if(vm._isFunction(arg3)){
                         // We are parsing reqPatch(url, data, successCallback, errorCallback)
                         failureCallback = arg3;
                     } else if (arg3 !== undefined){
@@ -243,31 +328,48 @@ var httpRequestMixin = {
             }
 
             return $.ajax({
+                method: 'PATCH',
                 url: url,
+                beforeSend: function(xhr, settings) {
+                    var authToken = vm._getAuthToken();
+                    if( authToken ) {
+                        xhr.setRequestHeader("Authorization",
+                            "Bearer " + authToken);
+                    } else {
+                        if( !vm._csrfSafeMethod(settings.type) ) {
+                            var csrfToken = vm._getCSRFToken();
+                            if( csrfToken ) {
+                                xhr.setRequestHeader("X-CSRFToken", csrfToken);
+                            }
+                        }
+                    }
+                },
                 contentType: 'application/json',
                 data: JSON.stringify(data),
-                method: 'PATCH',
             }).done(successCallback).fail(failureCallback);
         },
         /** This method generates a DELETE HTTP request to `url` with a query
             string built of a `queryParams` dictionnary.
+
             It supports the following prototypes:
+
             - reqDELETE(url)
             - reqDELETE(url, successCallback)
             - reqDELETE(url, successCallback, failureCallback)
+
             `successCallback` and `failureCallback` must be Javascript
             functions (i.e. instance of type `Function`).
         */
         reqDelete: function(url, arg, arg2){
             var vm = this;
             var data, successCallback;
-            var failureCallback = handleRequestError;
+            var failureCallback = showErrorMessages;
             if(typeof url != 'string') throw 'url should be a string';
-            if(isFunction(arg)){
+            if(vm._isFunction(arg)){
                 // We are parsing reqDelete(url, successCallback)
                 // or reqDelete(url, successCallback, errorCallback).
                 successCallback = arg;
-                if(isFunction(arg2)){
+                if(vm._isFunction(arg2)){
                     // We are parsing reqDelete(url, successCallback, errorCallback)
                     failureCallback = arg2;
                 } else if (arg2 !== undefined){
@@ -278,12 +380,27 @@ var httpRequestMixin = {
             }
 
             return $.ajax({
-                url: url,
                 method: 'DELETE',
+                url: url,
+                beforeSend: function(xhr, settings) {
+                    var authToken = vm._getAuthToken();
+                    if( authToken ) {
+                        xhr.setRequestHeader("Authorization",
+                            "Bearer " + authToken);
+                    } else {
+                        if( !vm._csrfSafeMethod(settings.type) ) {
+                            var csrfToken = vm._getCSRFToken();
+                            if( csrfToken ) {
+                                xhr.setRequestHeader("X-CSRFToken", csrfToken);
+                            }
+                        }
+                    }
+                },
             }).done(successCallback).fail(failureCallback);
         },
     }
 }
+
 
 var itemListMixin = {
     data: function(){
@@ -406,10 +523,12 @@ var itemListMixin = {
 }
 
 var itemMixin = {
-    mixins: [itemListMixin],
-    data: {
-        item: {},
-        itemLoaded: false,
+    mixins: [httpRequestMixin],
+    data: function() {
+        return {
+            item: {},
+            itemLoaded: false,
+        }
     },
     methods: {
         get: function(){
@@ -423,7 +542,7 @@ var itemMixin = {
                     vm.itemLoaded = true;
                 }
             }
-            vm.reqGet(vm.url, vm.getParams(), cb);
+            vm.reqGet(vm.url, cb);
         },
     },
 }
@@ -497,9 +616,12 @@ var paginationMixin = {
     }
 }
 
-if($('#rules-table').length > 0){
-var rtable = new Vue({
-    el: "#rules-table",
+
+Vue.component('rules-table', {
+    mixins: [
+        itemListMixin,
+        paginationMixin,
+    ],
     data: function(){
         return {
             url: djaodjinSettings.urls.rules.api_rules,
@@ -518,39 +640,25 @@ var rtable = new Vue({
             edit_description: [],
         }
     },
-    mixins: [
-        itemListMixin,
-        paginationMixin,
-    ],
     methods: {
         moved: function(e){
             var vm = this;
             var oldRank = vm.items.results[e.oldIndex].rank;
             var newRank = vm.items.results[e.newIndex].rank;
             var pos = [{oldpos: oldRank, newpos: newRank}];
-            $.ajax({
-                method: 'PATCH',
-                url: vm.url,
-                contentType: 'application/json',
-                data: JSON.stringify({"updates": pos}),
-            }).done(function (resp) {
+            vm.reqPatch(vm.url, {"updates": pos},
+            function (resp) {
 // XXX The following does not update the rules as would be expected.
 //     As a workaround, we call get() here.
 //                vm.items = resp;
 //                vm.itemsLoaded = true;
                 vm.get();
-            }).fail(function(resp){
-                showErrorMessages(resp);
             });
         },
         create: function(){
             var vm = this;
-            $.ajax({
-                method: 'POST',
-                url: vm.url,
-                contentType: 'application/json',
-                data: JSON.stringify(vm.newRule),
-            }).done(function (resp) {
+            vm.reqPost(vm.url, vm.newRule,
+            function (resp) {
                 vm.get();
                 vm.newRule = {
                     path: '',
@@ -558,22 +666,19 @@ var rtable = new Vue({
                     is_forward: false,
                 }
                 vm.ruleModalOpen = false;
-            }).fail(function(resp){
+            },
+            function(resp){
                 vm.ruleModalOpen = false;
                 showErrorMessages(resp);
             });
         },
         update: function(rule){
             var vm = this;
-            var url = vm.url + rule.path;
-            $.ajax({
-                method: 'PUT',
-                url: url,
-                contentType: 'application/json',
-                data: JSON.stringify(rule),
-            }).done(function (resp) {
+            vm.reqPut(vm.url + rule.path, rule,
+            function (resp) {
                 vm.ruleModalOpen = false;
-            }).fail(function(resp){
+            },
+            function(resp){
                 vm.ruleModalOpen = false;
                 showErrorMessages(resp);
             });
@@ -581,15 +686,10 @@ var rtable = new Vue({
         remove: function(idx){
             var vm = this;
             var rule = vm.items.results[idx]
-            var url = vm.url + rule.path;
-            $.ajax({
-                method: 'DELETE',
-                url: url,
-            }).done(function (resp) {
+            vm.reqDelete(vm.url + rule.path,
+            function (resp) {
                 vm.params.page = 1;
                 vm.get();
-            }).fail(function(resp){
-                showErrorMessages(resp);
             });
         },
         editDescription: function(idx){
@@ -616,48 +716,45 @@ var rtable = new Vue({
     }
 });
 
+// XXX Connects to bootstrap.js should be somewhere else.
 $('#new-rule').on('shown.bs.modal', function(){
     var self = $(this);
     self.find('[name="new_rule_path"]').focus();
 });
 
-} // $('#rules-table').length > 0
 
-if($('#rule-list-container').length > 0){
-var app = new Vue({
-    el: "#rule-list-container",
-    data: {
-        sessionKey: gettext('Generating...'),
-        testUsername: '',
-        forward_session: '',
-        forward_session_header: '',
-        forward_url: '',
+Vue.component('rule-list', {
+    mixins: [
+        itemMixin,
+    ],
+    data: function() {
+        return {
+            sessionKey: gettext('Generating...'),
+            testUsername: '',
+            forward_session: '',
+            forward_session_header: '',
+            forward_url: '',
+        }
     },
     methods: {
         generateKey: function(){
             var vm = this;
-            $.ajax({
-                method: 'PUT',
-                url: djaodjinSettings.urls.rules.api_generate_key,
-            }).done(function (resp) {
+            vm.reqPut(djaodjinSettings.urls.rules.api_generate_key,
+            function (resp) {
                 vm.sessionKey = resp.enc_key;
-            }).fail(function(resp){
+            },
+            function(resp) {
                 vm.sessionKey = gettext("ERROR");
                 showErrorMessages(resp);
             });
         },
         getSessionData: function(){
             var vm = this;
-            var url = djaodjinSettings.urls.rules.api_session_data + "/" + vm.testUsername;
-            $.ajax({
-                method: 'GET',
-                url: url,
-            }).done(function(resp) {
+            vm.reqGet(djaodjinSettings.urls.rules.api_session_data + "/" + vm.testUsername,
+            function(resp) {
                 vm.forward_session = resp.forward_session;
                 vm.forward_session_header = resp.forward_session_header;
                 vm.forward_url = resp.forward_url;
-            }).fail(function(resp){
-                showErrorMessages(resp);
             });
         },
         update: function(submitEntryPoint) {
@@ -670,30 +767,24 @@ var app = new Vue({
             if( submitEntryPoint ) {
                 data['entry_point'] = vm.$refs.entryPoint.value;
             }
-            $.ajax({
-                method: 'PUT',
-                url: djaodjinSettings.urls.rules.api_detail,
-                contentType: 'application/json',
-                data: JSON.stringify(data),
-            }).done(function (resp) {
+            vm.reqPut(djaodjinSettings.urls.rules.api_detail, data,
+            function (resp) {
                 showMessages([gettext("Update successful.")], "success");
-            }).fail(function(resp){
-                showErrorMessages(resp);
             });
         },
     },
-})
-}
+});
 
-if($('#user-engagement-container').length > 0){
-var app = new Vue({
-    el: "#user-engagement-container",
-    data: {
-        url: djaodjinSettings.urls.rules.api_user_engagement,
-    },
+
+Vue.component('user-engagement', {
     mixins: [
         itemListMixin,
     ],
+    data: function() {
+        return {
+            url: djaodjinSettings.urls.rules.api_user_engagement,
+        }
+    },
     computed: {
         tags: function(){
             var tags = [];
@@ -709,18 +800,15 @@ var app = new Vue({
         this.get();
     },
 });
-}
 
-if($('#engagement-users-container').length > 0){
-new Vue({
-    el: "#engagement-users-container",
-    mixins: [itemMixin],
+
+Vue.component('user-aggregate-engagement', {
+    mixins: [
+        itemMixin
+    ],
     data: function(){
         return {
             url: djaodjinSettings.urls.rules.api_engagement,
-            params: {
-                timezone: moment.tz.guess(),
-            },
             getCb: 'getAndChart',
         }
     },
@@ -782,5 +870,5 @@ new Vue({
     mounted: function(){
         this.get();
     }
-})
-}
+});
+
