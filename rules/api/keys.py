@@ -95,7 +95,7 @@ class AppUpdateAPIView(AppMixin, RetrieveUpdateAPIView):
 
         {
           "slug": "cowork",
-          "entry_point": "http://localhost:8001/",
+          "entry_point": "https://cowork.herokuapp.com/",
           "session_backend": 1
         }
     """
@@ -124,7 +124,7 @@ class AppUpdateAPIView(AppMixin, RetrieveUpdateAPIView):
         .. code-block:: json
 
             {
-              "entry_point": "http://localhost:8001/",
+              "entry_point": "https://cowork.herokuapp.com/",
               "session_backend": 1
             }
 
@@ -134,7 +134,7 @@ class AppUpdateAPIView(AppMixin, RetrieveUpdateAPIView):
 
             {
               "slug": "cowork",
-              "entry_point": "http://localhost:8001/",
+              "entry_point": "https://cowork.herokuapp.com/",
               "session_backend": 1
             }
         """

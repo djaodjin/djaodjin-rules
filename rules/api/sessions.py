@@ -66,7 +66,7 @@ class GetSessionDetailAPIView(SessionDataMixin, AppMixin, UserMixin,
         {
           "forward_session": "{username: xia}",
           "forward_session_header": "Authorization: XXX",
-          "forward_url": "http://localhost:8001/"
+          "forward_url": "https://cowork.herokuapp.com/"
         }
     """
     serializer_class = SessionDataSerializer
