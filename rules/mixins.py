@@ -130,7 +130,6 @@ class SessionDataMixin(object):
         session_token = session_store.prepare(session, app.enc_key)
         if not isinstance(session_token, six.string_types):
             # Because we don't want Python3 to prefix our strings with b'.
-            #pylint:disable=redefined-variable-type
             session_token = session_token.decode('ascii')
         return session_token
 

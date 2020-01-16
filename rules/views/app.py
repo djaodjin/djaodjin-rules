@@ -1,4 +1,4 @@
-# Copyright (c) 2019, DjaoDjin inc.
+# Copyright (c) 2020, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@ from deployutils.apps.django.settings import SESSION_COOKIE_NAME
 from .. import settings
 from ..compat import get_model
 from ..mixins import AppMixin, SessionDataMixin
-from ..perms import check_permissions as base_check_permissions
+from ..perms import check_permissions as base_check_permissions, find_rule
 from ..utils import JSONEncoder, get_app_model
 
 #pylint:disable=import-error
@@ -49,8 +49,9 @@ LOGGER = logging.getLogger(__name__)
 
 
 class DisallowedCookieName(SuspiciousOperation):
-    """Cookie header contains invalid value"""
-    pass
+    """
+    Cookie header contains invalid value
+    """
 
 
 class SessionProxyMixin(SessionDataMixin):
@@ -103,6 +104,18 @@ class SessionProxyMixin(SessionDataMixin):
 #       # If we get here, the request was forwarded and we got an exception
 #       # or the request must be handled locally.
 #       return super(SessionProxyMixin, self).dispatch(request, *args, **kwargs)
+
+    def options(self, request, *args, **kwargs):
+        # With CORS the browser strips the Authentication header yet
+        # it expects a 200 OK response.
+        request.matched_rule, request.matched_params = find_rule(
+            request, self.app)
+        if request.matched_rule and request.matched_rule.is_forward:
+            try:
+                return self.fetch_remote_page()
+            except RequestException as err:
+                return self.forward_error(err)
+        return self.forward_to_parent(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         response = self.conditional_forward(request)

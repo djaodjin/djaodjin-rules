@@ -1,4 +1,4 @@
-# Copyright (c) 2019, DjaoDjin inc.
+# Copyright (c) 2020, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -178,13 +178,12 @@ def check_matched(request, app, prefixes=None,
                 last_visited = engaged(matched, request=request)
                 session.update({'last_visited': last_visited})
             return (None, matched, session)
-        else:
-            response = fail_rule(request, matched, params, login_url=login_url,
-                redirect_field_name=redirect_field_name)
-            if not response:
-                last_visited = engaged(matched, request=request)
-                session.update({'last_visited': last_visited})
-            return (response, matched if response is None else None, session)
+        response = fail_rule(request, matched, params, login_url=login_url,
+            redirect_field_name=redirect_field_name)
+        if not response:
+            last_visited = engaged(matched, request=request)
+            session.update({'last_visited': last_visited})
+        return (response, matched if response is None else None, session)
     LOGGER.debug("unmatched %s", request.path)
     raise NoRuleMatch(request.path)
 

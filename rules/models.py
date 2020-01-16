@@ -97,7 +97,7 @@ class AppManager(models.Manager):
 
 
 @python_2_unicode_compatible
-class BaseApp(models.Model): #pylint: disable=super-on-old-class
+class BaseApp(models.Model):
     """
     A ``App`` is used to select a database and a firewall profile.
 
@@ -173,7 +173,7 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
         swappable = 'RULES_APP_MODEL'
         abstract = True
 
-    def __str__(self): #pylint: disable=super-on-old-class
+    def __str__(self):
         return self.slug
 
     @property
@@ -208,7 +208,7 @@ class BaseApp(models.Model): #pylint: disable=super-on-old-class
 @python_2_unicode_compatible
 class App(BaseApp):
 
-    def __str__(self): #pylint: disable=super-on-old-class
+    def __str__(self):
         return self.slug
 
 
@@ -240,7 +240,7 @@ class Rule(models.Model):
     Rule to check in order to forward request, serve it locally
     and editing the content coming back through the proxy.
     """
-    #pylint: disable=old-style-class,no-init
+    #pylint:disable=no-init
 
     HOME = 'index'
     ANY = 0

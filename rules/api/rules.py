@@ -1,4 +1,4 @@
-# Copyright (c) 2019, DjaoDjin inc.
+# Copyright (c) 2020, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -22,7 +22,7 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import datetime
+import datetime, logging
 
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth import get_user_model
@@ -43,7 +43,8 @@ from ..models import Rule, Engagement
 from ..utils import parse_tz, datetime_or_now
 
 #pylint: disable=no-init
-#pylint: disable=old-style-class
+
+LOGGER = logging.getLogger(__name__)
 
 
 class UpdateRuleSerializer(RuleSerializer):
@@ -351,6 +352,7 @@ class EngagementAPIView(GenericAPIView):
                 "engagements": []
             }
         """
+        #pylint:disable=unused-argument
         # https://docs.djangoproject.com/en/2.2/topics/db/aggregation/
         # #interaction-with-default-ordering-or-order-by
         engs = Engagement.objects.values('slug').annotate(

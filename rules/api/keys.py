@@ -1,4 +1,4 @@
-# Copyright (c) 2019, DjaoDjin inc.
+# Copyright (c) 2020, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,6 @@ from ..utils import get_app_model
 from .serializers import AppSerializer, AppKeySerializer
 
 #pylint: disable=no-init
-#pylint: disable=old-style-class
 
 
 class GenerateKeyAPIView(AppMixin, UpdateAPIView):

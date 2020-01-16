@@ -1,4 +1,4 @@
-# Copyright (c) 2019, DjaoDjin inc.
+# Copyright (c) 2020, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,6 @@ from ..models import Rule
 from ..utils import get_app_model
 
 #pylint: disable=no-init
-#pylint: disable=old-style-class
 
 class EnumField(serializers.Field):
     """
@@ -131,7 +130,6 @@ class RuleSerializer(serializers.ModelSerializer):
         fields = ('rank', 'path', 'allow', 'is_forward', 'engaged')
 
     def validate(self, attrs):
-        #pylint: disable=super-on-old-class,redefined-variable-type
         if 'get_allow' in attrs:
             parts = attrs.get('get_allow').split('/')
             try:
@@ -215,11 +213,13 @@ class UserEngagementSerializer(serializers.ModelSerializer):
         return list(set(user_tags))
 
 
-class EngagementSerializer(serializers.Serializer):
+class EngagementSerializer(NoModelSerializer):
+
     slug = serializers.CharField()
     count = serializers.IntegerField()
 
 
-class EngagementsSerializer(serializers.Serializer):
+class EngagementsSerializer(NoModelSerializer):
+
     engagements = EngagementSerializer(many=True)
     active_users = serializers.IntegerField()

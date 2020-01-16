@@ -29,15 +29,27 @@ Decorators to grant access to an URL based on a dynamic set of rules.
 import logging
 
 from functools import wraps
-from django import http
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import available_attrs
 
-from .perms import check_permissions
+from .perms import NoRuleMatch, check_matched, redirect_or_denied
 from .utils import get_app_model, get_current_app
 
 
 LOGGER = logging.getLogger(__name__)
+
+
+def fail_rule(request, app=None):
+    """
+    Custom rule
+    """
+    if not app:
+        app = get_current_app()
+    try:
+        redirect, _, _ = check_matched(request, app)
+    except NoRuleMatch as _:
+        redirect = True
+    return redirect
 
 
 def requires_permissions(function=None, app_url_kwarg='app'):
@@ -52,10 +64,10 @@ def requires_permissions(function=None, app_url_kwarg='app'):
                 app = get_object_or_404(
                     get_app_model(), slug=kwargs.get(app_url_kwarg))
             else:
-                app = get_current_app()
-            redirect_url, _, _ = check_permissions(request, app)
-            if redirect_url:
-                return http.HttpResponseRedirect(redirect_url)
+                app = None
+            redirect = fail_rule(request, app=app)
+            if redirect:
+                return redirect_or_denied(request, redirect)
             return view_func(request, *args, **kwargs)
         return _wrapped_view
 
