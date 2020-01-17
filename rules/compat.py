@@ -43,7 +43,7 @@ except ModuleNotFoundError: #pylint:disable=undefined-variable
 
 def get_func_arg_names(func):
     try:
-        return inspect.getfullargspec(fail_func).args
+        return inspect.getfullargspec(func).args
     except AttributeError: # Python<3
         pass
     return inspect.getargspec(func)[0]

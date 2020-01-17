@@ -93,7 +93,7 @@ class DecoratorMixin(object):
                     # filter out URL keyword arguments which the fail_func
                     # does not accept.
                     kwargs = {}
-                    for name in get_func_arg_names(func):
+                    for name in get_func_arg_names(fail_func):
                         value = view_kwargs.get(name)
                         if value is not None:
                             kwargs.update({name: value})
