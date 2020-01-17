@@ -35,7 +35,7 @@ for Django 2.0.
 """
 from __future__ import unicode_literals
 
-import inspect, logging
+import logging
 
 from django.conf import urls
 from django.contrib.auth import REDIRECT_FIELD_NAME
@@ -53,6 +53,7 @@ except ImportError: # Django<2.0
         RegexURLResolver as DjangoRegexURLResolver
     )
 
+from .compat import get_func_arg_names
 from .perms import redirect_or_denied
 
 
@@ -92,7 +93,7 @@ class DecoratorMixin(object):
                     # filter out URL keyword arguments which the fail_func
                     # does not accept.
                     kwargs = {}
-                    for name in inspect.getfullargspec(fail_func).args:
+                    for name in get_func_arg_names(func):
                         value = view_kwargs.get(name)
                         if value is not None:
                             kwargs.update({name: value})

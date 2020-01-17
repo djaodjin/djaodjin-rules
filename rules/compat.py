@@ -1,4 +1,4 @@
-# Copyright (c) 2019, DjaoDjin inc.
+# Copyright (c) 2020, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -23,6 +23,7 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pylint: disable=invalid-name,no-name-in-module,unused-import,import-error
+import inspect
 
 try:
     from django.apps import apps
@@ -38,6 +39,14 @@ except ImportError: # <= Django 1.10, Python<3.6
 except ModuleNotFoundError: #pylint:disable=undefined-variable
     # <= Django 1.10, Python>=3.6
     from django.core.urlresolvers import NoReverseMatch, reverse, reverse_lazy
+
+
+def get_func_arg_names(func):
+    try:
+        return inspect.getfullargspec(fail_func).args
+    except AttributeError: # Python<3
+        pass
+    return inspect.getargspec(func)[0]
 
 
 def get_model_class(full_name, settings_meta):
