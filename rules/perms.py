@@ -48,7 +48,7 @@ class NoRuleMatch(RuntimeError):
 
 
 def _insert_url(request, redirect_field_name=REDIRECT_FIELD_NAME,
-                inserted_url=None):
+                inserted_url=django_settings.LOGIN_URL):
     '''Redirects to the *inserted_url* before going to the orginal
     request path.'''
     # This code is pretty much straightforward
@@ -57,7 +57,7 @@ def _insert_url(request, redirect_field_name=REDIRECT_FIELD_NAME,
     # If the login url is the same scheme and net location then just
     # use the path as the "next" url.
     login_scheme, login_netloc = six.moves.urllib.parse.urlparse(
-        inserted_url)[:2]
+        str(inserted_url))[:2]
     current_scheme, current_netloc = six.moves.urllib.parse.urlparse(path)[:2]
     if ((not login_scheme or login_scheme == current_scheme) and
         (not login_netloc or login_netloc == current_netloc)):
