@@ -320,16 +320,17 @@ class UserEngagementAPIView(ListAPIView):
         }
     """
     serializer_class = UserEngagementSerializer
+    user_model = get_user_model()
 
     def get_queryset(self):
-        User = get_user_model()
-        return User.objects.order_by('-last_login').prefetch_related(
-            'engagements')
+        return self.user_model.objects.order_by(
+            '-last_login').prefetch_related('engagements')
 
 
 class EngagementAPIView(GenericAPIView):
 
     serializer_class = EngagementsSerializer
+    user_model = get_user_model()
 
     def get(self, request, *args, **kwargs):
         """
@@ -357,6 +358,15 @@ class EngagementAPIView(GenericAPIView):
         # #interaction-with-default-ordering-or-order-by
         engs = Engagement.objects.values('slug').annotate(
             count=Count('slug')).order_by('slug')
+        nb_users = self.user_model.objects.count()
+        engagement_stats = []
+        for eng in engs:
+            engagement_stats += [{
+                'slug': eng['slug'],
+                'count': eng['count'] * 100 / nb_users
+            }]
+        # Compute number active users for yesterday
+        # XXX there should already be a function to compute that date range.
         yest_dt = datetime_or_now() - relativedelta(days=1)
         yest_start = datetime.datetime(year=yest_dt.year, month=yest_dt.month,
             day=yest_dt.day)
@@ -369,9 +379,9 @@ class EngagementAPIView(GenericAPIView):
             tz_ob = utc
         yest_start = tz_ob.localize(yest_start)
         yest_end = tz_ob.localize(yest_end)
-        users = get_user_model().objects.filter(
+        users = self.user_model.objects.filter(
             last_login__gt=yest_start, last_login__lt=yest_end).count()
 
         return Response(self.get_serializer({
-            'engagements': engs,
+            'engagements': engagement_stats,
             'active_users': users}).data)
