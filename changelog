@@ -1,0 +1,6 @@
+0.2.4
+
+  * fixes engagement as percentage
+  * fixes inserted_url is sometimes a reverse_lazy
+
+ -- Sebastien Mirolo <smirolo@djaodjin.com>  Thu,  5 Mar 2020 09:20:00 -0700

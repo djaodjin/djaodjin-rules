@@ -24,3 +24,13 @@ It remains to create the database and populate it with test data.
 
     $ python ./manage.py migrate --run-syncdb --noinput
     $ python ./manage.py loaddata testsite/fixtures/test_data.json
+
+Release Notes
+=============
+
+0.2.4
+
+  * fixes engagement as percentage
+  * fixes inserted_url is sometimes a reverse_lazy
+
+[previous release notes](changelog)
