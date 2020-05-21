@@ -40,8 +40,6 @@ import logging
 from django.conf import urls
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.decorators import available_attrs
-from django.utils import six
 from functools import wraps
 
 try:
@@ -53,7 +51,7 @@ except ImportError: # Django<2.0
         RegexURLResolver as DjangoRegexURLResolver
     )
 
-from .compat import get_func_arg_names
+from .compat import available_attrs, get_func_arg_names, six
 from .perms import redirect_or_denied
 
 

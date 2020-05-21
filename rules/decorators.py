@@ -1,4 +1,4 @@
-# Copyright (c) 2019, DjaoDjin inc.
+# Copyright (c) 2020, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,8 +30,8 @@ import logging
 
 from functools import wraps
 from django.shortcuts import get_object_or_404
-from django.utils.decorators import available_attrs
 
+from .compat import available_attrs
 from .perms import NoRuleMatch, check_matched, redirect_or_denied
 from .utils import get_app_model, get_current_app
 

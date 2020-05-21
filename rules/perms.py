@@ -29,10 +29,9 @@ import logging
 from django.conf import settings as django_settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.core.exceptions import PermissionDenied
-from django.utils import six
 
 from . import settings
-from .compat import is_authenticated
+from .compat import is_authenticated, six
 from .models import Engagement, Rule
 from .utils import datetime_or_now
 

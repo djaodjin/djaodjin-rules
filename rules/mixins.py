@@ -1,4 +1,4 @@
-# Copyright (c) 2019, DjaoDjin inc.
+# Copyright (c) 2020, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,11 +31,10 @@ from deployutils.apps.django.backends.jwt_session_store import (
 from deployutils.apps.django.settings import SESSION_COOKIE_NAME
 from django.contrib.auth import get_user_model
 from django.utils.module_loading import import_string
-from django.utils import six
 from rest_framework.generics import get_object_or_404
 
 from . import settings
-from .compat import is_authenticated
+from .compat import is_authenticated, six
 from .models import Engagement
 from .utils import datetime_or_now
 from .extras import AppMixinBase

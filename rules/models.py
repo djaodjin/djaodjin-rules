@@ -39,12 +39,12 @@ from django.core.mail import get_connection as get_connection_base
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Q
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.timezone import utc
 from django.utils.module_loading import import_string
 from django.utils.translation import ugettext_lazy as _
 
 from . import settings
+from .compat import python_2_unicode_compatible
 
 
 LOGGER = logging.getLogger(__name__)

@@ -28,10 +28,10 @@ import logging
 from django.conf import settings
 from django.middleware.csrf import CsrfViewMiddleware
 from django.utils.cache import patch_vary_headers
-from django.utils import six
 from rest_framework.authentication import get_authorization_header
 from rest_framework.views import APIView
 
+from .compat import six
 from .perms import find_rule
 from .utils import get_current_app
 

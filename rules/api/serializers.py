@@ -26,11 +26,11 @@ from __future__ import unicode_literals
 import json
 
 from django.contrib.auth import get_user_model
-from django.utils import six
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 
 from .. import settings
+from ..compat import six
 from ..models import Rule
 from ..utils import get_app_model
 

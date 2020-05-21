@@ -1,0 +1,13 @@
+# Many prerequisite projects have dropped support for Python2.
+# This legacy requirements file is used for Python2 environments.
+Django==1.11.29
+djangorestframework==3.9.4
+djaodjin-deployutils==0.5.19
+requests==2.22.0
+python-dateutil==2.8.1
+
+# testsite-only
+coverage==4.0.3
+django-extensions==2.2.6
+gunicorn==19.7.1
+whitenoise==4.1.2

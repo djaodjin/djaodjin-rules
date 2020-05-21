@@ -29,20 +29,16 @@ from django.contrib.sites.requests import RequestSite
 from django.core.exceptions import FieldError, SuspiciousOperation
 from django.http import HttpResponse, SimpleCookie
 from django.template.response import TemplateResponse
-from django.utils import six
 from django.views.generic import UpdateView, TemplateView
 import requests
 from requests.exceptions import RequestException
 from deployutils.apps.django.settings import SESSION_COOKIE_NAME
 
 from .. import settings
-from ..compat import get_model
+from ..compat import get_model, http_cookies, six
 from ..mixins import AppMixin, SessionDataMixin
 from ..perms import check_permissions as base_check_permissions, find_rule
 from ..utils import JSONEncoder, get_app_model
-
-#pylint:disable=import-error
-from django.utils.six.moves import http_cookies
 
 
 LOGGER = logging.getLogger(__name__)
