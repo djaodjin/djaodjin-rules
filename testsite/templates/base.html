@@ -61,12 +61,6 @@
   {% block footer %}{% endblock %}
   {% block bodyscripts %}
   {% if VUEJS %}
-  <script type="text/javascript" charset="utf-8">
-    var djaodjinSettings = {
-      urls: {% if urls %}{{urls|to_json}}{% else %}{}{% endif %},
-      itemsPerPage: {% if items_per_page %}{{items_per_page}}{% else %}25{% endif %},
-    }
-  </script>
   <script type="text/javascript" charset="utf-8" src="/static/js/djaodjin-resources.js"></script>
   <script type="text/javascript" charset="utf-8" src="/static/vendor/moment.js"></script>
   <script type="text/javascript" charset="utf-8" src="/static/vendor/moment-timezone-with-data.js"></script>
@@ -74,10 +68,22 @@
   <script type="text/javascript" charset="utf-8" src="/static/vendor/vue.js"></script>
   <script type="text/javascript" charset="utf-8" src="/static/vendor/uiv.min.js"></script>
   <script type="text/javascript" charset="utf-8" src="/static/vendor/vue-sortable.js"></script>
+  <script type="text/javascript" charset="utf-8">
+Vue.prototype.$itemsPerPage =
+    {% if items_per_page %}{{items_per_page}}{% else %}25{% endif %};
+//Vue.prototype.$sortDirection = ;
+//Vue.prototype.$sortByField = ;
+Vue.prototype.$dateRange = {
+    start_at: "{% if start_at %}{{start_at|date:"Y-m-dTG:i:s"}}{% endif %}",
+    ends_at: "{% if ends_at %}{{ends_at|date:"Y-m-dTG:i:s"}}{% endif %}"
+};
+Vue.prototype.$urls = {% if urls %}{{urls|to_json}}{% else %}{}{% endif %};
+
+Vue.use(uiv, {prefix: 'uiv'});
+  </script>
   <script type="text/javascript" charset="utf-8" src="/static/js/djaodjin-resources-vue.js"></script>
   <script type="text/javascript" charset="utf-8" src="/static/js/djaodjin-rules-vue.js"></script>
   <script type="text/javascript" charset="utf-8">
-Vue.use(uiv, {prefix: 'uiv'});
 var app = new Vue({
   el: '#app',
   delimiters: ["[[","]]"],

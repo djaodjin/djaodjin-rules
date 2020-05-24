@@ -14,7 +14,7 @@ Vue.component('rules-table', {
     ],
     data: function(){
         return {
-            url: djaodjinSettings.urls.rules.api_rules,
+            url: this.$urls.rules.api_rules,
             itemsLoaded: false,
             items: {
                 results: [],
@@ -119,6 +119,9 @@ Vue.component('rule-list', {
     ],
     data: function() {
         return {
+            url: this.$urls.rules.api_detail,
+            api_generate_key_url: this.$urls.rules.api_generate_key,
+            api_session_data_url: this.$urls.rules.api_session_data,
             sessionKey: gettext('Generating...'),
             testUsername: '',
             forward_session: '',
@@ -129,7 +132,7 @@ Vue.component('rule-list', {
     methods: {
         generateKey: function(){
             var vm = this;
-            vm.reqPut(djaodjinSettings.urls.rules.api_generate_key,
+            vm.reqPut(vm.api_generate_key_url,
             function (resp) {
                 vm.sessionKey = resp.enc_key;
             },
@@ -140,7 +143,7 @@ Vue.component('rule-list', {
         },
         getSessionData: function(){
             var vm = this;
-            vm.reqGet(djaodjinSettings.urls.rules.api_session_data + "/" + vm.testUsername,
+            vm.reqGet(vm.api_session_data_url + "/" + vm.testUsername,
             function(resp) {
                 vm.forward_session = resp.forward_session;
                 vm.forward_session_header = resp.forward_session_header;
@@ -157,7 +160,7 @@ Vue.component('rule-list', {
             if( submitEntryPoint ) {
                 data['entry_point'] = vm.$refs.entryPoint.value;
             }
-            vm.reqPut(djaodjinSettings.urls.rules.api_detail, data,
+            vm.reqPut(vm.url, data,
             function (resp) {
                 showMessages([gettext("Update successful.")], "success");
             });
@@ -172,7 +175,7 @@ Vue.component('user-engagement', {
     ],
     data: function() {
         return {
-            url: djaodjinSettings.urls.rules.api_user_engagement,
+            url: this.$urls.rules.api_user_engagement,
         }
     },
     computed: {
@@ -198,7 +201,7 @@ Vue.component('user-aggregate-engagement', {
     ],
     data: function(){
         return {
-            url: djaodjinSettings.urls.rules.api_engagement,
+            url: this.$urls.rules.api_engagement,
             getCb: 'getAndChart',
         }
     },
