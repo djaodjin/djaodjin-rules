@@ -223,3 +223,11 @@ class EngagementsSerializer(NoModelSerializer):
 
     engagements = EngagementSerializer(many=True)
     active_users = serializers.IntegerField()
+
+
+class ValidationErrorSerializer(NoModelSerializer):
+    """
+    Details on why token is invalid.
+    """
+    detail = serializers.CharField(help_text=_("Describes the reason for"\
+        " the error in plain text"))

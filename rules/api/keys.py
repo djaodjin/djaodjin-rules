@@ -25,9 +25,9 @@
 from random import choice
 
 from rest_framework.response import Response
-from rest_framework.generics import (UpdateAPIView,
-    RetrieveUpdateAPIView)
+from rest_framework.generics import GenericAPIView, RetrieveUpdateAPIView
 
+from ..docs import no_body, swagger_auto_schema
 from ..mixins import AppMixin
 from ..utils import get_app_model
 from .serializers import AppSerializer, AppKeySerializer
@@ -35,40 +35,43 @@ from .serializers import AppSerializer, AppKeySerializer
 #pylint: disable=no-init
 
 
-class GenerateKeyAPIView(AppMixin, UpdateAPIView):
+class GenerateKeyAPIView(AppMixin, GenericAPIView):
     """
-    Rotates session encoding key
-
-    Rotates the key used to encode the session information forwarded
-    to the application entry point.
-
-    **Tags: rbac
-
-    **Examples
-
-    .. code-block:: http
-
-        PUT /api/proxy/key/ HTTP/1.1
-
-    responds
-
-    .. code-block:: json
-
-        {
-          "enc_key": "********"
-        }
+    Generate a new key to communicate between proxy and backend service.
     """
-    # XXX change to POST
+    http_method_names = ['post']
     model = get_app_model()
     serializer_class = AppKeySerializer
 
-    def update(self, request, *args, **kwargs):
-        self.object = self.app
-        self.object.enc_key = "".join([
+    @swagger_auto_schema(request_body=no_body)
+    def post(self, request, *args, **kwargs):
+        """
+        Rotates session encoding key
+
+        Rotates the key used to encode the session information forwarded
+        to the application entry point.
+
+        **Tags: rbac
+
+        **Examples
+
+        .. code-block:: http
+
+            POST /api/proxy/key/ HTTP/1.1
+
+        responds
+
+        .. code-block:: json
+
+            {
+              "enc_key": "********"
+            }
+        """
+        self.app.enc_key = "".join([
                 choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^*-_=+")
                 for idx in range(16)]) #pylint: disable=unused-variable
-        self.object.save()
-        return Response(AppKeySerializer().to_representation(self.object))
+        self.app.save()
+        return Response(self.get_serializer().to_representation(self.app))
 
 
 class AppUpdateAPIView(AppMixin, RetrieveUpdateAPIView):

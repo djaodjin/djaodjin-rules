@@ -153,6 +153,16 @@ class RuleListAPIView(RuleMixin, ListCreateAPIView):
                 "is_forward": true,
                 "engaged": ""
             }
+
+        responds
+
+            {
+                "rank": 0,
+                "path": "/",
+                "allow": "authenticated",
+                "is_forward": true,
+                "engaged": ""
+            }
         """
         self.check_path(request)
         return self.create(request, *args, **kwargs)

@@ -132,7 +132,7 @@ Vue.component('rule-list', {
     methods: {
         generateKey: function(){
             var vm = this;
-            vm.reqPut(vm.api_generate_key_url,
+            vm.reqPost(vm.api_generate_key_url,
             function (resp) {
                 vm.sessionKey = resp.enc_key;
             },
