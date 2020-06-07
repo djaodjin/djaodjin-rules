@@ -2,9 +2,9 @@ Flexible framework to check permissions to URIs and forward HTTP requests
 
 Tested with
 
-- **Python:** 2.7, **Django:** 1.11 ([LTS](https://www.djangoproject.com/download/)), **Django Rest Framework:** 3.9.4
-- **Python:** 3.6, **Django:** 1.11 ([LTS](https://www.djangoproject.com/download/)), **Django Rest Framework:** 3.9.4
-- **Python:** 3.6, **Django:** 2.2 ([LTS](https://www.djangoproject.com/download/)), **Django Rest Framework:** 3.9.4
+- **Python:** 2.7, **Django:** 1.11, **Django Rest Framework:** 3.9.4
+- **Python:** 3.6, **Django:** 2.2 ([LTS](https://www.djangoproject.com/download/)), **Django Rest Framework:** 3.10
+- **Python:** 3.6, **Django:** 3.0 (latest), **Django Rest Framework:** 3.10
 
 This project contains bare bone templates. To see it in action, integrated into
 a full-fledged subscription-based session proxy with bootstrap-styled
@@ -28,9 +28,10 @@ It remains to create the database and populate it with test data.
 Release Notes
 =============
 
-0.2.4
+0.2.5
 
-  * fixes engagement as percentage
-  * fixes inserted_url is sometimes a reverse_lazy
+  * changes PUT to POST to generate new key
+  * extends Vue with configuration constants
+  * introduces compatibility with Django3
 
 [previous release notes](changelog)
