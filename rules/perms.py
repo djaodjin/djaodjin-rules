@@ -116,26 +116,6 @@ def redirect_or_denied(request, inserted_url,
     raise PermissionDenied(descr)
 
 
-def fail_rule(request, rule, params, redirect_field_name=REDIRECT_FIELD_NAME,
-              login_url=None):
-    if not is_authenticated(request):
-        LOGGER.debug("user is not authenticated")
-        return _insert_url(request, redirect_field_name,
-            login_url or django_settings.LOGIN_URL)
-    _, fail_func, defaults = settings.RULE_OPERATORS[rule.rule_op]
-    kwargs = defaults.copy()
-    if isinstance(params, dict):
-        kwargs.update(params)
-    LOGGER.debug("calling %s(user=%s, kwargs=%s) ...",
-        fail_func.__name__, request.user, kwargs)
-    redirect = fail_func(request, **kwargs)
-    LOGGER.debug("calling %s(user=%s, kwargs=%s) => %s",
-        fail_func.__name__, request.user, kwargs, redirect)
-    if redirect:
-        return redirect_or_denied(request, redirect, redirect_field_name)
-    return None
-
-
 def engaged(rule, request=None):
     """
     Returns the last time the page was visited
@@ -179,12 +159,30 @@ def check_matched(request, app, prefixes=None,
                 last_visited = engaged(matched, request=request)
                 session.update({'last_visited': last_visited})
             return (None, matched, session)
-        response = fail_rule(request, matched, params, login_url=login_url,
-            redirect_field_name=redirect_field_name)
-        if not response:
+
+        redirect_url = None
+        if not is_authenticated(request):
+            LOGGER.debug("user is not authenticated")
+            redirect_url = _insert_url(request, redirect_field_name,
+                login_url or django_settings.LOGIN_URL)
+        else:
+            _, fail_func, defaults = settings.RULE_OPERATORS[matched.rule_op]
+            kwargs = defaults.copy()
+            if isinstance(params, dict):
+                kwargs.update(params)
+            LOGGER.debug("calling %s(user=%s, kwargs=%s) ...",
+                fail_func.__name__, request.user, kwargs)
+            redirect_url = fail_func(request, **kwargs)
+            LOGGER.debug("calling %s(user=%s, kwargs=%s) => %s",
+                fail_func.__name__, request.user, kwargs, redirect_url)
+            if not redirect_url:
+                redirect_url = None
+
+        if not redirect_url:
             last_visited = engaged(matched, request=request)
             session.update({'last_visited': last_visited})
-        return (response, matched if response is None else None, session)
+        return (redirect_url, matched if redirect_url is None else None,
+            session)
     LOGGER.debug("unmatched %s", request.path)
     raise NoRuleMatch(request.path)
 

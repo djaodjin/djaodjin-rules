@@ -280,6 +280,7 @@ class RuleDetailAPIView(RuleMixin, RetrieveUpdateDestroyAPIView):
                 "engaged": ""
             }
         """
+        #pylint:disable=useless-super-delegation
         return super(RuleDetailAPIView, self).put(request, *args, **kwargs)
 
     def delete(self, request, *args, **kwargs):
@@ -294,6 +295,7 @@ class RuleDetailAPIView(RuleMixin, RetrieveUpdateDestroyAPIView):
 
             DELETE /api/proxy/rules/app/ HTTP/1.1
         """
+        #pylint:disable=useless-super-delegation
         return super(RuleDetailAPIView, self).delete(request, *args, **kwargs)
 
 
@@ -352,7 +354,7 @@ class EngagementAPIView(GenericAPIView):
 
         .. code-block:: http
 
-            GET proxy/engagement/users/ HTTP/1.1
+            GET /api/proxy/engagement/ HTTP/1.1
 
         responds
 

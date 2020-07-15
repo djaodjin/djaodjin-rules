@@ -67,6 +67,7 @@ class GenerateKeyAPIView(AppMixin, GenericAPIView):
               "enc_key": "********"
             }
         """
+        #pylint:disable=unused-argument
         self.app.enc_key = "".join([
                 choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^*-_=+")
                 for idx in range(16)]) #pylint: disable=unused-variable
@@ -140,4 +141,5 @@ class AppUpdateAPIView(AppMixin, RetrieveUpdateAPIView):
               "session_backend": 1
             }
         """
+        #pylint:disable=useless-super-delegation
         return super(AppUpdateAPIView, self).put(request, *args, **kwargs)

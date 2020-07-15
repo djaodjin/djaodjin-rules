@@ -37,7 +37,8 @@ from deployutils.apps.django.settings import SESSION_COOKIE_NAME
 from .. import settings
 from ..compat import get_model, http_cookies, six
 from ..mixins import AppMixin, SessionDataMixin
-from ..perms import check_permissions as base_check_permissions, find_rule
+from ..perms import (check_permissions as base_check_permissions,
+    find_rule, redirect_or_denied)
 from ..utils import JSONEncoder, get_app_model
 
 
@@ -65,7 +66,11 @@ class SessionProxyMixin(SessionDataMixin):
             request, self.app,
             redirect_field_name=self.redirect_field_name,
             login_url=self.login_url)
-        if self.session:
+        response = None
+        if redirect_url:
+            response = redirect_or_denied(
+                request, redirect_url, self.redirect_field_name)
+        if not response and self.session:
             # XXX Insert into self.request.session so we can use the same
             #     code on self-hosted templates.
             last_visited = self.session.get('last_visited', None)
@@ -74,7 +79,7 @@ class SessionProxyMixin(SessionDataMixin):
                     last_visited = last_visited.isoformat()
                 self.request.session.update({
                     'last_visited': last_visited})
-        return (redirect_url, self.rule.is_forward if self.rule else False)
+        return (response, self.rule.is_forward if self.rule else False)
 
     def get_context_data(self, **kwargs):
         context = super(SessionProxyMixin, self).get_context_data(**kwargs)
@@ -197,6 +202,7 @@ class SessionProxyMixin(SessionDataMixin):
         return self.translate_response(response)
 
     def translate_request_args(self, request):
+        #pylint:disable=too-many-statements
         requests_args = {'allow_redirects': False, 'headers': {}}
         cookies = SimpleCookie()
         try:

@@ -25,7 +25,6 @@
 from __future__ import unicode_literals
 
 import logging
-from django.conf import settings
 from django.middleware.csrf import CsrfViewMiddleware
 from django.utils.cache import patch_vary_headers
 from rest_framework.authentication import get_authorization_header

@@ -22,7 +22,9 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#pylint: disable=invalid-name,no-name-in-module,unused-import,import-error
+#pylint:disable=invalid-name,no-name-in-module,unused-import,import-error
+#pylint:disable=unused-argument,bad-except-order,deprecated-method
+#pylint:disable=import-outside-toplevel
 from functools import WRAPPER_ASSIGNMENTS
 import inspect
 
