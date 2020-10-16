@@ -339,7 +339,7 @@ class UserEngagementAPIView(ListAPIView):
             '-last_login').prefetch_related('engagements')
 
 
-class EngagementAPIView(GenericAPIView):
+class EngagementAPIView(AppMixin, GenericAPIView):
 
     serializer_class = EngagementsSerializer
     user_model = get_user_model()
@@ -362,6 +362,7 @@ class EngagementAPIView(GenericAPIView):
 
             {
                 "active_users": 10,
+                "authentication": "enabled",
                 "engagements": []
             }
         """
@@ -395,5 +396,6 @@ class EngagementAPIView(GenericAPIView):
             last_login__gt=yest_start, last_login__lt=yest_end).count()
 
         return Response(self.get_serializer({
+            'authentication': self.app.authentication,
             'engagements': engagement_stats,
             'active_users': users}).data)

@@ -206,11 +206,10 @@ Vue.component('user-aggregate-engagement', {
         }
     },
     methods: {
-        getAndChart: function(res){
+        getAndChart: function(resp){
             var vm = this;
+            vm.item = resp;
             vm.itemLoaded = true;
-            vm.$set(vm.item, 'activeUsers', res.active_users);
-            vm.$set(vm.item, 'engagements', res.engagements);
             var el = vm.$refs.engagementChart;
 
             // nvd3 is available on djaoapp

@@ -223,6 +223,9 @@ class EngagementsSerializer(NoModelSerializer):
 
     engagements = EngagementSerializer(many=True)
     active_users = serializers.IntegerField()
+    authentication = EnumField(
+        choices=get_app_model().AUTH_TYPE, required=False,
+        help_text=_("Restricted authentication and registration"))
 
 
 class ValidationErrorSerializer(NoModelSerializer):
