@@ -1,3 +1,11 @@
+0.2.6
+
+  * fixes update to rules order after update
+  * adds authentication field to engagement api
+  * fixes `check_matched` to return a string instead of an `HttpResponse`
+
+ -- Sebastien Mirolo <smirolo@djaodjin.com>  Wed, 22 Oct 2020 07:50:00 -0700
+
 0.2.5
 
   * changes PUT to POST to generate new key

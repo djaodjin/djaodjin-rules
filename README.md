@@ -28,10 +28,10 @@ It remains to create the database and populate it with test data.
 Release Notes
 =============
 
-0.2.5
+0.2.6
 
-  * changes PUT to POST to generate new key
-  * extends Vue with configuration constants
-  * introduces compatibility with Django3
+  * fixes update to rules order after update
+  * adds authentication field to engagement api
+  * fixes `check_matched` to return a string instead of an `HttpResponse`
 
 [previous release notes](changelog)

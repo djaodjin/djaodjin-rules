@@ -1,7 +1,7 @@
 Vue.directive('sortable', {
-  inserted: function (el, binding) {
-    new Sortable(el, binding.value || {})
-  }
+  bind: function (el, binding) {
+    Sortable.create(el, binding.value || {})
+  },
 })
 
 var DATE_FORMAT = 'MMM DD, YYYY';
@@ -15,12 +15,6 @@ Vue.component('rules-table', {
     data: function(){
         return {
             url: this.$urls.rules.api_rules,
-            itemsLoaded: false,
-            items: {
-                results: [],
-                count: 0
-            },
-            params: {},
             ruleModalOpen: false,
             newRule: {
                 path: '',
@@ -31,18 +25,18 @@ Vue.component('rules-table', {
         }
     },
     methods: {
-        moved: function(e){
+        moved: function(event){
             var vm = this;
-            var oldRank = vm.items.results[e.oldIndex].rank;
-            var newRank = vm.items.results[e.newIndex].rank;
+            var oldRank = vm.items.results[event.oldIndex].rank;
+            var newRank = vm.items.results[event.newIndex].rank;
             var pos = [{oldpos: oldRank, newpos: newRank}];
             vm.reqPatch(vm.url, {"updates": pos},
             function (resp) {
-// XXX The following does not update the rules as would be expected.
-//     As a workaround, we call get() here.
-//                vm.items = resp;
-//                vm.itemsLoaded = true;
-                vm.get();
+                vm.items.results.splice(event.newIndex, 0,
+                    vm.items.results.splice(event.oldIndex, 1)[0]);
+                for( var idx = 0; idx < vm.items.results; ++idx ) {
+                    vm.items.results[idx].rank = resp.results[rank];
+                }
             });
         },
         create: function(){
