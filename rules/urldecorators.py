@@ -95,10 +95,12 @@ class DecoratorMixin(object):
                         value = view_kwargs.get(name)
                         if value is not None:
                             kwargs.update({name: value})
-                    LOGGER.debug("calling %s(user=%s, kwargs=%s) ...",
+                    LOGGER.debug(
+                        "[decorator] calling %s(user=%s, kwargs=%s) ...",
                         fail_func.__name__, request.user, kwargs)
                     redirect = fail_func(request, **kwargs)
-                    LOGGER.debug("calling %s(user=%s, kwargs=%s) => %s",
+                    LOGGER.debug(
+                        "[decorator] calling %s(user=%s, kwargs=%s) => %s",
                         fail_func.__name__, request.user, kwargs, redirect)
                     if redirect:
                         return redirect_or_denied(request, redirect,

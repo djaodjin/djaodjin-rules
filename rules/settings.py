@@ -73,6 +73,7 @@ _SETTINGS = {
     'DEFAULT_FROM_EMAIL': settings.DEFAULT_FROM_EMAIL,
     'DEFAULT_RULES': [('/', 0, False)],
     'EXTRA_MIXIN': object,
+    'LOGIN_URL': getattr(settings, 'LOGIN_URL', reverse_lazy('login')),
     'PATH_PREFIX_CALLABLE': None,
     'RULE_OPERATORS': (
         '',
@@ -89,7 +90,7 @@ def fail_authenticated(request):
     Authenticated
     """
     if not is_authenticated(request):
-        return reverse(settings.LOGIN_URL)
+        return str(LOGIN_URL)
     return False
 
 
@@ -147,6 +148,7 @@ DEFAULT_APP_ID = _SETTINGS.get('DEFAULT_APP_ID')
 DEFAULT_FROM_EMAIL = _SETTINGS.get('DEFAULT_FROM_EMAIL')
 DEFAULT_RULES = _SETTINGS.get('DEFAULT_RULES')
 EXTRA_MIXIN = _SETTINGS.get('EXTRA_MIXIN')
+LOGIN_URL = _SETTINGS.get('LOGIN_URL')
 PATH_PREFIX_CALLABLE = _SETTINGS.get('PATH_PREFIX_CALLABLE')
 RULE_OPERATORS = tuple([_load_perms_func(item)
     for item in _SETTINGS.get('RULE_OPERATORS')])

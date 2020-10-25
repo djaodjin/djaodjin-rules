@@ -100,6 +100,9 @@ def find_rule(request, app, prefixes=None):
 
 def redirect_or_denied(request, inserted_url,
                        redirect_field_name=REDIRECT_FIELD_NAME, descr=None):
+    LOGGER.debug("redirect_or_denied((%s, %s), %s %s,"\
+        " redirect_field_name=%s, descr=%s)", request.path, request.user,
+        inserted_url, inserted_url.__class__, redirect_field_name, descr)
     http_accepts = _get_accept_list(request)
     if ('text/html' in http_accepts
         and isinstance(inserted_url, six.string_types)):
@@ -163,17 +166,16 @@ def check_matched(request, app, prefixes=None,
         redirect_url = None
         if not is_authenticated(request):
             LOGGER.debug("user is not authenticated")
-            redirect_url = _insert_url(request, redirect_field_name,
-                login_url or django_settings.LOGIN_URL)
+            redirect_url = str(login_url or django_settings.LOGIN_URL)
         else:
             _, fail_func, defaults = settings.RULE_OPERATORS[matched.rule_op]
             kwargs = defaults.copy()
             if isinstance(params, dict):
                 kwargs.update(params)
-            LOGGER.debug("calling %s(user=%s, kwargs=%s) ...",
+            LOGGER.debug("[perms] calling %s(user=%s, kwargs=%s) ...",
                 fail_func.__name__, request.user, kwargs)
             redirect_url = fail_func(request, **kwargs)
-            LOGGER.debug("calling %s(user=%s, kwargs=%s) => %s",
+            LOGGER.debug("[perms] calling %s(user=%s, kwargs=%s) => %s",
                 fail_func.__name__, request.user, kwargs, redirect_url)
             if not redirect_url:
                 redirect_url = None
