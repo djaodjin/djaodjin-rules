@@ -1,3 +1,10 @@
+0.2.7
+
+  * moves all language translations server-side
+  * returns a URL as a string in all cases for `redirect_or_denied`
+
+ -- Sebastien Mirolo <smirolo@djaodjin.com>  Thu, 25 Mar 2021 10:41:00 -0700
+
 0.2.6
 
   * fixes update to rules order after update

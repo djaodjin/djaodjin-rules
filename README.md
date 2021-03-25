@@ -28,10 +28,9 @@ It remains to create the database and populate it with test data.
 Release Notes
 =============
 
-0.2.6
+0.2.7
 
-  * fixes update to rules order after update
-  * adds authentication field to engagement api
-  * fixes `check_matched` to return a string instead of an `HttpResponse`
+  * moves all language translations server-side
+  * returns a URL as a string in all cases for `redirect_or_denied`
 
 [previous release notes](changelog)
