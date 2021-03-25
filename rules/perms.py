@@ -1,4 +1,4 @@
-# Copyright (c) 2020, DjaoDjin inc.
+# Copyright (c) 2021, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,7 @@ import logging
 from django.conf import settings as django_settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.core.exceptions import PermissionDenied
+from django.contrib.auth.views import redirect_to_login
 
 from . import settings
 from .compat import is_authenticated, six
@@ -63,7 +64,6 @@ def _insert_url(request, redirect_field_name=REDIRECT_FIELD_NAME,
         path = request.get_full_path()
     # As long as *inserted_url* is not None, this call will redirect
     # anything (i.e. inserted_url), not just the login.
-    from django.contrib.auth.views import redirect_to_login
     return redirect_to_login(path, inserted_url, redirect_field_name)
 
 
@@ -148,8 +148,7 @@ def engaged(rule, request=None):
     return last_visited
 
 
-def check_matched(request, app, prefixes=None,
-                  redirect_field_name=REDIRECT_FIELD_NAME, login_url=None):
+def check_matched(request, app, prefixes=None, login_url=None):
     """
     Returns a tuple (response, forward, session) if the *request.path* can
     be matched otherwise raises a NoRuleMatch exception.
@@ -189,14 +188,12 @@ def check_matched(request, app, prefixes=None,
     raise NoRuleMatch(request.path)
 
 
-def check_permissions(request, app, redirect_field_name=REDIRECT_FIELD_NAME,
-                      login_url=None):
+def check_permissions(request, app, login_url=None):
     """
     Returns a tuple (response, forward, session) if the *request.path* can
     be matched otherwise raises a PermissionDenied exception.
     """
     try:
-        return check_matched(request, app,
-            redirect_field_name=redirect_field_name, login_url=login_url)
+        return check_matched(request, app, login_url=login_url)
     except NoRuleMatch as err:
         raise PermissionDenied(str(err))

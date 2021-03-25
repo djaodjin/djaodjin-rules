@@ -81,8 +81,8 @@ class DecoratorMixin(object):
         """
         Adds checks and decorators into the call sequence.
         """
-        for decorator in self.decorators:
-            func = decorator(func)
+        for decorator_func in self.decorators:
+            func = decorator_func(func)
 
         def decorator(view_func, redirects=[]):
             @wraps(view_func, assigned=available_attrs(view_func))

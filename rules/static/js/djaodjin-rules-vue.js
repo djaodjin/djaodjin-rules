@@ -116,7 +116,7 @@ Vue.component('rule-list', {
             url: this.$urls.rules.api_detail,
             api_generate_key_url: this.$urls.rules.api_generate_key,
             api_session_data_url: this.$urls.rules.api_session_data,
-            sessionKey: gettext('Generating...'),
+            sessionKey: null,
             testUsername: '',
             forward_session: '',
             forward_session_header: '',
@@ -131,7 +131,7 @@ Vue.component('rule-list', {
                 vm.sessionKey = resp.enc_key;
             },
             function(resp) {
-                vm.sessionKey = gettext("ERROR");
+                vm.sessionKey = null;
                 showErrorMessages(resp);
             });
         },
@@ -156,7 +156,9 @@ Vue.component('rule-list', {
             }
             vm.reqPut(vm.url, data,
             function (resp) {
-                showMessages([gettext("Update successful.")], "success");
+                if( resp.detail ) {
+                    showMessages([resp.detail], "success");
+                }
             });
         },
     },

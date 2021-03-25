@@ -1,4 +1,4 @@
-# Copyright (c) 2020, DjaoDjin inc.
+# Copyright (c) 2021, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,6 +24,7 @@
 
 from random import choice
 
+from django.utils.translation import ugettext_lazy as _
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView, RetrieveUpdateAPIView
 
@@ -143,3 +144,7 @@ class AppUpdateAPIView(AppMixin, RetrieveUpdateAPIView):
         """
         #pylint:disable=useless-super-delegation
         return super(AppUpdateAPIView, self).put(request, *args, **kwargs)
+
+    def perform_update(self, serializer):
+        serializer.save()
+        serializer.instance.detail = _("Update successful.")

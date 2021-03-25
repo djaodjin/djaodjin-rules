@@ -274,9 +274,10 @@ class Rule(models.Model):
         return "%s/%s" % (self.app, self.path)
 
     def get_allow(self):
+        rule_op = int(self.rule_op)
         if self.kwargs:
-            return '%d/%s' % (self.rule_op, self.kwargs)
-        return '%d' % self.rule_op
+            return '%d/%s' % (rule_op, self.kwargs)
+        return '%d' % rule_op
 
     def get_full_page_path(self):
         page_path = self.path

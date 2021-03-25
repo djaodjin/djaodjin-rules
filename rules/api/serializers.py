@@ -85,11 +85,15 @@ class AppSerializer(serializers.ModelSerializer):
         choices=get_app_model().AUTH_TYPE, required=False,
         help_text=_("Restricted authentication and registration"))
 
+    detail = serializers.CharField(required=False,
+        help_text=_("Describes the result of the action"\
+            " in human-readable form"))
+
     class Meta:
         model = get_app_model()
         fields = ('slug', 'entry_point', 'session_backend', 'authentication',
-            'welcome_email')
-        read_only_fields = ('slug',)
+            'welcome_email', 'detail')
+        read_only_fields = ('slug', 'detail')
 
     @staticmethod
     def validate_entry_point(value):

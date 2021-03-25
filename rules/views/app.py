@@ -63,9 +63,7 @@ class SessionProxyMixin(SessionDataMixin):
 
     def check_permissions(self, request):
         redirect_url, self.rule, self.session = base_check_permissions(
-            request, self.app,
-            redirect_field_name=self.redirect_field_name,
-            login_url=self.login_url)
+            request, self.app, login_url=self.login_url)
         response = None
         if redirect_url:
             response = redirect_or_denied(

@@ -1,6 +1,6 @@
 # Django settings for testsite project.
 
-import logging, os
+import logging, os, re, sys
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RUN_DIR = os.getcwd()
@@ -15,7 +15,6 @@ def load_config(confpath):
     '''
     # todo: consider using something like ConfigObj for this:
     # http://www.voidspace.org.uk/python/configobj.html
-    import re, sys
     if os.path.isfile(confpath):
         sys.stderr.write('config loaded from %s\n' % confpath)
         with open(confpath) as conffile:
