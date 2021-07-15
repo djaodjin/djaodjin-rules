@@ -53,9 +53,9 @@ doc: install-conf
 	$(installDirs) docs
 	cd $(srcDir) && sphinx-build -b html ./docs $(PWD)/docs
 
-vendor-assets-prerequisites: $(installTop)/.npm/djaoapp-packages
+vendor-assets-prerequisites: $(installTop)/.npm/djaodjin-rules-packages
 
-$(installTop)/.npm/djaoapp-packages: $(srcDir)/testsite/package.json
+$(installTop)/.npm/djaodjin-rules-packages: $(srcDir)/testsite/package.json
 	$(installFiles) $^ $(installTop)
 	$(NPM) install --loglevel verbose --cache $(installTop)/.npm --tmp $(installTop)/tmp --prefix $(installTop)
 	$(installDirs) -d $(srcDir)/testsite/static/vendor

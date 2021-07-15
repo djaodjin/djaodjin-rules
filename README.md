@@ -2,9 +2,9 @@ Flexible framework to check permissions to URIs and forward HTTP requests
 
 Tested with
 
-- **Python:** 2.7, **Django:** 1.11, **Django Rest Framework:** 3.9.4
-- **Python:** 3.6, **Django:** 2.2 ([LTS](https://www.djangoproject.com/download/)), **Django Rest Framework:** 3.10
-- **Python:** 3.6, **Django:** 3.0 (latest), **Django Rest Framework:** 3.10
+- **Python:** 3.6, **Django:** 2.2 ([LTS](https://www.djangoproject.com/download/)), **Django Rest Framework:** 3.12
+- **Python:** 3.6, **Django:** 3.2 (latest), **Django Rest Framework:** 3.12
+- **Python:** 2.7, **Django:** 1.11 (legacy), **Django Rest Framework:** 3.9.4
 
 This project contains bare bone templates. To see it in action, integrated into
 a full-fledged subscription-based session proxy with bootstrap-styled
