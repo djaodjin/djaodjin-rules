@@ -52,7 +52,8 @@ class RulesMiddleware(CsrfViewMiddleware):
     sent along by browser (CORS).
     """
 
-    def patch_set_cookies(self, response, domain):
+    @staticmethod
+    def patch_set_cookies(response, domain):
         if not response.cookies:
             return
         for key in response.cookies:

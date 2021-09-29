@@ -1,4 +1,4 @@
-# Copyright (c) 2020, DjaoDjin inc.
+# Copyright (c) 2021, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,14 +30,14 @@ from django.db import transaction
 from django.db.models import F, Q, Max, Count
 from django.db.utils import IntegrityError
 from django.utils.timezone import utc
-from rest_framework.generics import (GenericAPIView,
+from rest_framework.generics import (get_object_or_404, GenericAPIView,
     ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView)
 from rest_framework.response import Response
 from rest_framework import serializers
 
 from .serializers import (RuleSerializer, RuleRankUpdateSerializer,
     UserEngagementSerializer, EngagementsSerializer)
-from ..docs import swagger_auto_schema
+from ..docs import OpenAPIResponse, swagger_auto_schema
 from ..mixins import AppMixin
 from ..models import Rule, Engagement
 from ..utils import parse_tz, datetime_or_now
@@ -60,7 +60,7 @@ class RuleMixin(AppMixin):
     model = Rule
     serializer_class = RuleSerializer
     lookup_field = 'path'
-    lookup_url_kwarg = 'rule'
+    lookup_url_kwarg = 'path'
 
     def get_queryset(self):
         return self.model.objects.get_rules(self.app)
@@ -81,9 +81,10 @@ class RuleListAPIView(RuleMixin, ListCreateAPIView):
     """
     Lists access rules
 
-    Queries a page (``PAGE_SIZE`` records) of ``Rule``.
+    Returns a list of {{PAGE_SIZE}} rules incoming HTTP requests
+    are checked against.
 
-    **Tags: rbac
+    **Tags: rbac, broker, appmodel
 
     **Examples
 
@@ -103,13 +104,20 @@ class RuleListAPIView(RuleMixin, ListCreateAPIView):
                 {
                     "rank": 0,
                     "path": "/",
-                    "allow": "authenticated",
+                    "allow": 1,
                     "is_forward": true,
                     "engaged": "app"
                 }
             ]
         }
     """
+    serializer_class = RuleSerializer
+
+    def get_serializer_class(self):
+        if self.request.method.lower() in ('patch',):
+            return RuleRankUpdateSerializer
+        return super(RuleListAPIView, self).get_serializer_class()
+
     def get_queryset(self):
         return super(RuleListAPIView, self).get_queryset().order_by('rank')
 
@@ -136,30 +144,32 @@ class RuleListAPIView(RuleMixin, ListCreateAPIView):
         """
         Creates an access rule
 
-        **Tags: rbac
+        **Tags: rbac, broker, appmodel
 
         **Examples
 
         .. code-block:: http
 
-            POST /api/proxy/rules/ HTTP/1.1
+            POST /api/proxy/rules HTTP/1.1
 
         .. code-block:: json
 
             {
                 "rank": 0,
                 "path": "/",
-                "allow": "authenticated",
+                "allow": 1,
                 "is_forward": true,
                 "engaged": ""
             }
 
         responds
 
+        .. code-block:: json
+
             {
                 "rank": 0,
                 "path": "/",
-                "allow": "authenticated",
+                "allow": 1,
                 "is_forward": true,
                 "engaged": ""
             }
@@ -167,7 +177,8 @@ class RuleListAPIView(RuleMixin, ListCreateAPIView):
         self.check_path(request)
         return self.create(request, *args, **kwargs)
 
-    @swagger_auto_schema(request_body=RuleRankUpdateSerializer)
+    @swagger_auto_schema(responses={
+      201: OpenAPIResponse("Update successful", RuleSerializer(many=True))})
     def patch(self, request, *args, **kwargs):
         """
         Updates order of rules
@@ -176,13 +187,13 @@ class RuleListAPIView(RuleMixin, ListCreateAPIView):
         it will move the rule at position 3 to position 1, updating all
         rules ranks in-between.
 
-        **Tags: rbac
+        **Tags: rbac, broker, appmodel
 
         **Examples
 
         .. code-block:: http
 
-            POST /api/proxy/rules/ HTTP/1.1
+            PATCH /api/proxy/rules HTTP/1.1
 
         .. code-block:: json
 
@@ -192,6 +203,25 @@ class RuleListAPIView(RuleMixin, ListCreateAPIView):
                 "oldpos": 3
                }
             ]}
+
+        responds
+
+        .. code-block:: json
+
+            {
+                "count": 1,
+                "next": null,
+                "previous": null,
+                "results": [
+                    {
+                        "rank": 0,
+                        "path": "/",
+                        "allow": 1,
+                        "is_forward": true,
+                        "engaged": "app"
+                    }
+                ]
+            }
         """
         serializer = RuleRankUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -224,13 +254,13 @@ class RuleDetailAPIView(RuleMixin, RetrieveUpdateDestroyAPIView):
     """
     Retrieves an access rule
 
-    **Tags: rbac
+    **Tags: rbac, broker, appmodel
 
     **Examples
 
     .. code-block:: http
 
-        GET /api/proxy/rules/app/ HTTP/1.1
+        GET /api/proxy/rules/app HTTP/1.1
 
     responds
 
@@ -238,32 +268,41 @@ class RuleDetailAPIView(RuleMixin, RetrieveUpdateDestroyAPIView):
 
         {
             "rank": 0,
-            "path": "/app/",
-            "allow": "authenticated",
+            "path": "/app",
+            "allow": 1,
             "is_forward": true,
             "engaged": ""
         }
     """
     serializer_class = UpdateRuleSerializer
 
+    def get_object(self):
+        queryset = self.filter_queryset(self.get_queryset())
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+        path = self.kwargs.get(lookup_url_kwarg, "/")
+        if not path.startswith('/'):
+            path = '/' + path
+        obj = get_object_or_404(queryset, path=path)
+        return obj
+
     def put(self, request, *args, **kwargs):
         """
         Updates an access rule
 
-        **Tags: rbac
+        **Tags: rbac, broker, appmodel
 
         **Examples
 
         .. code-block:: http
 
-            PUT /api/proxy/rules/app/ HTTP/1.1
+            PUT /api/proxy/rules/app HTTP/1.1
 
         .. code-block:: json
 
             {
                 "rank": 0,
-                "path": "/app/",
-                "allow": "authenticated",
+                "path": "/app",
+                "allow": 1,
                 "is_forward": true,
                 "engaged": ""
             }
@@ -274,8 +313,8 @@ class RuleDetailAPIView(RuleMixin, RetrieveUpdateDestroyAPIView):
 
             {
                 "rank": 0,
-                "path": "/app/",
-                "allow": "authenticated",
+                "path": "/app",
+                "allow": 1,
                 "is_forward": true,
                 "engaged": ""
             }
@@ -287,13 +326,13 @@ class RuleDetailAPIView(RuleMixin, RetrieveUpdateDestroyAPIView):
         """
         Deletes an access rule
 
-        **Tags: rbac
+        **Tags: rbac, broker, appmodel
 
         **Examples
 
         .. code-block:: http
 
-            DELETE /api/proxy/rules/app/ HTTP/1.1
+            DELETE /api/proxy/rules/app HTTP/1.1
         """
         #pylint:disable=useless-super-delegation
         return super(RuleDetailAPIView, self).delete(request, *args, **kwargs)
@@ -303,7 +342,7 @@ class UserEngagementAPIView(ListAPIView):
     """
     Retrieves engagement metrics
 
-    **Tags: rbac
+    **Tags: rbac, broker, appmodel
 
     **Examples
 
@@ -348,7 +387,7 @@ class EngagementAPIView(AppMixin, GenericAPIView):
         """
         Retrieves users engagement
 
-        **Tags: rbac
+        **Tags: rbac, broker, appmodel
 
         **Examples
 

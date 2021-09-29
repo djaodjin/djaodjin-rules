@@ -2,7 +2,7 @@
     "name": "djaodjin-rules-ui",
     "version": "0.1.0",
     "dependencies": {
-        "jquery": "3.4.1",
+        "jquery": "~3.6.0",
         "moment": "2.29.1",
         "moment-timezone": "0.5.33",
         "sortablejs": "^1.13.0",

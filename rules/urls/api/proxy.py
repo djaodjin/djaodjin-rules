@@ -1,4 +1,4 @@
-# Copyright (c) 2019, DjaoDjin inc.
+# Copyright (c) 2021, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@ urlpatterns = [
         UserEngagementAPIView.as_view(), name='rules_api_user_engagement'),
     url(r'^proxy/engagement/',
         EngagementAPIView.as_view(), name='rules_api_engagement'),
-    url(r'^proxy/rules(?P<rule>\S+)$',
+    url(r'^proxy/rules/(?P<path>%s)$' % settings.PATH_RE,
         RuleDetailAPIView.as_view(), name='rules_api_rule_detail'),
     url(r'^proxy/rules',
         RuleListAPIView.as_view(), name='rules_api_rule_list'),

@@ -66,6 +66,21 @@ def get_app_model():
 " that has not been installed" % settings.RULES_APP_MODEL)
 
 
+def get_app_serializer():
+    """
+    Returns the serializer model that is active in this project.
+    """
+    from . import settings
+    try:
+        return import_string(settings.APP_SERIALIZER)
+    except ValueError:
+        raise ImproperlyConfigured(
+            "APP_SERIALIZER must be of the form 'app_label.model_name'")
+    except LookupError:
+        raise ImproperlyConfigured("APP_SERIALIZER refers to model '%s'"\
+" that has not been installed" % settings.APP_SERIALIZER)
+
+
 def get_current_app(request=None):
     """
     Returns the default app for a site.

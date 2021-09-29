@@ -1,4 +1,4 @@
-# Copyright (c) 2019, DjaoDjin inc.
+# Copyright (c) 2021, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@ class GetSessionDetailAPIView(SessionDataMixin, AppMixin, UserMixin,
     Returns a session data for a user as it will be passed to the backend
     service.
 
-    **Tags: rbac
+    **Tags: rbac, broker, appmodel
 
     **Examples
 

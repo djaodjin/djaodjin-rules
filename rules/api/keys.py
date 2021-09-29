@@ -30,8 +30,8 @@ from rest_framework.generics import GenericAPIView, RetrieveUpdateAPIView
 
 from ..docs import no_body, swagger_auto_schema
 from ..mixins import AppMixin
-from ..utils import get_app_model
-from .serializers import AppSerializer, AppKeySerializer
+from ..utils import get_app_model, get_app_serializer
+from .serializers import AppKeySerializer
 
 #pylint: disable=no-init
 
@@ -52,7 +52,7 @@ class GenerateKeyAPIView(AppMixin, GenericAPIView):
         Rotates the key used to encode the session information forwarded
         to the application entry point.
 
-        **Tags: rbac
+        **Tags: rbac, broker, appmodel
 
         **Examples
 
@@ -78,6 +78,8 @@ class GenerateKeyAPIView(AppMixin, GenericAPIView):
 
 class AppUpdateAPIView(AppMixin, RetrieveUpdateAPIView):
     """
+    Retrieves forward end-point
+
     Returns the URL endpoint to which requests passing the access rules
     are forwarded to, and the format in which the session information
     is encoded.
@@ -85,7 +87,7 @@ class AppUpdateAPIView(AppMixin, RetrieveUpdateAPIView):
     When running tests, you can retrieve the actual session information
     for a specific user through the `/proxy/sessions/{user}/` API call.
 
-    **Tags: rbac
+    **Tags: rbac, broker, appmodel
 
     **Examples
 
@@ -104,7 +106,7 @@ class AppUpdateAPIView(AppMixin, RetrieveUpdateAPIView):
         }
     """
     model = get_app_model()
-    serializer_class = AppSerializer
+    serializer_class = get_app_serializer()
 
     def get_object(self):
         return self.app
@@ -117,7 +119,7 @@ class AppUpdateAPIView(AppMixin, RetrieveUpdateAPIView):
         are forwarded to and/or the format in which the session information
         is encoded.
 
-        **Tags: rbac
+        **Tags: rbac, broker, appmodel
 
         **Examples
 

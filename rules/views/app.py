@@ -205,6 +205,9 @@ class SessionProxyMixin(SessionDataMixin):
         cookies = SimpleCookie()
         try:
             for key, value in six.iteritems(request.COOKIES):
+                LOGGER.debug("attempt to set %s=%s", key, value)
+                if key.lower() == 'samesite':
+                    continue
                 cookies[key] = value
             if (self.app.session_backend and
                 self.app.session_backend != self.app.JWT_SESSION_BACKEND):

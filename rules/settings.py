@@ -68,6 +68,7 @@ from .compat import is_authenticated, reverse_lazy, six
 _SETTINGS = {
     'ACCOUNT_MODEL': getattr(settings, 'AUTH_USER_MODEL', None),
     'ACCOUNT_URL_KWARG': None,
+    'APP_SERIALIZER': 'rules.api.serializers.AppSerializer',
     'DEFAULT_APP_CALLABLE': None,
     'DEFAULT_APP_ID': getattr(settings, 'SITE_ID', 1),
     'DEFAULT_FROM_EMAIL': settings.DEFAULT_FROM_EMAIL,
@@ -139,7 +140,7 @@ def _load_perms_func(path):
 
 
 RULES_APP_MODEL = getattr(settings, 'RULES_APP_MODEL', 'rules.App')
-
+APP_SERIALIZER = _SETTINGS.get('APP_SERIALIZER')
 AUTH_USER_MODEL = settings.AUTH_USER_MODEL
 ACCOUNT_MODEL = _SETTINGS.get('ACCOUNT_MODEL')
 ACCOUNT_URL_KWARG = _SETTINGS.get('ACCOUNT_URL_KWARG')
@@ -162,3 +163,4 @@ DB_RULE_OPERATORS = tuple([(idx, item[0])
 #     SLUG_RE = slug_re.pattern
 # but that includes ^ and $ which makes it unsuitable for use in URL patterns.
 SLUG_RE = r'[a-zA-Z0-9_\-]+'
+PATH_RE = r'([a-zA-Z0-9:\-\{\}]+/)*[a-zA-Z0-9:\-\{\}]*'

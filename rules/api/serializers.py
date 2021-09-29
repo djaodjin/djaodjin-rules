@@ -49,11 +49,11 @@ class EnumField(serializers.Field):
             val: key for key, val in six.iteritems(self.choices)}
         super(EnumField, self).__init__(*args, **kwargs)
 
-    def to_representation(self, obj):
-        if isinstance(obj, list):
-            result = [self.choices.get(item, None) for item in obj]
+    def to_representation(self, value):
+        if isinstance(value, list):
+            result = [self.choices.get(item, None) for item in value]
         else:
-            result = self.choices.get(obj, None)
+            result = self.choices.get(value, None)
         return result
 
     def to_internal_value(self, data):
@@ -66,7 +66,7 @@ class EnumField(serializers.Field):
                 raise serializers.ValidationError("This field cannot be blank.")
             raise serializers.ValidationError(
                 "'%s' is not a valid choice. Expected one of %s." % (
-                data, [choice for choice in six.itervalues(self.choices)]))
+                data, [str(choice) for choice in six.itervalues(self.choices)]))
         return result
 
 
@@ -202,13 +202,19 @@ class UsernameSerializer(NoModelSerializer):
 
 class UserEngagementSerializer(serializers.ModelSerializer):
 
+    # Implementation Note:
+    #   This serializer is used in a GET request but it will run
+    #   a `rest_framework.UniqueValidator` if left unchecked when
+    #   we run `_validate_examples` in the API doc generator.
+    username = serializers.CharField(help_text=_("Username"))
     engagements = serializers.SerializerMethodField()
 
     class Meta:
         model = get_user_model()
         fields = ('username', 'engagements')
 
-    def get_engagements(self, obj):
+    @staticmethod
+    def get_engagements(obj):
         engs = obj.engagements.all()
         user_tags = []
         for eng in engs:
