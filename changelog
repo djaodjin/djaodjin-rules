@@ -1,3 +1,11 @@
+0.2.8
+
+  * generates API documentation as expected
+  * enables to customize html/css for pagination links
+  * prepares migration to Vue3
+
+ -- Sebastien Mirolo <smirolo@djaodjin.com>  Wed, 29 Sep 2021 16:55:00 -0700
+
 0.2.7
 
   * moves all language translations server-side

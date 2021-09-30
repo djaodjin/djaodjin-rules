@@ -28,9 +28,10 @@ It remains to create the database and populate it with test data.
 Release Notes
 =============
 
-0.2.7
+0.2.8
 
-  * moves all language translations server-side
-  * returns a URL as a string in all cases for `redirect_or_denied`
+  * generates API documentation as expected
+  * enables to customize html/css for pagination links
+  * prepares migration to Vue3
 
 [previous release notes](changelog)
