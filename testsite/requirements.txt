@@ -1,4 +1,4 @@
-Django==2.2.24
+Django==2.2.27
 djangorestframework==3.12.4
 djaodjin-deployutils==0.6.0
 requests==2.24.0
