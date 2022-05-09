@@ -1,4 +1,4 @@
-# Copyright (c) 2021, DjaoDjin inc.
+# Copyright (c) 2022, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,29 +26,28 @@
 URLs for the resources API of rules.
 """
 
-from django.conf.urls import url
-
 from ... import settings
+from ...compat import re_path
 from ...api.keys import (AppUpdateAPIView, GenerateKeyAPIView)
 from ...api.rules import (RuleListAPIView, RuleDetailAPIView,
     UserEngagementAPIView, EngagementAPIView)
 from ...api.sessions import GetSessionAPIView, GetSessionDetailAPIView
 
 urlpatterns = [
-    url(r'^proxy/sessions/(?P<user>%s)/?' % settings.USERNAME_PAT,
+    re_path(r'^proxy/sessions/(?P<user>%s)/?' % settings.USERNAME_PAT,
         GetSessionDetailAPIView.as_view(), name='rules_api_session_data'),
-    url(r'^proxy/sessions/?',
+    re_path(r'^proxy/sessions/?',
         GetSessionAPIView.as_view(), name='rules_api_session_data_base'),
-    url(r'^proxy/key/',
+    re_path(r'^proxy/key/',
         GenerateKeyAPIView.as_view(), name='rules_api_generate_key'),
-    url(r'^proxy/engagement/users/',
+    re_path(r'^proxy/engagement/users/',
         UserEngagementAPIView.as_view(), name='rules_api_user_engagement'),
-    url(r'^proxy/engagement/',
+    re_path(r'^proxy/engagement/',
         EngagementAPIView.as_view(), name='rules_api_engagement'),
-    url(r'^proxy/rules/(?P<path>%s)$' % settings.PATH_RE,
+    re_path(r'^proxy/rules/(?P<path>%s)$' % settings.PATH_RE,
         RuleDetailAPIView.as_view(), name='rules_api_rule_detail'),
-    url(r'^proxy/rules',
+    re_path(r'^proxy/rules',
         RuleListAPIView.as_view(), name='rules_api_rule_list'),
-    url(r'^proxy/$',
+    re_path(r'^proxy/$',
         AppUpdateAPIView.as_view(), name='rules_api_app_detail'),
 ]

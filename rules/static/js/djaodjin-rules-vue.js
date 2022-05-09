@@ -9,8 +9,7 @@ var DATE_FORMAT = 'MMM DD, YYYY';
 
 Vue.component('rules-table', {
     mixins: [
-        itemListMixin,
-        paginationMixin,
+        itemListMixin
     ],
     data: function(){
         return {

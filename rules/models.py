@@ -1,4 +1,4 @@
-# Copyright (c) 2019, DjaoDjin inc.
+# Copyright (c) 2022, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -41,10 +41,9 @@ from django.db import models
 from django.db.models import Q
 from django.utils.timezone import utc
 from django.utils.module_loading import import_string
-from django.utils.translation import ugettext_lazy as _
 
 from . import settings
-from .compat import python_2_unicode_compatible
+from .compat import gettext_lazy as _, python_2_unicode_compatible
 
 
 LOGGER = logging.getLogger(__name__)
@@ -174,7 +173,7 @@ class BaseApp(models.Model):
         abstract = True
 
     def __str__(self):
-        return self.slug
+        return str(self.slug)
 
     @property
     def printable_name(self): # XXX Organization full_name
@@ -209,7 +208,7 @@ class BaseApp(models.Model):
 class App(BaseApp):
 
     def __str__(self):
-        return self.slug
+        return str(self.slug)
 
 
 class RuleManager(models.Manager):

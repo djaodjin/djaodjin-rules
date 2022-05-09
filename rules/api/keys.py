@@ -1,4 +1,4 @@
-# Copyright (c) 2021, DjaoDjin inc.
+# Copyright (c) 2022, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,10 +24,10 @@
 
 from random import choice
 
-from django.utils.translation import ugettext_lazy as _
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView, RetrieveUpdateAPIView
 
+from ..compat import gettext_lazy as _
 from ..docs import no_body, swagger_auto_schema
 from ..mixins import AppMixin
 from ..utils import get_app_model, get_app_serializer

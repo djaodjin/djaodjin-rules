@@ -1,4 +1,4 @@
-# Copyright (c) 2019, DjaoDjin inc.
+# Copyright (c) 2022, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -22,15 +22,16 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from django.conf.urls import include, url
 from django.views.i18n import JavaScriptCatalog
 from django.views.generic import TemplateView
+from rules.compat import include, re_path
 
 
 urlpatterns = [
-    url(r'^jsi18n/$', JavaScriptCatalog.as_view(), name='javascript-catalog'),
-    url(r'^favicon.ico$', TemplateView.as_view(template_name='index.html')),
-    url(r'^$', TemplateView.as_view(template_name='index.html')),
-    url(r'^', include('django.contrib.auth.urls')),
-    url(r'^', include('rules.urls')),
+    re_path(r'^jsi18n/$',
+        JavaScriptCatalog.as_view(), name='javascript-catalog'),
+    re_path(r'^favicon.ico$', TemplateView.as_view(template_name='index.html')),
+    re_path(r'^$', TemplateView.as_view(template_name='index.html')),
+    re_path(r'^', include('django.contrib.auth.urls')),
+    re_path(r'^', include('rules.urls')),
 ]

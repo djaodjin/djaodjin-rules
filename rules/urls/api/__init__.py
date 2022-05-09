@@ -1,4 +1,4 @@
-# Copyright (c) 2015, DjaoDjin inc.
+# Copyright (c) 2022, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,8 @@
 rules API URLs
 """
 
-from django.conf.urls import include, url
+from ...compat import include, re_path
 
 urlpatterns = [
-    url('^', include('rules.urls.api.proxy')),
+    re_path('^', include('rules.urls.api.proxy')),
 ]

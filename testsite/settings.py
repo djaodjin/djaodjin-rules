@@ -85,6 +85,8 @@ DATABASES = {
     }
 }
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 REST_FRAMEWORK = {
     'PAGE_SIZE': 25,
     'DEFAULT_PAGINATION_CLASS':

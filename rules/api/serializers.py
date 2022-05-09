@@ -1,4 +1,4 @@
-# Copyright (c) 2020, DjaoDjin inc.
+# Copyright (c) 2022, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,10 @@ from __future__ import unicode_literals
 import json
 
 from django.contrib.auth import get_user_model
-from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 
 from .. import settings
-from ..compat import six
+from ..compat import gettext_lazy as _, six
 from ..models import Rule
 from ..utils import get_app_model
 

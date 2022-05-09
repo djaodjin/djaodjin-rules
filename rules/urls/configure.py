@@ -1,4 +1,4 @@
-# Copyright (c) 2015, DjaoDjin inc.
+# Copyright (c) 2022, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -22,13 +22,12 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from django.conf.urls import url
-
+from ..compat import re_path
 from ..views.app import AppDashboardView, UserEngagementView
 
 urlpatterns = [
-    url(r'^proxy/engagement/',
+    re_path(r'^proxy/engagement/',
         UserEngagementView.as_view(), name='rules_user_engagement'),
-    url(r'^proxy/rules/',
+    re_path(r'^proxy/rules/',
         AppDashboardView.as_view(), name='rules_update'),
 ]

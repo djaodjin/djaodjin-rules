@@ -1,4 +1,4 @@
-# Copyright (c) 2015, DjaoDjin inc.
+# Copyright (c) 2022, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -22,10 +22,9 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from django.conf.urls import url
-
+from ..compat import re_path
 from ..views.app import SessionProxyView
 
 urlpatterns = [
-    url(r'^(?P<page>\S+)?', SessionProxyView.as_view(), name='rules_page'),
+    re_path(r'^(?P<page>\S+)?', SessionProxyView.as_view(), name='rules_page'),
 ]

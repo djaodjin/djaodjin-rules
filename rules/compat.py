@@ -52,12 +52,24 @@ except ImportError: # django < 1.8
 
 
 try:
+    from django.utils.translation import gettext_lazy
+except ImportError: # django < 3.0
+    from django.utils.translation import ugettext_lazy as gettext_lazy
+
+
+try:
     from django.urls import NoReverseMatch, reverse, reverse_lazy
 except ImportError: # <= Django 1.10, Python<3.6
     from django.core.urlresolvers import NoReverseMatch, reverse, reverse_lazy
 except ModuleNotFoundError: #pylint:disable=undefined-variable
     # <= Django 1.10, Python>=3.6
     from django.core.urlresolvers import NoReverseMatch, reverse, reverse_lazy
+
+
+try:
+    from django.urls import include, re_path
+except ImportError: # <= Django 2.0, Python<3.6
+    from django.conf.urls import include, url as re_path
 
 
 def get_func_arg_names(func):

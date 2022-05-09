@@ -1,4 +1,4 @@
-# Copyright (c) 2020, DjaoDjin inc.
+# Copyright (c) 2022, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,6 @@ from __future__ import unicode_literals
 
 import logging
 
-from django.conf import urls
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.core.exceptions import ImproperlyConfigured
 from functools import wraps
@@ -51,7 +50,8 @@ except ImportError: # Django<2.0
         RegexURLResolver as DjangoRegexURLResolver
     )
 
-from .compat import available_attrs, get_func_arg_names, six
+from .compat import (available_attrs, get_func_arg_names,
+    include as django_include, re_path as django_re_path, six)
 from .perms import redirect_or_denied
 
 
@@ -151,38 +151,44 @@ def import_if_string(path):
 def include(arg, namespace=None, app_name=None):
     try:
         #pylint:disable=unexpected-keyword-arg
-        return urls.include(arg, namespace=namespace, app_name=app_name)
+        return django_include(arg, namespace=namespace, app_name=app_name)
     except TypeError:
         # Django2.0 removed the `app_name` parameter and asks to pass
         # it inside a tuple (`arg`, `app_name`).
         pass
     if not isinstance(arg, tuple):
         arg = (arg, app_name)
-    return urls.include(arg, namespace=namespace)
+    return django_include(arg, namespace=namespace)
 
 
 def url(regex, view, kwargs=None, name=None, prefix='',
         redirects=None, decorators=None):
+    return re_path(regex, view, kwargs=kwargs, name=name, prefix=prefix,
+        redirects=redirects, decorators=decorators)
+
+
+def re_path(regex, view, kwargs=None, name=None, prefix='',
+        redirects=None, decorators=None):
     """
-    Extended `django.conf.urls.url` with support to check checks before
+    Extended `django.urls.re_path` with support to check checks before
     a view function is called.
 
     Example urls.py file:
 
-        from rules.urldecorators import url, include
+        from rules.urldecorators import include, re_path
 
         urlpatterns = [
-            url(r'^private/$', include('example.private.urls'),
+            re_path(r'^private/$', include('example.private.urls'),
                 redirects=[rules.fail_authenticated]),
         ]
     """
     #pylint:disable=too-many-arguments
     if not redirects and not decorators:
         try:
-            return urls.url(regex, view, kwargs, name)
+            return django_re_path(regex, view, kwargs, name)
         except TypeError:  # Django<1.10
             #pylint:disable=too-many-function-args
-            return urls.url(regex, view, kwargs, name, prefix)
+            return django_re_path(regex, view, kwargs, name, prefix)
     rule = _url(regex, view, kwargs, name, prefix)
     rule.redirects = tuple([import_if_string(check)
         for check in redirects or []])
@@ -220,7 +226,7 @@ except ImportError:
     def _url(regex, view, kwargs=None, name=None, prefix='',
              pattern=RegexURLPattern, resolver=RegexURLResolver):
         """
-        Modified `django.conf.urls.url` with allows to specify custom
+        Modified `django.urls.re_path` with allows to specify custom
         RegexURLPattern and RegexURLResolver classes.
         """
         #pylint:disable=too-many-arguments

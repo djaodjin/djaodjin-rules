@@ -1,4 +1,4 @@
-# Copyright (c) 2016, DjaoDjin inc.
+# Copyright (c) 2022, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -25,5 +25,9 @@
 from django.dispatch import Signal
 
 #pylint:disable=invalid-name
-app_created = Signal(providing_args=["app", "request"])
-app_updated = Signal(providing_args=["app", "changes", "user"])
+app_created = Signal(
+#    providing_args=["app", "request"]
+)
+app_updated = Signal(
+#    providing_args=["app", "changes", "user"]
+)
