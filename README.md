@@ -28,10 +28,8 @@ It remains to create the database and populate it with test data.
 Release Notes
 =============
 
-0.2.8
+0.2.9
 
-  * generates API documentation as expected
-  * enables to customize html/css for pagination links
-  * prepares migration to Vue3
+  * compatibles with Django 4.0
 
 [previous release notes](changelog)

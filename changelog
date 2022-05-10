@@ -1,3 +1,9 @@
+0.2.9
+
+  * compatibles with Django 4.0
+
+ -- Sebastien Mirolo <smirolo@djaodjin.com>  Mon,  9 May 2022 21:35:00 -0700
+
 0.2.8
 
   * generates API documentation as expected
