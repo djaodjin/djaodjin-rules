@@ -27,27 +27,27 @@ URLs for the resources API of rules.
 """
 
 from ... import settings
-from ...compat import re_path
+from ...compat import path, re_path
 from ...api.keys import (AppUpdateAPIView, GenerateKeyAPIView)
 from ...api.rules import (RuleListAPIView, RuleDetailAPIView,
     UserEngagementAPIView, EngagementAPIView)
 from ...api.sessions import GetSessionAPIView, GetSessionDetailAPIView
 
 urlpatterns = [
-    re_path(r'^proxy/sessions/(?P<user>%s)/?' % settings.USERNAME_PAT,
+    path('proxy/sessions/<slug:user>',
         GetSessionDetailAPIView.as_view(), name='rules_api_session_data'),
-    re_path(r'^proxy/sessions/?',
+    path('proxy/sessions',
         GetSessionAPIView.as_view(), name='rules_api_session_data_base'),
-    re_path(r'^proxy/key/',
+    path('proxy/key',
         GenerateKeyAPIView.as_view(), name='rules_api_generate_key'),
-    re_path(r'^proxy/engagement/users/',
+    path('proxy/engagement/users',
         UserEngagementAPIView.as_view(), name='rules_api_user_engagement'),
-    re_path(r'^proxy/engagement/',
+    path('proxy/engagement',
         EngagementAPIView.as_view(), name='rules_api_engagement'),
     re_path(r'^proxy/rules/(?P<path>%s)$' % settings.PATH_RE,
         RuleDetailAPIView.as_view(), name='rules_api_rule_detail'),
-    re_path(r'^proxy/rules',
+    path('proxy/rules',
         RuleListAPIView.as_view(), name='rules_api_rule_list'),
-    re_path(r'^proxy/$',
+    path('proxy',
         AppUpdateAPIView.as_view(), name='rules_api_app_detail'),
 ]

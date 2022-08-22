@@ -57,7 +57,7 @@ class GetSessionDetailAPIView(SessionDataMixin, AppMixin, UserMixin,
 
     .. code-block:: http
 
-        GET /api/proxy/sessions/xia/ HTTP/1.1
+        GET /api/proxy/sessions/xia HTTP/1.1
 
     responds
 
@@ -65,7 +65,7 @@ class GetSessionDetailAPIView(SessionDataMixin, AppMixin, UserMixin,
 
         {
           "forward_session": "{username: xia}",
-          "forward_session_header": "Authorization: XXX",
+          "forward_session_header": "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzbHVnIjoieGlhIiwicHJpbnRhYmxlX25hbWUiOiJYaWEgTGVlIiwicGljdHVyZSI6bnVsbCwiZW1haWwiOiJzbWlyb2xvKzExQGRqYW9kamluLmNvbSIsImNyZWF0ZWRfYXQiOiIyMDIxLTAxLTAxVDAwOjAwOjAwWiIsImNyZWRlbnRpYWxzIjp0cnVlLCJ1c2VybmFtZSI6InhpYSIsImZ1bGxfbmFtZSI6IlhpYSBMZWUiLCJleHAiOjE2MzI5MzM0NDJ9.ZFA3-LH3O7z7JVZdpBLz0AbnZd-zFtqiehk40Jc5uya",
           "forward_url": "https://cowork.herokuapp.com/"
         }
     """

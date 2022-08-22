@@ -348,7 +348,7 @@ class UserEngagementAPIView(ListAPIView):
 
     .. code-block:: http
 
-        GET /api/proxy/engagement/users/ HTTP/1.1
+        GET /api/proxy/engagement/users HTTP/1.1
 
     responds
 
@@ -393,7 +393,7 @@ class EngagementAPIView(AppMixin, GenericAPIView):
 
         .. code-block:: http
 
-            GET /api/proxy/engagement/ HTTP/1.1
+            GET /api/proxy/engagement HTTP/1.1
 
         responds
 

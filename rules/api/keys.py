@@ -58,7 +58,7 @@ class GenerateKeyAPIView(AppMixin, GenericAPIView):
 
         .. code-block:: http
 
-            POST /api/proxy/key/ HTTP/1.1
+            POST /api/proxy/key HTTP/1.1
 
         responds
 
@@ -93,7 +93,7 @@ class AppUpdateAPIView(AppMixin, RetrieveUpdateAPIView):
 
     .. code-block:: http
 
-        GET /api/proxy/ HTTP/1.1
+        GET /api/proxy HTTP/1.1
 
     responds
 
@@ -125,7 +125,7 @@ class AppUpdateAPIView(AppMixin, RetrieveUpdateAPIView):
 
         .. code-block:: http
 
-            PUT /api/proxy/ HTTP/1.1
+            PUT /api/proxy HTTP/1.1
 
         .. code-block:: json
 

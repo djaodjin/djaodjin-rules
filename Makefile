@@ -14,6 +14,11 @@ installFiles  ?= install -p -m 644
 NPM           ?= npm
 PYTHON        := TESTSITE_SETTINGS_LOCATION=$(CONFIG_DIR) $(binDir)/python
 
+RUN_DIR       ?= $(srcDir)
+DB_NAME       ?= $(RUN_DIR)/db.sqlite
+
+MANAGE        := TESTSITE_SETTINGS_LOCATION=$(CONFIG_DIR) RUN_DIR=$(RUN_DIR) $(PYTHON) manage.py
+
 # Django 1.7,1.8 sync tables without migrations by default while Django 1.9
 # requires a --run-syncdb argument.
 # Implementation Note: We have to wait for the config files to be installed
@@ -34,6 +39,16 @@ install-conf:: $(DESTDIR)$(CONFIG_DIR)/credentials \
 build-assets: vendor-assets-prerequisites
 
 
+clean: clean-dbs
+	[ ! -f $(srcDir)/package-lock.json ] || rm $(srcDir)/package-lock.json
+	find $(srcDir) -name '__pycache__' -exec rm -rf {} +
+	find $(srcDir) -name '*~' -exec rm -rf {} +
+
+clean-dbs:
+	[ ! -f $(DB_NAME) ] || rm $(DB_NAME)
+	[ ! -f $(srcDir)/testsite-app.log ] || rm $(srcDir)/testsite-app.log
+
+
 vendor-assets-prerequisites: $(srcDir)/testsite/package.json
 
 
@@ -49,10 +64,9 @@ $(DESTDIR)$(CONFIG_DIR)/gunicorn.conf: $(srcDir)/testsite/etc/gunicorn.conf
 		-e 's,%(LOCALSTATEDIR)s,$(LOCALSTATEDIR),' $< > $@
 
 
-initdb: install-conf
-	-rm -f $(srcDir)/db.sqlite $(srcDir)/testsite-app.log
-	cd $(srcDir) && $(PYTHON) ./manage.py migrate $(RUNSYNCDB) --noinput
-	cd $(srcDir) && $(PYTHON) ./manage.py loaddata testsite/fixtures/test_data.json
+initdb: clean-dbs install-conf
+	cd $(srcDir) && $(MANAGE) migrate $(RUNSYNCDB) --noinput
+	cd $(srcDir) && $(MANAGE) loaddata testsite/fixtures/test_data.json
 
 doc: install-conf
 	$(installDirs) docs
