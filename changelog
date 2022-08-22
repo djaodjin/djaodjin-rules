@@ -1,3 +1,9 @@
+0.3.0
+
+  * removes trailing '/' in API endpoints
+
+ -- Sebastien Mirolo <smirolo@djaodjin.com>  Mon, 22 May 2022 13:27:00 -0700
+
 0.2.9
 
   * compatibles with Django 4.0

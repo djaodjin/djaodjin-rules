@@ -28,8 +28,8 @@ It remains to create the database and populate it with test data.
 Release Notes
 =============
 
-0.2.9
+0.3.0
 
-  * compatibles with Django 4.0
+  * removes trailing '/' in API endpoints
 
 [previous release notes](changelog)
