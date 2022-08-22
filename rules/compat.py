@@ -26,7 +26,7 @@
 #pylint:disable=unused-argument,bad-except-order,deprecated-method
 #pylint:disable=import-outside-toplevel
 from functools import WRAPPER_ASSIGNMENTS
-import inspect
+import inspect, re
 
 import six
 
