@@ -301,7 +301,6 @@ class RuleDetailAPIView(RuleMixin, RetrieveUpdateDestroyAPIView):
 
             {
                 "rank": 0,
-                "path": "/app",
                 "allow": 1,
                 "is_forward": true,
                 "engaged": ""

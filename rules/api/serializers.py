@@ -206,7 +206,8 @@ class UserEngagementSerializer(serializers.ModelSerializer):
     #   a `rest_framework.UniqueValidator` if left unchecked when
     #   we run `_validate_examples` in the API doc generator.
     username = serializers.CharField(help_text=_("Username"))
-    engagements = serializers.SerializerMethodField()
+    engagements = serializers.SerializerMethodField(
+        help_text=_("Engagement tags for username"))
 
     class Meta:
         model = get_user_model()
@@ -224,14 +225,18 @@ class UserEngagementSerializer(serializers.ModelSerializer):
 
 class EngagementSerializer(NoModelSerializer):
 
-    slug = serializers.CharField()
-    count = serializers.IntegerField()
+    slug = serializers.CharField(
+        help_text=_("Engagement tag"))
+    count = serializers.IntegerField(
+        help_text=_("Number of users that have engaged with this tag"))
 
 
 class EngagementsSerializer(NoModelSerializer):
 
-    engagements = EngagementSerializer(many=True)
-    active_users = serializers.IntegerField()
+    engagements = EngagementSerializer(many=True,
+        help_text=_("Engagement tags by user"))
+    active_users = serializers.IntegerField(
+        help_text=_("Number of users that have engaged with the app"))
     authentication = EnumField(
         choices=get_app_model().AUTH_TYPE, required=False,
         help_text=_("Restricted authentication and registration"))
