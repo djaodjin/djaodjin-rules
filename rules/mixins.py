@@ -96,7 +96,7 @@ class SessionDataMixin(object):
         """
         if not hasattr(self, '_session_cookie_string'):
             self._session_cookie_string = self.get_session_cookie_string(
-                self.request, self.app, self.rule, self.session)
+                self.request, self.app, self.request.matched_rule, self.session)
         return self._session_cookie_string
 
     def get_session_cookie_string(self, request, app, rule, session):
@@ -118,7 +118,7 @@ class SessionDataMixin(object):
         """
         if not hasattr(self, '_session_jwt_string'):
             self._session_jwt_string = self.get_session_jwt_string(
-                self.request, self.app, self.rule, self.session)
+                self.request, self.app, self.request.matched_rule, self.session)
         return self._session_jwt_string
 
     def get_session_jwt_string(self, request, app, rule, session):

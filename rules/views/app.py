@@ -62,7 +62,7 @@ class SessionProxyMixin(SessionDataMixin):
     login_url = None
 
     def check_permissions(self, request):
-        redirect_url, self.rule, self.session = base_check_permissions(
+        redirect_url, request.matched_rule, self.session = base_check_permissions(
             request, self.app, login_url=self.login_url)
         response = None
         if redirect_url:
@@ -77,7 +77,7 @@ class SessionProxyMixin(SessionDataMixin):
                     last_visited = last_visited.isoformat()
                 self.request.session.update({
                     'last_visited': last_visited})
-        return (response, self.rule.is_forward if self.rule else False)
+        return (response, request.matched_rule.is_forward if request.matched_rule else False)
 
     def get_context_data(self, **kwargs):
         context = super(SessionProxyMixin, self).get_context_data(**kwargs)
@@ -107,6 +107,7 @@ class SessionProxyMixin(SessionDataMixin):
     def options(self, request, *args, **kwargs):
         # With CORS the browser strips the Authentication header yet
         # it expects a 200 OK response.
+        self.session = {}
         request.matched_rule, request.matched_params = find_rule(
             request, self.app)
         if request.matched_rule and request.matched_rule.is_forward:
