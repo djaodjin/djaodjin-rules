@@ -223,7 +223,7 @@ class RuleListAPIView(RuleMixin, ListCreateAPIView):
                 ]
             }
         """
-        serializer = RuleRankUpdateSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         with transaction.atomic():
             for move in serializer.validated_data['updates']:
@@ -247,7 +247,21 @@ class RuleListAPIView(RuleMixin, ListCreateAPIView):
                 except Rule.DoesNotExist:
                     LOGGER.info("unable to move rule with rank=%d to rank=%d",
                         oldrank, newrank)
-        return self.get(request, *args, **kwargs)
+
+        return self.list(request, *args, **kwargs)
+
+    def list(self, request, *args, **kwargs):
+        # If we were to use `get_serializer`, it would return the calling
+        # arguments serializer instead of the result serialize for PATCH calls.
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = RuleSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = RuleSerializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class RuleDetailAPIView(RuleMixin, RetrieveUpdateDestroyAPIView):

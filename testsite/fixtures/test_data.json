@@ -19,8 +19,8 @@
     "fields": {
         "app": 1,
         "rank": 2,
-        "path": "/forward/:organization/",
-        "rule_op": 1,
+        "path": "/forward/{profile}/",
+        "rule_op": 2,
         "engaged": "features",
         "is_forward": true
     },

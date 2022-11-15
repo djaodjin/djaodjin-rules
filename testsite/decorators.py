@@ -22,13 +22,22 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from django.views.generic import TemplateView
-from rules.compat import include, re_path
+from django.contrib.auth import get_user_model
 
 
-urlpatterns = [
-    re_path(r'^favicon.ico$', TemplateView.as_view(template_name='index.html')),
-    re_path(r'^$', TemplateView.as_view(template_name='index.html')),
-    re_path(r'^', include('django.contrib.auth.urls')),
-    re_path(r'^', include('rules.urls')),
-]
+def fail_direct(request, profile=None):
+    """
+    Request user is :profile
+
+    Returns False if the authenticated ``request.user.username``
+    is equal to {profile}.
+    """
+    profile_model = get_user_model()
+    if profile and not isinstance(profile, profile_model):
+        try:
+            profile = profile_model.objects.get(
+                slug=str(profile))
+        except profile_model.DoesNotExist:
+            profile = None
+    print("XXX profile=%s, request.user.username=%s" % (profile, request.user.username))
+    return not(profile and request.user.username == profile.username)

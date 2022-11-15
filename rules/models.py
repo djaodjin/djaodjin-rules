@@ -159,12 +159,14 @@ class BaseApp(models.Model):
         choices=SESSION_BACKEND_TYPE, default=COOKIE_SESSION_BACKEND,
         help_text=_("Format to encode session in the forwarded HTTP request"))
 
-    # XXX Fields used to custom signup form
-    registration = models.PositiveSmallIntegerField(
-        choices=REGISTRATION_TYPE, default=USER_REGISTRATION)
+    cors_restricted = models.BooleanField(default=True,
+        help_text=_("Set CORS headers on HTTP responses"))
 
+    # XXX Fields used to custom signup form
     authentication = models.PositiveSmallIntegerField(
         choices=AUTH_TYPE, default=AUTH_LOGIN_ONLY)
+    registration = models.PositiveSmallIntegerField(
+        choices=REGISTRATION_TYPE, default=USER_REGISTRATION)
     welcome_email = models.BooleanField(default=True,
         help_text=_("Send a welcome e-mail to newly registered users"))
 

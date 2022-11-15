@@ -242,3 +242,13 @@ if logging.getLogger('gunicorn.error').handlers:
 # Session settings
 # ----------------
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
+
+# Rules application
+# -----------------
+RULES = {
+    'RULE_OPERATORS': (
+        '',                                            # 0
+        'rules.settings.fail_authenticated',           # 1
+        'testsite.decorators.fail_direct',             # 2
+    ),
+}

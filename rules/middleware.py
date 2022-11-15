@@ -1,4 +1,4 @@
-# Copyright (c) 2020, DjaoDjin inc.
+# Copyright (c) 2022, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -121,7 +121,12 @@ class RulesMiddleware(CsrfViewMiddleware):
         #pylint:disable=no-self-use
 
         # Sets the CORS headers as appropriate.
-        origin = request.META.get('HTTP_ORIGIN')
+        app = get_current_app(request)
+        if app.cors_restricted:
+            origin = request.META.get('HTTP_ORIGIN')
+        else:
+            origin = None
+
         if not origin:
             return super(RulesMiddleware, self).process_response(
                 request, response)

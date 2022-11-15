@@ -91,7 +91,7 @@ class AppSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_app_model()
         fields = ('slug', 'entry_point', 'session_backend', 'authentication',
-            'welcome_email', 'detail')
+            'welcome_email', 'cors_restricted', 'detail')
         read_only_fields = ('slug', 'detail')
 
     @staticmethod

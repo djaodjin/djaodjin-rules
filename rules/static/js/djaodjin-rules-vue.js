@@ -1,9 +1,3 @@
-Vue.directive('sortable', {
-  bind: function (el, binding) {
-    Sortable.create(el, binding.value || {})
-  },
-})
-
 var DATE_FORMAT = 'MMM DD, YYYY';
 
 
@@ -37,6 +31,16 @@ Vue.component('rules-table', {
                     vm.items.results[idx].rank = resp.results[rank];
                 }
             });
+        },
+        moveDown: function(rule, index) {
+            if( index < (this.items.results.length - 1) ) {
+                this.moved({oldIndex: index, newIndex: index + 1});
+            }
+        },
+        moveUp: function(rule, index) {
+            if( index > 0 ) {
+                this.moved({oldIndex: index, newIndex: index - 1});
+            }
         },
         create: function(){
             var vm = this;
@@ -146,9 +150,14 @@ Vue.component('rule-list', {
         update: function(submitEntryPoint) {
             var vm = this;
             var data = {
-                authentication: vm.$refs.authentication.value,
-                welcome_email: vm.$refs.welcomeEmail.checked,
+                cors_restricted: vm.$refs.corsRestricted.checked,
                 session_backend: vm.$refs.sessionBackend.value,
+            }
+            if( vm.$refs.authentication ) {
+                data['authentication'] = vm.$refs.authentication.value;
+            }
+            if( vm.$refs.welcomeEmail ) {
+                data['welcome_email'] = vm.$refs.welcomeEmail.checked;
             }
             if( submitEntryPoint ) {
                 data['entry_point'] = vm.$refs.entryPoint.value;

@@ -81,7 +81,6 @@ $(installTop)/.npm/djaodjin-rules-packages: $(srcDir)/testsite/package.json
 	$(installFiles) $(installTop)/node_modules/jquery/dist/jquery.js $(srcDir)/testsite/static/vendor
 	$(installFiles) $(installTop)/node_modules/moment/moment.js $(srcDir)/testsite/static/vendor
 	$(installFiles) $(installTop)/node_modules/moment-timezone/builds/moment-timezone-with-data.js $(srcDir)/testsite/static/vendor
-	$(installFiles) $(installTop)/node_modules/sortablejs/Sortable.js $(srcDir)/testsite/static/vendor
 	$(installFiles) $(installTop)/node_modules/vue/dist/vue.js $(srcDir)/testsite/static/vendor
 	$(installFiles) $(installTop)/node_modules/vue-infinite-loading/dist/vue-infinite-loading.js $(srcDir)/testsite/static/vendor
 	touch $@
