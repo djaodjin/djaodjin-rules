@@ -241,9 +241,6 @@ class Rule(models.Model):
     Rule to check in order to forward request, serve it locally
     and editing the content coming back through the proxy.
     """
-    #pylint:disable=no-init
-
-    HOME = 'index'
     ANY = 0
 
     objects = RuleManager()
@@ -256,7 +253,7 @@ class Rule(models.Model):
     path = models.CharField(max_length=255,
         help_text=_("OpenAPI path against which requests are matched"))
     rule_op = models.PositiveSmallIntegerField(
-        choices=settings.DB_RULE_OPERATORS, default=ANY,
+        choices=settings.DB_RULE_OPERATORS, default=settings.DEFAULT_RULE_OP,
         help_text=_("Method applied to grant or deny access"))
     kwargs = models.CharField(max_length=255, default="",
         help_text=_("Arguments to pass to the method to grant or deny access"))
