@@ -65,12 +65,22 @@ class RuleMixin(AppMixin):
     def get_queryset(self):
         return self.model.objects.get_rules(self.app)
 
+    def insert_space(self, queryset, rank=1):
+        queryset.filter(rank__gte=rank).update(rank=F('rank') + 1, moved=True)
+        queryset.filter(moved=True).update(moved=False)
+
+
     def perform_create(self, serializer):
-        # We don't compact ranks after DELETE
-        last_rank = self.get_queryset().aggregate(
-            Max('rank')).get('rank__max', 0)
-        # If the key exists and return None the default value is not applied
-        last_rank = last_rank + 1 if last_rank is not None else 1
+        # XXX adds rule at the top or bottom (False and True respectively).
+        last_rank = 1
+        if False:
+            # We don't compact ranks after DELETE
+            last_rank_qs = self.get_queryset().aggregate(Max('rank')).get(
+                'rank__max', 0)
+            # If the key exists and return None the default value is not applied
+            if last_rank_qs is not None:
+                last_rank = last_rank_qs + 1
+        self.insert_space(self.get_queryset(), rank=last_rank)
         serializer.save(app=self.app, rank=last_rank)
 
     def perform_update(self, serializer):
