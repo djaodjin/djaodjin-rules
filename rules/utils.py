@@ -1,4 +1,4 @@
-# Copyright (c) 2017, DjaoDjin inc.
+# Copyright (c) 2022, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,8 @@ from django.utils.timezone import utc
 from pytz import timezone, UnknownTimeZoneError
 from pytz.tzinfo import DstTzInfo
 
+from .compat import six
+
 
 LOGGER = logging.getLogger(__name__)
 
@@ -49,6 +51,23 @@ def datetime_or_now(dtime_at=None):
     if dtime_at.tzinfo is None:
         dtime_at = dtime_at.replace(tzinfo=utc)
     return dtime_at
+
+
+def update_context_urls(context, urls):
+    if 'urls' in context:
+        for key, val in six.iteritems(urls):
+            if key in context['urls']:
+                if isinstance(val, dict):
+                    context['urls'][key].update(val)
+                else:
+                    # Because organization_create url is added in this mixin
+                    # and in ``OrganizationRedirectView``.
+                    context['urls'][key] = val
+            else:
+                context['urls'].update({key: val})
+    else:
+        context.update({'urls': urls})
+    return context
 
 
 def get_app_model():

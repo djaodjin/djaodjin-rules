@@ -22,12 +22,15 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from ..compat import re_path
+from ..compat import path
 from ..views.app import AppDashboardView, UserEngagementView
+from ..views.download import UserEngagementCSVView
 
 urlpatterns = [
-    re_path(r'^proxy/engagement/',
+    path('proxy/engagement/download/',
+        UserEngagementCSVView.as_view(), name='rules_user_engagement_download'),
+    path('proxy/engagement/',
         UserEngagementView.as_view(), name='rules_user_engagement'),
-    re_path(r'^proxy/rules/',
+    path('proxy/rules/',
         AppDashboardView.as_view(), name='rules_update'),
 ]

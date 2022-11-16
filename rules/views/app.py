@@ -1,4 +1,4 @@
-# Copyright (c) 2020, DjaoDjin inc.
+# Copyright (c) 2022, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,11 +35,11 @@ from requests.exceptions import RequestException
 from deployutils.apps.django.settings import SESSION_COOKIE_NAME
 
 from .. import settings
-from ..compat import get_model, http_cookies, six
+from ..compat import get_model, http_cookies, reverse, six
 from ..mixins import AppMixin, SessionDataMixin
 from ..perms import (check_permissions as base_check_permissions,
     find_rule, redirect_or_denied)
-from ..utils import JSONEncoder, get_app_model
+from ..utils import JSONEncoder, get_app_model, update_context_urls
 
 
 LOGGER = logging.getLogger(__name__)
@@ -435,3 +435,12 @@ class AppDashboardView(AppMixin, UpdateView):
 class UserEngagementView(AppMixin, TemplateView):
 
     template_name = 'rules/engagement.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(UserEngagementView, self).get_context_data(**kwargs)
+        update_context_urls(context, {
+            'rules': {
+               'user_engagement_download': reverse(
+                   'rules_user_engagement_download')
+        }})
+        return context

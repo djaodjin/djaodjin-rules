@@ -361,7 +361,16 @@ class RuleDetailAPIView(RuleMixin, RetrieveUpdateDestroyAPIView):
         return super(RuleDetailAPIView, self).delete(request, *args, **kwargs)
 
 
-class UserEngagementAPIView(ListAPIView):
+class UserEngagementMixin(object):
+
+    user_model = get_user_model()
+
+    def get_queryset(self):
+        return self.user_model.objects.order_by(
+            '-last_login').prefetch_related('engagements')
+
+
+class UserEngagementAPIView(UserEngagementMixin, ListAPIView):
     """
     Retrieves engagement metrics
 
@@ -394,11 +403,7 @@ class UserEngagementAPIView(ListAPIView):
         }
     """
     serializer_class = UserEngagementSerializer
-    user_model = get_user_model()
 
-    def get_queryset(self):
-        return self.user_model.objects.order_by(
-            '-last_login').prefetch_related('engagements')
 
 
 class EngagementAPIView(AppMixin, GenericAPIView):
