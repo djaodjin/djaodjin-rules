@@ -41,7 +41,7 @@ class AppMixinBase(object):
                 self._app = get_object_or_404(get_app_model(),
                     slug=self.kwargs.get(self.app_url_kwarg))
             else:
-                self._app = get_current_app()
+                self._app = get_current_app(self.request)
         return self._app
 
     def get_context_data(self, **kwargs):

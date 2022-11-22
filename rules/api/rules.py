@@ -42,7 +42,6 @@ from ..mixins import AppMixin
 from ..models import Rule, Engagement
 from ..utils import parse_tz, datetime_or_now
 
-#pylint: disable=no-init
 
 LOGGER = logging.getLogger(__name__)
 

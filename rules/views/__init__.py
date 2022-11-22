@@ -34,6 +34,6 @@ class AppRedirectView(RedirectView):
     slug_url_kwarg = 'app'
 
     def get(self, request, *args, **kwargs):
-        app = get_current_app()
+        app = get_current_app(request)
         kwargs.update({self.slug_url_kwarg: app})
         return super(AppRedirectView, self).get(request, *args, **kwargs)

@@ -44,7 +44,7 @@ def fail_rule(request, app=None):
     Custom rule
     """
     if not app:
-        app = get_current_app()
+        app = get_current_app(request)
     try:
         redirect, _, _ = check_matched(request, app)
     except NoRuleMatch as _:

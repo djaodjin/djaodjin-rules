@@ -35,9 +35,7 @@ def fail_direct(request, profile=None):
     profile_model = get_user_model()
     if profile and not isinstance(profile, profile_model):
         try:
-            profile = profile_model.objects.get(
-                slug=str(profile))
+            profile = profile_model.objects.get(username=str(profile))
         except profile_model.DoesNotExist:
             profile = None
-    print("XXX profile=%s, request.user.username=%s" % (profile, request.user.username))
     return not(profile and request.user.username == profile.username)

@@ -29,16 +29,13 @@ CSV download view basics.
 from __future__ import unicode_literals
 
 import csv
-from decimal import Decimal
 from io import BytesIO, StringIO
 
 from django.http import HttpResponse
-from django.template.defaultfilters import slugify
 from django.views.generic import View
-from rest_framework.generics import get_object_or_404
 from rest_framework.request import Request
 
-from ..compat import reverse, six
+from ..compat import six
 from ..mixins import AppMixin
 from ..models import Rule
 from ..utils import datetime_or_now, get_current_app
@@ -59,11 +56,6 @@ class CSVDownloadView(View):
         if six.PY2:
             return text.encode('utf-8')
         return text
-
-    def encode_descr(self, transaction):
-        return self.encode(('"%s"' % as_html_description(
-            transaction, active_links=False).replace(
-            '\\', '\\\\').replace('"', '\"')))
 
     @staticmethod
     def decorate_queryset(queryset):
@@ -134,5 +126,3 @@ class UserEngagementCSVView(UserEngagementMixin, AppMixin, CSVDownloadView):
         for head in self.headings[1:]: # first column is user
             row += [by_tags.get(head, "")]
         return row
-
-

@@ -33,7 +33,6 @@ from ..compat import gettext_lazy as _, six
 from ..models import Rule
 from ..utils import get_app_model
 
-#pylint: disable=no-init
 
 class EnumField(serializers.Field):
     """

@@ -168,9 +168,12 @@ def check_matched(request, app, prefixes=None, login_url=None):
             redirect_url = str(login_url or django_settings.LOGIN_URL)
         else:
             _, fail_func, defaults = settings.RULE_OPERATORS[matched.rule_op]
-            kwargs = defaults.copy()
-            if isinstance(params, dict):
-                kwargs.update(params)
+            kwargs = {}
+            for key in defaults:
+                if params and key in params:
+                    kwargs.update({key: params[key]})
+                else:
+                    kwargs.update({key: defaults[key]})
             LOGGER.debug("[perms] calling %s(user=%s, kwargs=%s) ...",
                 fail_func.__name__, request.user, kwargs)
             redirect_url = fail_func(request, **kwargs)

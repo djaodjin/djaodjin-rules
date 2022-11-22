@@ -36,7 +36,6 @@ does not contain the appropriate settings.
 ACCOUNT_MODEL             AUTH_USER_MODEL         Model used in a multi-party implementation.
 ACCOUNT_URL_KWARG         None                    Variable name used in url definition to select an account.
 DEFAULT_APP_CALLABLE      None                    Function to get the default app.
-DEFAULT_APP_ID            SITE_ID                 Primary key to get the default app.
 DEFAULT_RULES             ('/', 0, False)         Rules used when creating a new account
 EXTRA_MIXIN               object                  Mixin to derive from
 PATH_PREFIX_CALLABLE      None                    Function to retrive the path prefix
@@ -70,7 +69,6 @@ _SETTINGS = {
     'ACCOUNT_URL_KWARG': None,
     'APP_SERIALIZER': 'rules.api.serializers.AppSerializer',
     'DEFAULT_APP_CALLABLE': None,
-    'DEFAULT_APP_ID': getattr(settings, 'SITE_ID', 1),
     'DEFAULT_FROM_EMAIL': settings.DEFAULT_FROM_EMAIL,
     'DEFAULT_RULE_OP': 1,
     'DEFAULT_RULES': [('/', 0, False)],
@@ -146,7 +144,6 @@ AUTH_USER_MODEL = settings.AUTH_USER_MODEL
 ACCOUNT_MODEL = _SETTINGS.get('ACCOUNT_MODEL')
 ACCOUNT_URL_KWARG = _SETTINGS.get('ACCOUNT_URL_KWARG')
 DEFAULT_APP_CALLABLE = _SETTINGS.get('DEFAULT_APP_CALLABLE')
-DEFAULT_APP_ID = _SETTINGS.get('DEFAULT_APP_ID')
 DEFAULT_FROM_EMAIL = _SETTINGS.get('DEFAULT_FROM_EMAIL')
 DEFAULT_RULE_OP = _SETTINGS.get('DEFAULT_RULE_OP')
 DEFAULT_RULES = _SETTINGS.get('DEFAULT_RULES')

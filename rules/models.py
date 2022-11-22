@@ -150,6 +150,8 @@ class BaseApp(models.Model):
         null=True, on_delete=models.CASCADE)
 
     # Fields for proxy features
+    path_prefix = models.CharField(max_length=26, null=True,
+        help_text=_("Path prefix for all rules in the app"))
     entry_point = models.URLField(max_length=100, null=True,
         help_text=_("Entry point to which requests will be redirected to"))
     enc_key = models.TextField(max_length=480, default="",
@@ -193,7 +195,6 @@ class BaseApp(models.Model):
         return changes
 
     def get_connection(self):
-        #pylint:disable=no-self-use
         kwargs = {}
         return get_connection_base(**kwargs)
 
@@ -202,7 +203,6 @@ class BaseApp(models.Model):
             self.PERSONAL_REGISTRATION, self.IMPLICIT_REGISTRATION)
 
     def get_from_email(self):
-        #pylint:disable=no-self-use
         return settings.DEFAULT_FROM_EMAIL
 
 
@@ -307,16 +307,17 @@ class Rule(models.Model):
         pat_parts = [part for part in page_path.split('/') if part]
         if len(request_path_parts) >= len(pat_parts):
             # Only worth matching if the URL is longer than the pattern.
-            try:
-                params = json.loads(self.kwargs)
-            except ValueError:
-                params = {}
+            params = {}
             for part, pat_part in izip(request_path_parts, pat_parts):
-                look = re.match(r'^:(\S+)|\{\S+\}$', pat_part)
+                look = re.match(r'^:(\S+)|\{(\S+)\}$', pat_part)
                 if look:
-                    slug = look.group(1)
-                    if slug in params:
-                        params.update({slug: part})
+                    slug = look.group(1) if look.group(1) else look.group(2)
+                    params.update({slug: part})
                 elif part != pat_part:
                     return None
+            # overrides parameters read from the URL path
+            try:
+                params.update(json.loads(self.kwargs))
+            except ValueError:
+                pass
         return params

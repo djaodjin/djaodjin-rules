@@ -26,6 +26,7 @@ import datetime, json, logging
 
 from django.apps import apps as django_apps
 from django.core.exceptions import ImproperlyConfigured
+from django.db.models import Q
 from django.utils.module_loading import import_string
 from django.utils.timezone import utc
 from pytz import timezone, UnknownTimeZoneError
@@ -109,7 +110,12 @@ def get_current_app(request=None):
         app = import_string(settings.DEFAULT_APP_CALLABLE)(request=request)
         LOGGER.debug("rules.get_current_app: '%s'", app)
     else:
-        app = get_app_model().objects.get(pk=settings.DEFAULT_APP_ID)
+        flt = Q(path_prefix__isnull=True)
+        request_path_parts = request.path.lstrip('/').split('/')
+        if request_path_parts:
+            flt = flt | Q(path_prefix='/%s' % request_path_parts[0])
+        app = get_app_model().objects.filter(flt).order_by(
+                '-path_prefix', '-pk').first()
     return app
 
 

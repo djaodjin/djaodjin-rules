@@ -36,10 +36,10 @@ for Django 2.0.
 from __future__ import unicode_literals
 
 import logging
+from functools import wraps
 
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.core.exceptions import ImproperlyConfigured
-from functools import wraps
 
 try:
     from django.urls.resolvers import URLPattern as DjangoRegexURLPattern

@@ -33,8 +33,6 @@ from ..mixins import AppMixin
 from ..utils import get_app_model, get_app_serializer
 from .serializers import AppKeySerializer
 
-#pylint: disable=no-init
-
 
 class GenerateKeyAPIView(AppMixin, GenericAPIView):
     """

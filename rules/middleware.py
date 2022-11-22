@@ -59,8 +59,8 @@ class RulesMiddleware(CsrfViewMiddleware):
         for key in response.cookies:
             response.cookies[key]['domain'] = domain
 
-    def process_view(self, request, view_func, view_args, view_kwargs):
-        view_class = getattr(view_func, 'view_class', None)
+    def process_view(self, request, callback, callback_args, callback_kwargs):
+        view_class = getattr(callback, 'view_class', None)
         if hasattr(view_class, 'conditional_forward'):
             app = get_current_app(request)
             request.matched_rule, request.matched_params = find_rule(
@@ -88,8 +88,8 @@ class RulesMiddleware(CsrfViewMiddleware):
         if request.method.lower() == 'options':
             if view_class and isinstance(view_class, APIView):
                 # Duplicates what Django does before calling `dispatch`
-                view = view_class(**view_func.initkwargs)
-                view.setup(request, *view_args, **view_kwargs)
+                view = view_class(**callback.initkwargs)
+                view.setup(request, *callback_args, **callback_kwargs)
                 if not hasattr(view, 'request'):
                     raise AttributeError("%s instance has no 'request'"
                         " attribute. Did you override setup() and forget"
@@ -99,27 +99,27 @@ class RulesMiddleware(CsrfViewMiddleware):
                     # `options` minus testing for permissions since we won't
                     # have a user (no Authorization header).
                     request = view.initialize_request(
-                        request, *view_args, **view_kwargs)
+                        request, *callback_args, **callback_kwargs)
                     view.headers = view.default_response_headers
-                    view.format_kwarg = view.get_format_suffix(**view_kwargs)
+                    view.format_kwarg = view.get_format_suffix(
+                        **callback_kwargs)
                     request.accepted_renderer, request.accepted_media_type = \
                         view.perform_content_negotiation(request)
                     version, scheme = view.determine_version(
-                        request, *view_args, **view_kwargs)
+                        request, *callback_args, **callback_kwargs)
                     request.version, request.versioning_scheme = version, scheme
-                    response = view.options(request, *view_args, **view_kwargs)
+                    response = view.options(
+                        request, *callback_args, **callback_kwargs)
                     view.response = view.finalize_response(
-                        request, response, *view_args, **view_kwargs)
+                        request, response, *callback_args, **callback_kwargs)
                     return view.response
 
-                return view.options(request, *view_args, **view_kwargs)
+                return view.options(request, *callback_args, **callback_kwargs)
 
         return super(RulesMiddleware, self).process_view(
-            request, view_func, view_args, view_kwargs)
+            request, callback, callback_args, callback_kwargs)
 
     def process_response(self, request, response):
-        #pylint:disable=no-self-use
-
         # Sets the CORS headers as appropriate.
         app = get_current_app(request)
         if app.cors_restricted:
