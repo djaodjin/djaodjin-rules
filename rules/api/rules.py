@@ -79,7 +79,11 @@ class RuleMixin(AppMixin):
             # If the key exists and return None the default value is not applied
             if last_rank_qs is not None:
                 last_rank = last_rank_qs + 1
-        self.insert_space(self.get_queryset(), rank=last_rank)
+        if not self.get_queryset().filter(
+            path=serializer.validated_data['path']).exists():
+            # If the path exists, we do not want to create a hole
+            # when we are guarenteed to fail on insert.
+            self.insert_space(self.get_queryset(), rank=last_rank)
         serializer.save(app=self.app, rank=last_rank)
 
     def perform_update(self, serializer):
@@ -358,6 +362,16 @@ class RuleDetailAPIView(RuleMixin, RetrieveUpdateDestroyAPIView):
         """
         #pylint:disable=useless-super-delegation
         return super(RuleDetailAPIView, self).delete(request, *args, **kwargs)
+
+    def perform_destroy(self, instance):
+        rank = instance.rank
+        with transaction.atomic():
+            instance.delete()
+            # compacts ranks
+            queryset = self.get_queryset()
+            queryset.filter(rank__gte=rank).update(
+                rank=F('rank') - 1, moved=True)
+            queryset.filter(moved=True).update(moved=False)
 
 
 class UserEngagementMixin(object):
