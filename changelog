@@ -1,3 +1,14 @@
+0.4.0
+
+  * adds toggle to enable/disable CORS checks
+  * selects rules.App based on path_prefix
+  * supports forwarded "OPTIONS" HTTP requests
+  * defaults new rule to authenticated and at the top of the list
+  * uses up/down arrows in rules dashboard
+  * downloads user engagement
+
+ -- Sebastien Mirolo <smirolo@djaodjin.com>  Sat, 26 May 2022 17:12:00 -0700
+
 0.3.0
 
   * removes trailing '/' in API endpoints
