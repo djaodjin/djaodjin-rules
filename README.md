@@ -33,7 +33,7 @@ Run the testsite
 Release Notes
 =============
 
-0.4.0
+0.4.1
 
   * adds toggle to enable/disable CORS checks
   * selects rules.App based on path_prefix

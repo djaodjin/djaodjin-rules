@@ -126,6 +126,10 @@ class RulesMiddleware(CsrfViewMiddleware):
             origin = request.META.get('HTTP_ORIGIN')
         else:
             origin = None
+            response[ACCESS_CONTROL_ALLOW_HEADERS] = \
+                ACCESS_CONTROL_ALLOW_HEADERS_ALLOWED
+            response[ACCESS_CONTROL_ALLOW_ORIGIN] = "*"
+            response[ACCESS_CONTROL_ALLOW_CREDENTIALS] = "true"
 
         if not origin:
             return super(RulesMiddleware, self).process_response(

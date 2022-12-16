@@ -1,3 +1,9 @@
+0.4.1
+
+  * accepts all origins when CORS is disabled
+
+ -- Sebastien Mirolo <smirolo@djaodjin.com>  Fri, 15 May 2022 20:56:00 -0700
+
 0.4.0
 
   * adds toggle to enable/disable CORS checks
@@ -7,7 +13,7 @@
   * uses up/down arrows in rules dashboard
   * downloads user engagement
 
- -- Sebastien Mirolo <smirolo@djaodjin.com>  Sat, 26 May 2022 17:12:00 -0700
+ -- Sebastien Mirolo <smirolo@djaodjin.com>  Sat, 26 Nov 2022 17:12:00 -0700
 
 0.3.0
 
