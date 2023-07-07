@@ -26,8 +26,7 @@ MANAGE        := TESTSITE_SETTINGS_LOCATION=$(CONFIG_DIR) RUN_DIR=$(RUN_DIR) $(P
 RUNSYNCDB     = $(if $(findstring --run-syncdb,$(shell cd $(srcDir) && $(PYTHON) manage.py migrate --help 2>/dev/null)),--run-syncdb,)
 
 install::
-	cd $(srcDir) && $(PYTHON) ./setup.py --quiet \
-		build -b $(CURDIR)/build install
+	cd $(srcDir) && $(PIP) install .
 
 
 install-conf:: $(DESTDIR)$(CONFIG_DIR)/credentials \
@@ -82,5 +81,4 @@ $(installTop)/.npm/djaodjin-rules-packages: $(srcDir)/testsite/package.json
 	$(installFiles) $(installTop)/node_modules/moment/moment.js $(srcDir)/testsite/static/vendor
 	$(installFiles) $(installTop)/node_modules/moment-timezone/builds/moment-timezone-with-data.js $(srcDir)/testsite/static/vendor
 	$(installFiles) $(installTop)/node_modules/vue/dist/vue.js $(srcDir)/testsite/static/vendor
-	$(installFiles) $(installTop)/node_modules/vue-infinite-loading/dist/vue-infinite-loading.js $(srcDir)/testsite/static/vendor
 	touch $@
