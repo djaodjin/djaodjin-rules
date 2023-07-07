@@ -83,9 +83,10 @@ initdb: clean-dbs
 	cd $(srcDir) && $(MANAGE) migrate $(RUNSYNCDB) --noinput
 	cd $(srcDir) && $(MANAGE) loaddata testsite/fixtures/test_data.json
 
-doc: install-conf
-	$(installDirs) docs
-	cd $(srcDir) && sphinx-build -b html ./docs $(PWD)/docs
+doc:
+	$(installDirs) build/docs
+	cd $(srcDir) && sphinx-build -b html ./docs $(PWD)/build/docs
+
 
 vendor-assets-prerequisites: $(installTop)/.npm/djaodjin-rules-packages
 
