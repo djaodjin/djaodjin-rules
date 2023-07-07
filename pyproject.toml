@@ -1,0 +1,50 @@
+# This pyproject.toml seems to work to build a new package
+# when `setuptools==67.6.1` is installed.
+[project]
+name = "djaodjin-rules"
+dynamic = ["version"]
+description = "Flexible framework to check permissions to URIs and forward HTTP requests"
+readme = "README.md"
+requires-python = ">=3.7"
+license =  {text = "BSD-2-Clause"}
+keywords = ["django", "security", "rules", "proxy", "rbac"]
+authors = [
+  {name = "The DjaoDjin Team", email = "help@djaodjin.com"}
+]
+maintainers = [
+  {name = "The DjaoDjin Team", email = "help@djaodjin.com"}
+]
+classifiers = [
+  "Framework :: Django",
+  "Environment :: Web Environment",
+  "Programming Language :: Python",
+  "License :: OSI Approved :: BSD License"
+]
+dependencies = [
+  "Django>=1.11",
+  "djangorestframework>=3.9.4",
+  "djaodjin-deployutils>=0.10.3",
+  "requests>=2.22.0",
+  "python-dateutil>=2.8.0"
+]
+
+[project.urls]
+repository = "https://github.com/djaodjin/djaodjin-rules"
+documentation = "https://djaodjin-rules.readthedocs.io/"
+changelog = "https://github.com/djaodjin/djaodjin-rules/changelog"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["rules*"]
+
+[tool.setuptools.package-data]
+rules = [
+  'static/js/*.js',
+  'templates/rules/*.html'
+]
+
+[tool.setuptools.dynamic]
+version = {attr = "rules.__version__"}

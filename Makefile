@@ -13,6 +13,8 @@ installDirs   ?= install -d
 installFiles  ?= install -p -m 644
 NPM           ?= npm
 PYTHON        := TESTSITE_SETTINGS_LOCATION=$(CONFIG_DIR) $(binDir)/python
+PIP           := $(binDir)/pip
+TWINE         := $(binDir)/twine
 
 RUN_DIR       ?= $(srcDir)
 DB_NAME       ?= $(RUN_DIR)/db.sqlite
@@ -34,6 +36,11 @@ install-conf:: $(DESTDIR)$(CONFIG_DIR)/credentials \
 	install -d $(DESTDIR)$(LOCALSTATEDIR)/db
 	install -d $(DESTDIR)$(LOCALSTATEDIR)/run
 	install -d $(DESTDIR)$(LOCALSTATEDIR)/log/gunicorn
+
+dist:
+	$(PYTHON) -m build
+	$(TWINE) check dist/*
+	$(TWINE) upload dist/*
 
 build-assets: vendor-assets-prerequisites
 
