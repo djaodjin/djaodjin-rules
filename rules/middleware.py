@@ -86,7 +86,7 @@ class RulesMiddleware(CsrfViewMiddleware):
         # CORS will first send an OPTIONS request with no authorization header
         # and expect to get a 200 OK response.
         if request.method.lower() == 'options':
-            if view_class and isinstance(view_class, APIView):
+            if view_class and issubclass(view_class, APIView):
                 # Duplicates what Django does before calling `dispatch`
                 view = view_class(**callback.initkwargs)
                 view.setup(request, *callback_args, **callback_kwargs)
