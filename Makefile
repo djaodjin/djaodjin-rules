@@ -25,7 +25,8 @@ MANAGE        := TESTSITE_SETTINGS_LOCATION=$(CONFIG_DIR) RUN_DIR=$(RUN_DIR) $(P
 # requires a --run-syncdb argument.
 # Implementation Note: We have to wait for the config files to be installed
 # before running the manage.py command (else missing SECRECT_KEY).
-RUNSYNCDB     = $(if $(findstring --run-syncdb,$(shell cd $(srcDir) && $(PYTHON) manage.py migrate --help 2>/dev/null)),--run-syncdb,)
+RUNSYNCDB     = $(if $(findstring --run-syncdb,$(shell cd $(srcDir) && $(MANAGE) migrate --help 2>/dev/null)),--run-syncdb,)
+
 
 install::
 	cd $(srcDir) && $(PIP) install .
@@ -33,14 +34,16 @@ install::
 
 install-conf:: $(DESTDIR)$(CONFIG_DIR)/credentials \
                 $(DESTDIR)$(CONFIG_DIR)/gunicorn.conf
-	install -d $(DESTDIR)$(LOCALSTATEDIR)/db
-	install -d $(DESTDIR)$(LOCALSTATEDIR)/run
-	install -d $(DESTDIR)$(LOCALSTATEDIR)/log/gunicorn
+	$(installDirs) $(DESTDIR)$(LOCALSTATEDIR)/db
+	$(installDirs) $(DESTDIR)$(LOCALSTATEDIR)/run
+	$(installDirs) $(DESTDIR)$(LOCALSTATEDIR)/log/gunicorn
+
 
 dist:
 	$(PYTHON) -m build
 	$(TWINE) check dist/*
 	$(TWINE) upload dist/*
+
 
 build-assets: vendor-assets-prerequisites
 
@@ -59,18 +62,24 @@ vendor-assets-prerequisites: $(srcDir)/testsite/package.json
 
 
 $(DESTDIR)$(CONFIG_DIR)/credentials: $(srcDir)/testsite/etc/credentials
-	install -d $(dir $@)
-	[ -f $@ ] || \
-		sed -e "s,\%(SECRET_KEY)s,`$(PYTHON) -c 'import sys ; from random import choice ; sys.stdout.write("".join([choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^*-_=+") for i in range(50)]))'`," $< > $@
+	$(installDirs) $(dir $@)
+	@if [ ! -f $@ ] ; then \
+		sed \
+		-e "s,\%(SECRET_KEY)s,`$(PYTHON) -c 'import sys ; from random import choice ; sys.stdout.write("".join([choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^*-_=+") for i in range(50)]))'`," \
+			$< > $@ ; \
+	else \
+		echo "warning: We are keeping $@ intact but $< contains updates that might affect behavior of the testsite." ; \
+	fi
 
 
 $(DESTDIR)$(CONFIG_DIR)/gunicorn.conf: $(srcDir)/testsite/etc/gunicorn.conf
-	install -d $(dir $@)
+	$(installDirs) $(dir $@)
 	[ -f $@ ] || sed \
 		-e 's,%(LOCALSTATEDIR)s,$(LOCALSTATEDIR),' $< > $@
 
 
-initdb: clean-dbs install-conf
+initdb: clean-dbs
+	$(installDirs) $(dir $(DB_NAME))
 	cd $(srcDir) && $(MANAGE) migrate $(RUNSYNCDB) --noinput
 	cd $(srcDir) && $(MANAGE) loaddata testsite/fixtures/test_data.json
 
