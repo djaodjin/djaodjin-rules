@@ -31,7 +31,7 @@ function showMessages(messages, style) {
             messageBlock += "<div>" + messages[i] + "</div>";
          }
          messageBlock += "<button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button></div>";
-         jQuery("#messages-content").append(messageBlock);
+         $("#messages-content").append(messageBlock);
     }
     $("#messages").removeClass("hidden");
     $("html, body").animate({
