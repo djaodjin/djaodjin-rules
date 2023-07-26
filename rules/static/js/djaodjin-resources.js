@@ -15,14 +15,14 @@ function showMessages(messages, style) {
         }
 
     } else {
-        var messageBlock = "<div class=\"alert alert-block";
+        var messageBlock = "<div class=\"alert alert-block alert-dismissible fade show";
         if( style ) {
             if( style === "error" ) {
                 style = "danger";
             }
             messageBlock += " alert-" + style;
         }
-        messageBlock += "\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>";
+        messageBlock += "\">";
 
         if( typeof messages === "string" ) {
             messages = [messages];
@@ -30,8 +30,8 @@ function showMessages(messages, style) {
         for( var i = 0; i < messages.length; ++i ) {
             messageBlock += "<div>" + messages[i] + "</div>";
          }
-         messageBlock += "</div>";
-         $("#messages-content").append(messageBlock);
+         messageBlock += "<button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button></div>";
+         jQuery("#messages-content").append(messageBlock);
     }
     $("#messages").removeClass("hidden");
     $("html, body").animate({
