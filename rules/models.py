@@ -158,7 +158,7 @@ class BaseApp(models.Model):
         verbose_name='Encryption Key',
         help_text=_("Encryption key used to sign proxyed requests"))
     session_backend = models.PositiveSmallIntegerField(
-        choices=SESSION_BACKEND_TYPE, default=COOKIE_SESSION_BACKEND,
+        choices=SESSION_BACKEND_TYPE, default=JWT_SESSION_BACKEND,
         help_text=_("Format to encode session in the forwarded HTTP request"))
 
     cors_restricted = models.BooleanField(default=True,
