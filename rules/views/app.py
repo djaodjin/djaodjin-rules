@@ -1,4 +1,4 @@
-# Copyright (c) 2022, DjaoDjin inc.
+# Copyright (c) 2023, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,7 @@ import json, logging, re
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.sites.requests import RequestSite
 from django.core.exceptions import FieldError, SuspiciousOperation
+from django.db.models import Q
 from django.http import HttpResponse, SimpleCookie
 from django.template.response import TemplateResponse
 from django.views.generic import UpdateView, TemplateView
@@ -294,8 +295,7 @@ class SessionProxyMixin(SessionDataMixin):
         requests_args['params'] = params
         return requests_args
 
-    @staticmethod
-    def translate_response(response):
+    def translate_response(self, response):
         proxy_response = HttpResponse(
             response.content, status=response.status_code)
         if 'set-cookie' in response.headers:
@@ -409,11 +409,12 @@ class AppDashboardView(AppMixin, UpdateView):
                     queryset = cls.objects.filter(
                         organization=self.app.account, is_active=True)
                 except FieldError:
-                    # The following code means we do not support optional
-                    # ``organization`` foreign keys (i.e. ``null=True``).
+                    # Support optional null ``organization`` foreign keys
+                    # for ``saas.RoleDescription`` global roles.
                     try:
                         queryset = cls.objects.filter(
-                            organization=self.app.account)
+                            Q(organization__isnull=True) |
+                            Q(organization=self.app.account))
                     except FieldError:
                         queryset = cls.objects.all()
                 for obj in queryset:

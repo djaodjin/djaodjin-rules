@@ -111,11 +111,12 @@ def get_current_app(request=None):
         LOGGER.debug("rules.get_current_app: '%s'", app)
     else:
         flt = Q(path_prefix__isnull=True)
-        request_path_parts = request.path.lstrip('/').split('/')
-        if request_path_parts:
-            flt = flt | Q(path_prefix='/%s' % request_path_parts[0])
+        if request:
+            request_path_parts = request.path.lstrip('/').split('/')
+            if request_path_parts:
+                flt = flt | Q(path_prefix='/%s' % request_path_parts[0])
         app = get_app_model().objects.filter(flt).order_by(
-                '-path_prefix', '-pk').first()
+                'path_prefix', '-pk').first()
     return app
 
 
