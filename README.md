@@ -1,3 +1,8 @@
+DjaoDjin-Rules
+==============
+
+[![PyPI version](https://badge.fury.io/py/djaodjin-rules.svg)](https://badge.fury.io/py/djaodjin-rules)
+
 Flexible framework to check permissions to URIs and forward HTTP requests
 
 This project contains bare bone templates. To see it in action, integrated into
@@ -33,10 +38,9 @@ Tested with
 - **Python:** 3.10, **Django:** 4.2 (latest)
 - **Python:** 2.7, **Django:** 1.11 (legacy) - use testsite/requirements-legacy.txt
 
-0.4.2
+0.4.3
 
-  * fixes error when OPTIONS on restframework View subclass
-  * removes dependency on vue-infinite-loading.js
-  * installs using pyproject.toml
+  * creates derivative rules when adding a role description
+  * changes default to JWT sessions
 
 [previous release notes](changelog)

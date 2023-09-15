@@ -1,3 +1,10 @@
+0.4.3
+
+  * creates derivative rules when adding a role description
+  * changes default to JWT sessions
+
+ -- Sebastien Mirolo <smirolo@djaodjin.com>  Fri, 15 Sep 2023 13:25:00 -0700
+
 0.4.2
 
   * fixes error when OPTIONS on restframework View subclass
