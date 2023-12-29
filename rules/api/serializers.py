@@ -26,6 +26,7 @@ from __future__ import unicode_literals
 import json
 
 from django.contrib.auth import get_user_model
+from django.template.defaultfilters import slugify
 from rest_framework import serializers
 
 from .. import settings
@@ -34,37 +35,38 @@ from ..models import Rule
 from ..utils import get_app_model
 
 
-class EnumField(serializers.Field):
+class EnumField(serializers.ChoiceField):
     """
     Treat a ``PositiveSmallIntegerField`` as an enum.
     """
-    choices = {}
-    inverted_choices = {}
+    translated_choices = {}
 
     def __init__(self, choices, *args, **kwargs):
-        self.choices = dict(choices)
-        self.inverted_choices = {
-            val: key for key, val in six.iteritems(self.choices)}
-        super(EnumField, self).__init__(*args, **kwargs)
+        self.translated_choices = {key: slugify(val) for key, val in choices}
+        super(EnumField, self).__init__([(slugify(val), key)
+            for key, val in choices],
+            *args, **kwargs)
 
     def to_representation(self, value):
         if isinstance(value, list):
-            result = [self.choices.get(item, None) for item in value]
+            result = [slugify(self.translated_choices.get(item, None))
+                for item in value]
         else:
-            result = self.choices.get(value, None)
+            result = slugify(self.translated_choices.get(value, None))
         return result
 
     def to_internal_value(self, data):
         if isinstance(data, list):
-            result = [self.inverted_choices.get(item, None) for item in data]
+            result = [self.choices.get(item, None) for item in data]
         else:
-            result = self.inverted_choices.get(data, None)
+            result = self.choices.get(data, None)
         if result is None:
             if not data:
-                raise serializers.ValidationError("This field cannot be blank.")
-            raise serializers.ValidationError(
-                "'%s' is not a valid choice. Expected one of %s." % (
-                data, [str(choice) for choice in six.itervalues(self.choices)]))
+                raise ValidationError(_("This field cannot be blank."))
+            raise ValidationError(_("'%(data)s' is not a valid choice."\
+                " Expected one of %(choices)s.") % {
+                    'data': data, 'choices': [str(choice)
+                    for choice in six.iterkeys(self.choices)]})
         return result
 
 

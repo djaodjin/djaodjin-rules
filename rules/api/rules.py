@@ -1,4 +1,4 @@
-# Copyright (c) 2021, DjaoDjin inc.
+# Copyright (c) 2023, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@ from rest_framework import serializers
 
 from .serializers import (RuleSerializer, RuleRankUpdateSerializer,
     UserEngagementSerializer, EngagementsSerializer)
-from ..docs import OpenAPIResponse, swagger_auto_schema
+from ..docs import extend_schema, OpenApiResponse
 from ..mixins import AppMixin
 from ..models import Rule, Engagement
 from ..utils import parse_tz, datetime_or_now
@@ -190,8 +190,8 @@ class RuleListAPIView(RuleMixin, ListCreateAPIView):
         self.check_path(request)
         return self.create(request, *args, **kwargs)
 
-    @swagger_auto_schema(responses={
-      201: OpenAPIResponse("Update successful", RuleSerializer(many=True))})
+    @extend_schema(responses={
+      201: OpenApiResponse(RuleSerializer(many=True))})
     def patch(self, request, *args, **kwargs):
         """
         Updates order of rules

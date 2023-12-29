@@ -1,4 +1,4 @@
-# Copyright (c) 2022, DjaoDjin inc.
+# Copyright (c) 2023, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@ from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView, RetrieveUpdateAPIView
 
 from ..compat import gettext_lazy as _
-from ..docs import no_body, swagger_auto_schema
+from ..docs import extend_schema
 from ..mixins import AppMixin
 from ..utils import get_app_model, get_app_serializer
 from .serializers import AppKeySerializer
@@ -42,7 +42,7 @@ class GenerateKeyAPIView(AppMixin, GenericAPIView):
     model = get_app_model()
     serializer_class = AppKeySerializer
 
-    @swagger_auto_schema(request_body=no_body)
+    @extend_schema(request=None)
     def post(self, request, *args, **kwargs):
         """
         Rotates session encoding key
@@ -83,7 +83,8 @@ class AppUpdateAPIView(AppMixin, RetrieveUpdateAPIView):
     is encoded.
 
     When running tests, you can retrieve the actual session information
-    for a specific user through the `/proxy/sessions/{user}/` API call.
+    for a specific user through the
+    :ref:`session API endpoint <#retrieveGetSessionDetail>`.
 
     **Tags: rbac, broker, appmodel
 
