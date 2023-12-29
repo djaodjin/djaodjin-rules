@@ -56,6 +56,12 @@ SUBDOMAIN_SLUG = RegexValidator(
     'invalid'
 )
 
+PATH_VALIDATOR = RegexValidator(
+    '^/?' + settings.PATH_RE + '$',
+    _("Enter a valid path consisting of letters, digits, -, {, }, or /."),
+    'invalid'
+)
+
 
 @python_2_unicode_compatible
 class Engagement(models.Model):
@@ -251,6 +257,7 @@ class Rule(models.Model):
     #     works for URLs starting with a http/ftp protocol. What we really
     #     want here is a Path validator (including /).
     path = models.CharField(max_length=255,
+        validators=[PATH_VALIDATOR],
         help_text=_("OpenAPI path against which requests are matched"))
     rule_op = models.PositiveSmallIntegerField(
         choices=settings.DB_RULE_OPERATORS, default=settings.DEFAULT_RULE_OP,
