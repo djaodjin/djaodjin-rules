@@ -38,9 +38,9 @@ Tested with
 - **Python:** 3.10, **Django:** 4.2 (latest)
 - **Python:** 2.7, **Django:** 1.11 (legacy) - use testsite/requirements-legacy.txt
 
-0.4.3
+0.4.4
 
-  * creates derivative rules when adding a role description
-  * changes default to JWT sessions
+  * raises an error when trying to create a path with invalid characters
+  * supports OpenAPI 3 schemas
 
 [previous release notes](changelog)

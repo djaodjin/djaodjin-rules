@@ -1,3 +1,10 @@
+0.4.4
+
+  * raises an error when trying to create a path with invalid characters
+  * supports OpenAPI 3 schemas
+
+ -- Sebastien Mirolo <smirolo@djaodjin.com>  Sun, 4 Feb 2024 11:25:00 -0700
+
 0.4.3
 
   * creates derivative rules when adding a role description
