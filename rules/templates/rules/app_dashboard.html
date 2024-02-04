@@ -25,6 +25,13 @@ The site is available at <a href="{{site_available_at_url}}">{{site_available_at
               </tr>
             </thead>
             <tbody>
+              <tr>
+                <td colspan="6">
+                  <a id="add-rule" href="#"
+                     data-toggle="modal" data-target="#new-rule"
+                     @click.prevent="ruleModalOpen=true">Add ...</a>
+                </td>
+              </tr>
               <tr class="item"
                   ng-prop-id="'rule-'+rule.rank"
                   ng-repeat="rule in rules.results"
@@ -58,18 +65,11 @@ The site is available at <a href="{{site_available_at_url}}">{{site_available_at
                 <td>
                   <input type="text" ng-model="rule.engaged"
                          ng-blur="saveEngaged($event, rule, $index)">
-            </td>
+                </td>
                 <td width="100">
                   <button class="rule-delete"
                           ng-click="remove($index)"
                           @click="remove(index)">Delete</button>
-                </td>
-              </tr>
-              <tr slot="footer">
-                <td colspan="6">
-                  <a id="add-rule" href="#"
-                     data-toggle="modal" data-target="#new-rule"
-                     @click.prevent="ruleModalOpen=true">Add ...</a>
                 </td>
               </tr>
             </tbody>

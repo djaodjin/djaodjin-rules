@@ -4,37 +4,49 @@
     },
     "model": "rules.App", "pk": 1
 },
-{
-    "fields": {
-        "app": 1,
-        "rank": 1,
-        "path": "/app/",
-        "rule_op": 1,
-        "engaged": "onboarding",
-        "is_forward": false
-    },
-    "model": "rules.Rule", "pk": 1
+{ "fields": {
+    "app": 1,
+    "rank": 1,
+    "path": "/api/content/editables/{profile}/",
+    "rule_op": 1
+  },
+  "model": "rules.Rule", "pk": 1
 },
-{
-    "fields": {
-        "app": 1,
-        "rank": 2,
-        "path": "/forward/{profile}/",
-        "rule_op": 2,
-        "engaged": "features",
-        "is_forward": true
-    },
-    "model": "rules.Rule", "pk": 2
+{ "fields": {
+    "app": 1,
+    "rank": 2,
+    "path": "/api/content/",
+    "rule_op": 1
+  },
+  "model": "rules.Rule", "pk": 2
 },
-{
-    "fields": {
-        "app": 1,
-        "rank": 3,
-        "path": "/",
-        "rule_op": 0,
-        "is_forward": false
-    },
-    "model": "rules.Rule", "pk": 3
+{ "fields": {
+    "app": 1,
+    "rank": 19,
+    "path": "/app/{profile}/assess/",
+    "rule_op": 1,
+    "is_forward": true
+  },
+  "model": "rules.Rule", "pk": 19
+},
+{ "fields": {
+    "app": 1,
+    "rank": 20,
+    "path": "/app/",
+    "rule_op": 1,
+    "engaged": "app",
+    "is_forward": false
+  },
+  "model": "rules.Rule", "pk": 20
+},
+{ "fields": {
+    "app": 1,
+    "rank": 23,
+    "path": "/",
+    "rule_op": 0,
+    "is_forward": false
+  },
+  "model": "rules.Rule", "pk": 23
 },
 {
     "fields": {
