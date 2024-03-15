@@ -1,4 +1,4 @@
-# Copyright (c) 2019, DjaoDjin inc.
+# Copyright (c) 2024, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -81,7 +81,7 @@ _SETTINGS = {
         '',
         'rules.settings.fail_authenticated'),
     'SESSION_SERIALIZER': 'rules.api.serializers.UsernameSerializer',
-    'TIMEOUT': 0
+    'TIMEOUT': getattr(settings, 'REQUESTS_TIMEOUT', 120)
 }
 _SETTINGS.update(getattr(settings, 'RULES', {}))
 

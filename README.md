@@ -38,10 +38,8 @@ Tested with
 - **Python:** 3.10, **Django:** 4.2 (latest)
 - **Python:** 2.7, **Django:** 1.11 (legacy) - use testsite/requirements-legacy.txt
 
-0.4.5
+0.4.6
 
-  * enables override of entry_point/enc_key
-  * raises an error when trying to create a path with invalid characters
-  * supports OpenAPI 3 schemas
+  * hotfix requests library timeout cannot be zero
 
 [previous release notes](changelog)
