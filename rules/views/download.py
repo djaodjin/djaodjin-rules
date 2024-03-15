@@ -1,4 +1,4 @@
-# Copyright (c) 2022, DjaoDjin inc.
+# Copyright (c) 2024, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@ from rest_framework.request import Request
 from ..compat import six
 from ..mixins import AppMixin
 from ..models import Rule
-from ..utils import datetime_or_now, get_current_app
+from ..utils import datetime_or_now
 from ..api.rules import UserEngagementMixin
 
 
@@ -109,7 +109,7 @@ class UserEngagementCSVView(UserEngagementMixin, AppMixin, CSVDownloadView):
     def headings(self):
         if not hasattr(self, '_headings'):
             tags = set([])
-            for rule in Rule.objects.get_rules(get_current_app(self.request)):
+            for rule in Rule.objects.get_rules(self.app):
                 if rule.engaged:
                     tags |= set(rule.engaged.split(','))
             self._headings = ['user'] + list(tags)

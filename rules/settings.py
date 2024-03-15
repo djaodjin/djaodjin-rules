@@ -72,13 +72,16 @@ _SETTINGS = {
     'DEFAULT_FROM_EMAIL': settings.DEFAULT_FROM_EMAIL,
     'DEFAULT_RULE_OP': 1,
     'DEFAULT_RULES': [('/', 0, False)],
+    'ENC_KEY_OVERRIDE': None,
+    'ENTRY_POINT_OVERRIDE': None,
     'EXTRA_MIXIN': object,
     'LOGIN_URL': getattr(settings, 'LOGIN_URL', reverse_lazy('login')),
     'PATH_PREFIX_CALLABLE': None,
     'RULE_OPERATORS': (
         '',
         'rules.settings.fail_authenticated'),
-    'SESSION_SERIALIZER': 'rules.api.serializers.UsernameSerializer'
+    'SESSION_SERIALIZER': 'rules.api.serializers.UsernameSerializer',
+    'TIMEOUT': 0
 }
 _SETTINGS.update(getattr(settings, 'RULES', {}))
 
@@ -147,12 +150,15 @@ DEFAULT_APP_CALLABLE = _SETTINGS.get('DEFAULT_APP_CALLABLE')
 DEFAULT_FROM_EMAIL = _SETTINGS.get('DEFAULT_FROM_EMAIL')
 DEFAULT_RULE_OP = _SETTINGS.get('DEFAULT_RULE_OP')
 DEFAULT_RULES = _SETTINGS.get('DEFAULT_RULES')
+ENC_KEY_OVERRIDE = _SETTINGS.get('ENC_KEY_OVERRIDE')
+ENTRY_POINT_OVERRIDE = _SETTINGS.get('ENTRY_POINT_OVERRIDE')
 EXTRA_MIXIN = _SETTINGS.get('EXTRA_MIXIN')
 LOGIN_URL = _SETTINGS.get('LOGIN_URL')
 PATH_PREFIX_CALLABLE = _SETTINGS.get('PATH_PREFIX_CALLABLE')
 RULE_OPERATORS = tuple([_load_perms_func(item)
     for item in _SETTINGS.get('RULE_OPERATORS')])
 SESSION_SERIALIZER = _SETTINGS.get('SESSION_SERIALIZER')
+TIMEOUT = _SETTINGS.get('TIMEOUT')
 
 DB_RULE_OPERATORS = tuple([(idx, item[0])
     for idx, item in enumerate(RULE_OPERATORS)])

@@ -1,4 +1,4 @@
-# Copyright (c) 2021, DjaoDjin inc.
+# Copyright (c) 2024, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@ from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView, RetrieveAPIView
 
 from ..mixins import AppMixin, SessionDataMixin, UserMixin
-from ..utils import JSONEncoder
+from ..utils import JSONEncoder, get_current_entry_point
 from .serializers import SessionDataSerializer
 
 
@@ -80,8 +80,9 @@ class GetSessionDetailAPIView(SessionDataMixin, AppMixin, UserMixin,
         # is important because of the call to `serialize_request`.
         forward_session = json.dumps(
             session, indent=2, cls=JSONEncoder)
+        entry_point = get_current_entry_point(request=request)
         serializer = self.get_serializer({
             'forward_session': forward_session,
             'forward_session_header': forward_session_header,
-            'forward_url': self.app.entry_point})
+            'forward_url': entry_point})
         return Response(serializer.data)

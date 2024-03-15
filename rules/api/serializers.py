@@ -1,4 +1,4 @@
-# Copyright (c) 2023, DjaoDjin inc.
+# Copyright (c) 2024, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -62,8 +62,10 @@ class EnumField(serializers.ChoiceField):
             result = self.choices.get(data, None)
         if result is None:
             if not data:
-                raise ValidationError(_("This field cannot be blank."))
-            raise ValidationError(_("'%(data)s' is not a valid choice."\
+                raise serializers.ValidationError(
+                    _("This field cannot be blank."))
+            raise serializers.ValidationError(
+                _("'%(data)s' is not a valid choice."\
                 " Expected one of %(choices)s.") % {
                     'data': data, 'choices': [str(choice)
                     for choice in six.iterkeys(self.choices)]})

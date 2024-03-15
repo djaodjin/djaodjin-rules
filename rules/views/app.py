@@ -1,4 +1,4 @@
-# Copyright (c) 2023, DjaoDjin inc.
+# Copyright (c) 2024, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,8 @@ from ..compat import get_model, http_cookies, reverse, six
 from ..mixins import AppMixin, SessionDataMixin
 from ..perms import (check_permissions as base_check_permissions,
     find_rule, redirect_or_denied)
-from ..utils import JSONEncoder, get_app_model, update_context_urls
+from ..utils import (JSONEncoder, get_app_model, get_current_entry_point,
+    update_context_urls)
 
 
 LOGGER = logging.getLogger(__name__)
@@ -82,11 +83,13 @@ class SessionProxyMixin(SessionDataMixin):
 
     def get_context_data(self, **kwargs):
         context = super(SessionProxyMixin, self).get_context_data(**kwargs)
+        entry_point = get_current_entry_point(request=self.request)
+        forward_url = '%s%s' % (entry_point, self.request.path)
         context.update({
             'forward_session': json.dumps(
                 self.session, indent=2, cls=JSONEncoder),
             'forward_session_cookie': self.forward_session_header,
-            'forward_url': '%s%s' % (self.app.entry_point, self.request.path),
+            'forward_url': forward_url,
         })
         return context
 
@@ -185,20 +188,22 @@ class SessionProxyMixin(SessionDataMixin):
         Respond with the remote site response after adjusting session
         information and response headers.
         """
-        remoteurl = '%s%s' % (self.app.entry_point, self.request.path)
+        entry_point = get_current_entry_point(request=self.request)
+        forward_url = '%s%s' % (entry_point, self.request.path) # XXX
         requests_args = self.translate_request_args(self.request)
         if LOGGER.getEffectiveLevel() == logging.DEBUG:
             LOGGER.debug("\"%s %s (Fwd to %s)\" with session %s,"\
                 " updated headers: %s",
-                self.request.method, self.request.path, self.app.entry_point,
+                self.request.method, self.request.path, entry_point,
                 self.session, requests_args)
         else:
             LOGGER.info("\"%s %s (Fwd to %s)\"", self.request.method,
-                self.request.path, self.app.entry_point, extra={
-                    'event': 'http_forward', 'fwd_to': self.app.entry_point,
+                self.request.path, entry_point, extra={
+                    'event': 'http_forward', 'fwd_to': entry_point,
                     'request': self.request})
         response = requests.request(
-            self.request.method, remoteurl, **requests_args)
+            self.request.method, forward_url, timeout=settings.TIMEOUT,
+            **requests_args)
         return self.translate_response(response)
 
     def translate_request_args(self, request):

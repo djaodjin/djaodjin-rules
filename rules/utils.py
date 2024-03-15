@@ -1,4 +1,4 @@
-# Copyright (c) 2022, DjaoDjin inc.
+# Copyright (c) 2024, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -22,7 +22,7 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import datetime, json, logging
+import datetime, json, logging, sys
 
 from django.apps import apps as django_apps
 from django.core.exceptions import ImproperlyConfigured
@@ -118,6 +118,44 @@ def get_current_app(request=None):
         app = get_app_model().objects.filter(flt).order_by(
                 'path_prefix', '-pk').first()
     return app
+
+
+def get_current_enc_key(request=None):
+    """
+    Returns the default encoding key to encrypt forwarded sessions for a site.
+    """
+    from . import settings
+    if settings.ENC_KEY_OVERRIDE:
+        enc_key = getattr(sys.modules[__name__], '_ENC_KEY', None)
+        if enc_key is None:
+            try:
+                enc_key = import_string(settings.ENC_KEY_OVERRIDE)
+            except (ImportError, ModuleNotFoundError):
+                enc_key = settings.ENC_KEY_OVERRIDE
+            setattr(sys.modules[__name__], '_ENC_KEY', enc_key)
+        if callable(enc_key):
+            return enc_key(request=request)
+        return enc_key
+    return get_current_app(request=request).enc_key
+
+
+def get_current_entry_point(request=None):
+    """
+    Returns the default forward entry point for a site.
+    """
+    from . import settings
+    if settings.ENTRY_POINT_OVERRIDE:
+        entry_point = getattr(sys.modules[__name__], '_ENTRY_POINT', None)
+        if entry_point is None:
+            try:
+                entry_point = import_string(settings.ENTRY_POINT_OVERRIDE)
+            except (ImportError, ModuleNotFoundError):
+                entry_point = settings.ENTRY_POINT_OVERRIDE
+            setattr(sys.modules[__name__], '_ENTRY_POINT', entry_point)
+        if callable(entry_point):
+            return entry_point(request=request)
+        return entry_point
+    return get_current_app(request=request).entry_point
 
 
 def parse_tz(tzone):

@@ -1,4 +1,4 @@
-# Copyright (c) 2020, DjaoDjin inc.
+# Copyright (c) 2024, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@ from rest_framework.generics import get_object_or_404
 from . import settings
 from .compat import is_authenticated, six
 from .models import Engagement
-from .utils import datetime_or_now
+from .utils import datetime_or_now, get_current_enc_key
 from .extras import AppMixinBase
 
 
@@ -102,9 +102,10 @@ class SessionDataMixin(object):
     def get_session_cookie_string(self, request, app, rule, session):
         # This is the latest time we can populate the session
         # since after that we need it to encrypt the cookie string.
+        enc_key = get_current_enc_key(request=request)
         session.update(self.serialize_request(request, app, rule))
-        session_store = CookieSessionStore(app.enc_key)
-        session_token = session_store.prepare(session, app.enc_key)
+        session_store = CookieSessionStore(enc_key)
+        session_token = session_store.prepare(session, enc_key)
         if not isinstance(session_token, six.string_types):
             # Because we don't want Python3 to prefix our strings with b'.
             session_token = session_token.decode('ascii')
@@ -124,9 +125,10 @@ class SessionDataMixin(object):
     def get_session_jwt_string(self, request, app, rule, session):
         # This is the latest time we can populate the session
         # since after that we need it to encrypt the cookie string.
+        enc_key = get_current_enc_key(request=request)
         session.update(self.serialize_request(request, app, rule))
-        session_store = JWTSessionStore(app.enc_key)
-        session_token = session_store.prepare(session, app.enc_key)
+        session_store = JWTSessionStore(enc_key)
+        session_token = session_store.prepare(session, enc_key)
         if not isinstance(session_token, six.string_types):
             # Because we don't want Python3 to prefix our strings with b'.
             session_token = session_token.decode('ascii')
