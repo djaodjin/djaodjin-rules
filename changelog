@@ -1,3 +1,9 @@
+0.4.5
+
+  * enables override of entry_point/enc_key
+
+ -- Sebastien Mirolo <smirolo@djaodjin.com>  Thu, 14 Mar 2024 21:40:00 -0700
+
 0.4.4
 
   * raises an error when trying to create a path with invalid characters
