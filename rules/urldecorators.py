@@ -1,4 +1,4 @@
-# Copyright (c) 2022, DjaoDjin inc.
+# Copyright (c) 2024, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -50,9 +50,11 @@ except ImportError: # Django<2.0
         RegexURLResolver as DjangoRegexURLResolver
     )
 
+from . import settings
 from .compat import (available_attrs, get_func_arg_names,
     include as django_include, re_path as django_re_path, six)
-from .perms import redirect_or_denied
+from .perms import NoRuleMatch, check_matched, redirect_or_denied
+from .utils import get_current_app
 
 
 __all__ = ['include', 'url']
@@ -87,6 +89,22 @@ class DecoratorMixin(object):
         def decorator(view_func, redirects=[]):
             @wraps(view_func, assigned=available_attrs(view_func))
             def _wrapped_view(request, *view_args, **view_kwargs):
+                LOGGER.debug("[DecoratorMixin._wrapped_view]"\
+                    " request.path=%s, view_args=%s, view_kwargs=%s ...",
+                    request.path, view_args, view_kwargs)
+                try:
+                    app = get_current_app(request)
+                    #pylint:disable=unused-variable
+                    redirect, matched, session = check_matched(request, app,
+                        prefixes=settings.DEFAULT_PREFIXES)
+                    if redirect:
+                        return redirect_or_denied(request, redirect,
+                            redirect_field_name=REDIRECT_FIELD_NAME)
+                    return view_func(request, *view_args, **view_kwargs)
+                except NoRuleMatch:
+                    # No custom rules, so we will run the default set
+                    # of rules in `redirects`.
+                    pass
                 for fail_func in redirects:
                     # filter out URL keyword arguments which the fail_func
                     # does not accept.
@@ -100,7 +118,7 @@ class DecoratorMixin(object):
                         fail_func.__name__, request.user, kwargs)
                     redirect = fail_func(request, **kwargs)
                     LOGGER.debug(
-                        "[decorator] calling %s(user=%s, kwargs=%s) => %s",
+                    "[decorator] call returned %s(user=%s, kwargs=%s) => %s",
                         fail_func.__name__, request.user, kwargs, redirect)
                     if redirect:
                         return redirect_or_denied(request, redirect,

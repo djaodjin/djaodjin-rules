@@ -138,8 +138,6 @@ class RuleListAPIView(RuleMixin, ListCreateAPIView):
     def check_path(request):
         if 'path' not in request.data:
             request.data.update({'path': "/"})
-        if not request.data['path'].endswith('/'):
-            request.data['path'] += '/'
         if not request.data['path'].startswith('/'):
             request.data['path'] = '/' + request.data['path']
 

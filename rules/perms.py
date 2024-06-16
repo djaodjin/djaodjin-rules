@@ -86,8 +86,6 @@ def find_rule(request, app, prefixes=None):
     request_path = request.path
     request_path_parts = [part for part in request_path.split('/') if part]
     for rule in Rule.objects.get_rules(app, prefixes=prefixes):
-        LOGGER.debug("Match %s with %s ...",
-            '/'.join(request_path_parts), rule.get_full_page_path())
         params = rule.match(request_path_parts)
         if params is not None:
             LOGGER.debug(
@@ -95,6 +93,9 @@ def find_rule(request, app, prefixes=None):
                 request_path, rule.get_full_page_path(),
                 rule.rule_op, rule.is_forward, params)
             return (rule, params)
+        else:
+            LOGGER.debug("match %s with %s ... no",
+                '/'.join(request_path_parts), rule.get_full_page_path())
     return (None, {})
 
 
@@ -177,7 +178,7 @@ def check_matched(request, app, prefixes=None, login_url=None):
             LOGGER.debug("[perms] calling %s(user=%s, kwargs=%s) ...",
                 fail_func.__name__, request.user, kwargs)
             redirect_url = fail_func(request, **kwargs)
-            LOGGER.debug("[perms] calling %s(user=%s, kwargs=%s) => %s",
+            LOGGER.debug("[perms] call returned %s(user=%s, kwargs=%s) => %s",
                 fail_func.__name__, request.user, kwargs, redirect_url)
             if not redirect_url:
                 redirect_url = None

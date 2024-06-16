@@ -158,6 +158,7 @@ class RuleSerializer(serializers.ModelSerializer):
                 attrs['kwargs'] = kwargs_encoded
             except ValueError as err:
                 raise serializers.ValidationError(str(err))
+            del attrs['get_allow']
         return super(RuleSerializer, self).validate(attrs)
 
 
