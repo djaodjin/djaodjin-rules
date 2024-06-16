@@ -38,8 +38,8 @@ Tested with
 - **Python:** 3.10, **Django:** 4.2 (latest)
 - **Python:** 2.7, **Django:** 1.11 (legacy) - use testsite/requirements-legacy.txt
 
-0.4.6
+0.4.7
 
-  * hotfix requests library timeout cannot be zero
+  * runs access rule override in decorator
 
 [previous release notes](changelog)

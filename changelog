@@ -1,3 +1,9 @@
+0.4.7
+
+  * runs access rule override in decorator
+
+ -- Sebastien Mirolo <smirolo@djaodjin.com>  Sun, 16 Jun 2024 16:30:00 -0700
+
 0.4.6
 
   * hotfix requests library timeout cannot be zero
