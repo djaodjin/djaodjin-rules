@@ -468,8 +468,8 @@ class EngagementAPIView(AppMixin, GenericAPIView):
         tz_ob = parse_tz(timezone)
         if not tz_ob:
             tz_ob = utc
-        yest_start = tz_ob.localize(yest_start)
-        yest_end = tz_ob.localize(yest_end)
+        yest_start = yest_start.replace(tzinfo=tz_ob)
+        yest_end = yest_end.replace(tzinfo=tz_ob)
         users = self.user_model.objects.filter(
             last_login__gt=yest_start, last_login__lt=yest_end).count()
 

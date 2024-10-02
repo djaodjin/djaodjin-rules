@@ -94,13 +94,14 @@ class DecoratorMixin(object):
                     request.path, view_args, view_kwargs)
                 try:
                     app = get_current_app(request)
-                    #pylint:disable=unused-variable
-                    redirect, matched, session = check_matched(request, app,
-                        prefixes=settings.DEFAULT_PREFIXES)
-                    if redirect:
-                        return redirect_or_denied(request, redirect,
-                            redirect_field_name=REDIRECT_FIELD_NAME)
-                    return view_func(request, *view_args, **view_kwargs)
+                    if app:
+                        #pylint:disable=unused-variable
+                        redirect, matched, session = check_matched(request, app,
+                            prefixes=settings.DEFAULT_PREFIXES)
+                        if redirect:
+                            return redirect_or_denied(request, redirect,
+                                redirect_field_name=REDIRECT_FIELD_NAME)
+                        return view_func(request, *view_args, **view_kwargs)
                 except NoRuleMatch:
                     # No custom rules, so we will run the default set
                     # of rules in `redirects`.
@@ -181,6 +182,7 @@ def include(arg, namespace=None, app_name=None):
 
 def url(regex, view, kwargs=None, name=None, prefix='',
         redirects=None, decorators=None):
+    #pylint:disable=too-many-arguments
     return re_path(regex, view, kwargs=kwargs, name=name, prefix=prefix,
         redirects=redirects, decorators=decorators)
 

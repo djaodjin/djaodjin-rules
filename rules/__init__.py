@@ -26,4 +26,4 @@
 PEP 386-compliant version number for the rules django app.
 """
 
-__version__ = '0.4.7'
+__version__ = '0.4.8-dev'
