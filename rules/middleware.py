@@ -40,9 +40,13 @@ LOGGER = logging.getLogger(__name__)
 ACCESS_CONTROL_ALLOW_HEADERS = 'Access-Control-Allow-Headers'
 ACCESS_CONTROL_ALLOW_ORIGIN = 'Access-Control-Allow-Origin'
 ACCESS_CONTROL_ALLOW_CREDENTIALS = 'Access-Control-Allow-Credentials'
+ACCESS_CONTROL_EXPOSE_HEADERS = 'Access-Control-Expose-Headers'
+ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods"
 
 ACCESS_CONTROL_ALLOW_HEADERS_ALLOWED = \
     "Origin, X-Requested-With, Content-Type, Accept, X-CSRFToken, Authorization"
+
+ACCESS_CONTROL_EXPOSE_HEADERS_ALLOWED = "Location"
 
 
 class RulesMiddleware(CsrfViewMiddleware):
@@ -122,15 +126,7 @@ class RulesMiddleware(CsrfViewMiddleware):
     def process_response(self, request, response):
         # Sets the CORS headers as appropriate.
         app = get_current_app(request)
-        if app.cors_restricted:
-            origin = request.META.get('HTTP_ORIGIN')
-        else:
-            origin = None
-            response[ACCESS_CONTROL_ALLOW_HEADERS] = \
-                ACCESS_CONTROL_ALLOW_HEADERS_ALLOWED
-            response[ACCESS_CONTROL_ALLOW_ORIGIN] = "*"
-            response[ACCESS_CONTROL_ALLOW_CREDENTIALS] = "true"
-
+        origin = request.META.get('HTTP_ORIGIN')
         if not origin:
             return super(RulesMiddleware, self).process_response(
                 request, response)
@@ -146,6 +142,23 @@ class RulesMiddleware(CsrfViewMiddleware):
         origin_parts = origin_parsed.netloc.split(':')
         origin_host = origin_parts[0].lower()
         origin_port = origin_parts[1] if len(origin_parts) > 1 else None
+
+        if not app.cors_restricted:
+            response[ACCESS_CONTROL_ALLOW_HEADERS] = \
+                ACCESS_CONTROL_ALLOW_HEADERS_ALLOWED
+            response[ACCESS_CONTROL_EXPOSE_HEADERS] = \
+                ACCESS_CONTROL_EXPOSE_HEADERS_ALLOWED
+            response[ACCESS_CONTROL_ALLOW_METHODS] = "*"
+            response[ACCESS_CONTROL_ALLOW_CREDENTIALS] = "true"
+            # We use the origin host instead of "*" such that requests
+            # with `credentials: true` also pass CORS.
+            response[ACCESS_CONTROL_ALLOW_ORIGIN] = \
+                six.moves.urllib.parse.urlunparse((
+                    origin_parsed.scheme, origin_parsed.netloc, "",
+                    None, None, None))
+            return super(RulesMiddleware, self).process_response(
+                request, response)
+
         if host != origin_host or port != origin_port:
             if origin_host.startswith('www.'):
                 origin_host = origin_host[4:]
@@ -153,8 +166,11 @@ class RulesMiddleware(CsrfViewMiddleware):
                 patch_vary_headers(response, ['Origin'])
                 response[ACCESS_CONTROL_ALLOW_HEADERS] = \
                     ACCESS_CONTROL_ALLOW_HEADERS_ALLOWED
-                response[ACCESS_CONTROL_ALLOW_ORIGIN] = origin
+                response[ACCESS_CONTROL_EXPOSE_HEADERS] = \
+                    ACCESS_CONTROL_EXPOSE_HEADERS_ALLOWED
+                response[ACCESS_CONTROL_ALLOW_METHODS] = "*"
                 response[ACCESS_CONTROL_ALLOW_CREDENTIALS] = "true"
+                response[ACCESS_CONTROL_ALLOW_ORIGIN] = origin
                 # Patch cookies with `Domain=`
                 self.patch_set_cookies(response, origin_host)
             else:
