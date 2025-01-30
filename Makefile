@@ -5,9 +5,10 @@
 srcDir        ?= .
 installTop    ?= $(VIRTUAL_ENV)
 binDir        ?= $(installTop)/bin
-CONFIG_DIR    ?= $(srcDir)
-# XXX CONFIG_DIR should really be $(installTop)/etc/testsite
+CONFIG_DIR    ?= $(installTop)/etc/testsite
 LOCALSTATEDIR ?= $(installTop)/var
+# because there is no site.conf
+RUN_DIR       ?= $(abspath $(srcDir))
 
 installDirs   ?= install -d
 installFiles  ?= install -p -m 644
@@ -16,7 +17,6 @@ PYTHON        := $(binDir)/python
 PIP           := $(binDir)/pip
 TWINE         := $(binDir)/twine
 
-RUN_DIR       ?= $(srcDir)
 DB_NAME       ?= $(RUN_DIR)/db.sqlite
 
 MANAGE        := TESTSITE_SETTINGS_LOCATION=$(CONFIG_DIR) RUN_DIR=$(RUN_DIR) $(PYTHON) manage.py
@@ -34,9 +34,6 @@ install::
 
 install-conf:: $(DESTDIR)$(CONFIG_DIR)/credentials \
                 $(DESTDIR)$(CONFIG_DIR)/gunicorn.conf
-	$(installDirs) $(DESTDIR)$(LOCALSTATEDIR)/db
-	$(installDirs) $(DESTDIR)$(LOCALSTATEDIR)/run
-	$(installDirs) $(DESTDIR)$(LOCALSTATEDIR)/log/gunicorn
 
 
 dist::
