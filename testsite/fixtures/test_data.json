@@ -51,9 +51,9 @@
 {
     "fields": {
       "date_joined": "2019-01-01T00:00:00-00:00",
-      "email": "alice@localhost.localdomain",
-      "username": "alice",
-      "first_name": "Alice",
+      "email": "donny@localhost.localdomain",
+      "username": "donny",
+      "first_name": "Donny",
       "last_name": "Manager",
       "is_active": true,
       "is_staff": true,
