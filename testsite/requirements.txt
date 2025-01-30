@@ -1,10 +1,20 @@
-Django==3.2.23
-djangorestframework==3.14.0       # 3.12.4 not compatible with Django4.2
-djaodjin-deployutils==0.10.6
+# Unified requirements file supporting py37-django3.2, py39-django4.2,
+# py312-django5.1.
+
+Django==3.2.25 ; python_version < "3.9"
+Django==4.2.18 ; python_version >= "3.9" and python_version < "3.12"
+Django==5.1.5 ; python_version >= "3.12"
+djangorestframework==3.14.0 ; python_version < "3.9"
+                                      # 3.12.4 not compatible with Django4.2
+djangorestframework==3.15.2 ; python_version >= "3.9" # Breaking
+                                      # changes in 3.15.0 and 3.15.1.
+                                      # Requires Django>=4.2 and Python >=3.8.
+djaodjin-deployutils==0.11.0
 requests==2.31.0
 python-dateutil==2.8.2
 
 # testsite-only
-coverage==6.4.4
-django-extensions==3.2.0
-whitenoise==6.2.0
+coverage==7.2.1
+django-extensions==3.2.1
+gunicorn==20.1.0
+whitenoise==6.4.0
