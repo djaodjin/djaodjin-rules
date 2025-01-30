@@ -93,9 +93,8 @@ def find_rule(request, app, prefixes=None):
                 request_path, rule.get_full_page_path(),
                 rule.rule_op, rule.is_forward, params)
             return (rule, params)
-        else:
-            LOGGER.debug("match %s with %s ... no",
-                '/'.join(request_path_parts), rule.get_full_page_path())
+        LOGGER.debug("match %s with %s ... no",
+            '/'.join(request_path_parts), rule.get_full_page_path())
     return (None, {})
 
 

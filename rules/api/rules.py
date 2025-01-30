@@ -1,4 +1,4 @@
-# Copyright (c) 2023, DjaoDjin inc.
+# Copyright (c) 2025, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,6 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import F, Q, Max, Count
 from django.db.utils import IntegrityError
-from django.utils.timezone import utc
 from rest_framework.generics import (get_object_or_404, GenericAPIView,
     ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView)
 from rest_framework.response import Response
@@ -37,6 +36,7 @@ from rest_framework import serializers
 
 from .serializers import (RuleSerializer, RuleRankUpdateSerializer,
     UserEngagementSerializer, EngagementsSerializer)
+from ..compat import timezone_or_utc
 from ..docs import extend_schema, OpenApiResponse
 from ..mixins import AppMixin
 from ..models import Rule, Engagement
@@ -467,7 +467,7 @@ class EngagementAPIView(AppMixin, GenericAPIView):
         timezone = self.request.GET.get('timezone')
         tz_ob = parse_tz(timezone)
         if not tz_ob:
-            tz_ob = utc
+            tz_ob = timezone_or_utc()
         yest_start = yest_start.replace(tzinfo=tz_ob)
         yest_end = yest_end.replace(tzinfo=tz_ob)
         users = self.user_model.objects.filter(

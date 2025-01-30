@@ -1,4 +1,4 @@
-# Copyright (c) 2024, DjaoDjin inc.
+# Copyright (c) 2025, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,11 +28,10 @@ from django.apps import apps as django_apps
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Q
 from django.utils.module_loading import import_string
-from django.utils.timezone import utc
 from pytz import timezone, UnknownTimeZoneError
 from pytz.tzinfo import DstTzInfo
 
-from .compat import six
+from .compat import six, timezone_or_utc
 
 
 LOGGER = logging.getLogger(__name__)
@@ -48,9 +47,9 @@ class JSONEncoder(json.JSONEncoder):
 
 def datetime_or_now(dtime_at=None):
     if not dtime_at:
-        return datetime.datetime.utcnow().replace(tzinfo=utc)
+        return datetime.datetime.utcnow().replace(tzinfo=timezone_or_utc())
     if dtime_at.tzinfo is None:
-        dtime_at = dtime_at.replace(tzinfo=utc)
+        dtime_at = dtime_at.replace(tzinfo=timezone_or_utc())
     return dtime_at
 
 

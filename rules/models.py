@@ -1,4 +1,4 @@
-# Copyright (c) 2022, DjaoDjin inc.
+# Copyright (c) 2025, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -39,11 +39,11 @@ from django.core.mail import get_connection as get_connection_base
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Q
-from django.utils.timezone import utc
 from django.utils.module_loading import import_string
 
 from . import settings
-from .compat import gettext_lazy as _, python_2_unicode_compatible
+from .compat import (gettext_lazy as _, python_2_unicode_compatible,
+    timezone_or_utc)
 
 
 LOGGER = logging.getLogger(__name__)
@@ -75,7 +75,7 @@ class Engagement(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
         related_name='engagements')
     last_visited = models.DateTimeField(
-        default=datetime.datetime(1971, 1, 1).replace(tzinfo=utc))
+        default=datetime.datetime(1971, 1, 1).replace(tzinfo=timezone_or_utc()))
     # 1971 instead of 1970 to avoid Overflow exception in South.
 
     class Meta:
