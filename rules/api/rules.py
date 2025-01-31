@@ -188,7 +188,8 @@ class RuleListAPIView(RuleMixin, ListCreateAPIView):
         self.check_path(request)
         return self.create(request, *args, **kwargs)
 
-    @extend_schema(responses={
+    @extend_schema(operation_id='proxy_rules_order_update',
+    responses={
       201: OpenApiResponse(RuleSerializer(many=True))})
     def patch(self, request, *args, **kwargs):
         """

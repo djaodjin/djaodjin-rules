@@ -34,12 +34,14 @@ Release Notes
 
 Tested with
 
-- **Python:** 3.7, **Django:** 3.2 ([LTS](https://www.djangoproject.com/download/))
-- **Python:** 3.10, **Django:** 4.2 (latest)
-- **Python:** 2.7, **Django:** 1.11 (legacy) - use testsite/requirements-legacy.txt
+- **Python:** 3.10, **Django:** 4.2 ([LTS](https://www.djangoproject.com/download/))
+- **Python:** 3.12, **Django:** 5.1 (next)
+- **Python:** 3.7, **Django:** 3.2 (legacy)
 
-0.4.7
+0.4.8
 
-  * runs access rule override in decorator
+  * adds compatibility with Django5.1
+  * expands CORS headers to pass credentials
+  * deals with `get_current_app` returning `None`
 
 [previous release notes](changelog)
