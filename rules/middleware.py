@@ -176,6 +176,10 @@ class RulesMiddleware(CsrfViewMiddleware):
             else:
                 logging.getLogger('django.security.SuspiciousOperation').info(
                     "request %s was not initiated by origin %s",
-                    request.get_raw_uri(), origin)
+                    '{scheme}://{host}{path}'.format(
+                        scheme=request.scheme,
+                        host=request._get_raw_host(),
+                        path=request.get_full_path()),
+                    origin)
         return super(RulesMiddleware, self).process_response(
             request, response)
