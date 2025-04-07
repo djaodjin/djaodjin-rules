@@ -38,10 +38,9 @@ Tested with
 - **Python:** 3.12, **Django:** 5.1 (next)
 - **Python:** 3.7, **Django:** 3.2 (legacy)
 
-0.4.8
+0.4.9
 
-  * adds compatibility with Django5.1
-  * expands CORS headers to pass credentials
-  * deals with `get_current_app` returning `None`
+  * uses settings.AUTHENTICATION_OVERRIDE instead of as an App field
+  * fixes `get_raw_uri` was removed in Django4.2
 
 [previous release notes](changelog)

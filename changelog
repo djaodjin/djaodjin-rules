@@ -1,3 +1,10 @@
+0.4.9
+
+  * uses settings.AUTHENTICATION_OVERRIDE instead of as an App field
+  * fixes `get_raw_uri` was removed in Django4.2
+
+ -- Sebastien Mirolo <smirolo@djaodjin.com>  Mon,  7 Apr 2025 13:35:00 -0700
+
 0.4.8
 
   * adds compatibility with Django5.1
