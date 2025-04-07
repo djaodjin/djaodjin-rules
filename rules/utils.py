@@ -39,7 +39,8 @@ LOGGER = logging.getLogger(__name__)
 
 class JSONEncoder(json.JSONEncoder):
 
-    def default(self, obj): #pylint: disable=method-hidden
+    def default(self, o): #pylint: disable=method-hidden
+        obj = o
         if hasattr(obj, 'isoformat'):
             return obj.isoformat()
         return super(JSONEncoder, self).default(obj)
@@ -106,16 +107,24 @@ def get_current_app(request=None):
     """
     from . import settings
     if settings.DEFAULT_APP_CALLABLE:
-        app = import_string(settings.DEFAULT_APP_CALLABLE)(request=request)
-        LOGGER.debug("rules.get_current_app: '%s'", app)
-    else:
-        flt = Q(path_prefix__isnull=True)
-        if request:
-            request_path_parts = request.path.lstrip('/').split('/')
-            if request_path_parts:
-                flt = flt | Q(path_prefix='/%s' % request_path_parts[0])
-        app = get_app_model().objects.filter(flt).order_by(
-                'path_prefix', '-pk').first()
+        if isinstance(settings.DEFAULT_APP_CALLABLE, six.string_types):
+            try:
+                settings.DEFAULT_APP_CALLABLE = import_string(
+                    settings.DEFAULT_APP_CALLABLE)
+            except (ImportError, ModuleNotFoundError):
+                pass
+        if callable(settings.DEFAULT_APP_CALLABLE):
+            app = settings.DEFAULT_APP_CALLABLE(request=request)
+            LOGGER.debug("rules.get_current_app: '%s'", app)
+            return app
+
+    flt = Q(path_prefix__isnull=True)
+    if request:
+        request_path_parts = request.path.lstrip('/').split('/')
+        if request_path_parts:
+            flt = flt | Q(path_prefix='/%s' % request_path_parts[0])
+    app = get_app_model().objects.filter(flt).order_by(
+            'path_prefix', '-pk').first()
     return app
 
 

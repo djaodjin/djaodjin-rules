@@ -35,7 +35,6 @@ except ImportError:
     # Python 3
     izip = zip # pylint:disable=invalid-name
 
-from django.core.mail import get_connection as get_connection_base
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Q
@@ -122,28 +121,6 @@ class BaseApp(models.Model):
         (JWT_SESSION_BACKEND, "JWT based session backend"),
     )
 
-    USER_REGISTRATION = 0
-    PERSONAL_REGISTRATION = 1
-    TOGETHER_REGISTRATION = 2
-    IMPLICIT_REGISTRATION = 3
-
-    REGISTRATION_TYPE = (
-        (USER_REGISTRATION, "User registration"),
-        (PERSONAL_REGISTRATION, "Personal registration"),
-        (TOGETHER_REGISTRATION, "User and organization registration"),
-        (IMPLICIT_REGISTRATION, "User registration wth implicit billing"),
-    )
-
-    AUTH_ENABLED = 0
-    AUTH_LOGIN_ONLY = 1
-    AUTH_DISABLED = 2
-
-    AUTH_TYPE = (
-        (AUTH_ENABLED, "enabled"),
-        (AUTH_LOGIN_ONLY, "login-only"),
-        (AUTH_DISABLED, "disabled"),
-    )
-
     objects = AppManager()
 
     # Since most DNS provider limit subdomain length to 25 characters,
@@ -170,11 +147,6 @@ class BaseApp(models.Model):
     cors_restricted = models.BooleanField(default=True,
         help_text=_("Set CORS headers on HTTP responses"))
 
-    # XXX Fields used to custom signup form
-    authentication = models.PositiveSmallIntegerField(
-        choices=AUTH_TYPE, default=AUTH_LOGIN_ONLY)
-    registration = models.PositiveSmallIntegerField(
-        choices=REGISTRATION_TYPE, default=USER_REGISTRATION)
     welcome_email = models.BooleanField(default=True,
         help_text=_("Send a welcome e-mail to newly registered users"))
 
@@ -199,17 +171,6 @@ class BaseApp(models.Model):
             if post_value is not None and pre_value != post_value:
                 changes[field_name] = {'pre': pre_value, 'post': post_value}
         return changes
-
-    def get_connection(self):
-        kwargs = {}
-        return get_connection_base(**kwargs)
-
-    def get_implicit_create_on_none(self):
-        return self.registration in (
-            self.PERSONAL_REGISTRATION, self.IMPLICIT_REGISTRATION)
-
-    def get_from_email(self):
-        return settings.DEFAULT_FROM_EMAIL
 
 
 @python_2_unicode_compatible

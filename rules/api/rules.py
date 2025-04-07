@@ -36,6 +36,7 @@ from rest_framework import serializers
 
 from .serializers import (RuleSerializer, RuleRankUpdateSerializer,
     UserEngagementSerializer, EngagementsSerializer)
+from .. import settings
 from ..compat import timezone_or_utc
 from ..docs import extend_schema, OpenApiResponse
 from ..mixins import AppMixin
@@ -475,6 +476,6 @@ class EngagementAPIView(AppMixin, GenericAPIView):
             last_login__gt=yest_start, last_login__lt=yest_end).count()
 
         return Response(self.get_serializer({
-            'authentication': self.app.authentication,
+            'authentication': settings.AUTHENTICATION_OVERRIDE,
             'engagements': engagement_stats,
             'active_users': users}).data)

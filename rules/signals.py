@@ -1,4 +1,4 @@
-# Copyright (c) 2022, DjaoDjin inc.
+# Copyright (c) 2025, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,4 +30,8 @@ app_created = Signal(
 )
 app_updated = Signal(
 #    providing_args=["app", "changes", "user"]
+)
+
+user_welcome = Signal(
+#    providing_args=["user"]
 )

@@ -112,6 +112,7 @@ class UserEngagementCSVView(UserEngagementMixin, AppMixin, CSVDownloadView):
             for rule in Rule.objects.get_rules(self.app):
                 if rule.engaged:
                     tags |= set(rule.engaged.split(','))
+            #pylint:disable=attribute-defined-outside-init
             self._headings = ['user'] + list(tags)
         return self._headings
 

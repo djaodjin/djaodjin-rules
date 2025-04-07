@@ -1,4 +1,4 @@
-# Copyright (c) 2024, DjaoDjin inc.
+# Copyright (c) 2025, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -83,17 +83,13 @@ class NoModelSerializer(serializers.Serializer):
 
 class AppSerializer(serializers.ModelSerializer):
 
-    authentication = EnumField(
-        choices=get_app_model().AUTH_TYPE, required=False,
-        help_text=_("Restricted authentication and registration"))
-
     detail = serializers.CharField(required=False,
         help_text=_("Describes the result of the action"\
             " in human-readable form"))
 
     class Meta:
         model = get_app_model()
-        fields = ('slug', 'entry_point', 'session_backend', 'authentication',
+        fields = ('slug', 'entry_point', 'session_backend',
             'welcome_email', 'cors_restricted', 'detail')
         read_only_fields = ('slug', 'detail')
 
@@ -237,13 +233,20 @@ class EngagementSerializer(NoModelSerializer):
 
 class EngagementsSerializer(NoModelSerializer):
 
+    AUTH_TYPE = (
+        (0, "enabled"),
+        (1, "login-only"),
+        (2, "disabled"),
+    )
+
     engagements = EngagementSerializer(many=True,
         help_text=_("Engagement tags by user"))
     active_users = serializers.IntegerField(
         help_text=_("Number of users that have engaged with the app"))
     authentication = EnumField(
-        choices=get_app_model().AUTH_TYPE, required=False,
-        help_text=_("Restricted authentication and registration"))
+        choices=AUTH_TYPE, required=False,
+        help_text=_("Configuration of the authentication workflow"\
+" (enabled, login-only, disabled)"))
 
 
 class ValidationErrorSerializer(NoModelSerializer):
