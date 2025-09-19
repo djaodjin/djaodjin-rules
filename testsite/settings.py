@@ -61,7 +61,7 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'rest_framework',
-    'deployutils.apps.django',
+    'deployutils.apps.django_deployutils',
     'rules',
     'testsite'
 )
@@ -234,8 +234,8 @@ TEMPLATES = [
                 'django.template.loaders.app_directories.Loader'],
             'libraries': {},
             'builtins': [
-                'deployutils.apps.django.templatetags.deployutils_prefixtags',
-                'deployutils.apps.django.templatetags.deployutils_extratags'
+    'deployutils.apps.django_deployutils.templatetags.deployutils_prefixtags',
+    'deployutils.apps.django_deployutils.templatetags.deployutils_extratags'
             ]
         }
     }

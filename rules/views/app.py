@@ -1,4 +1,4 @@
-# Copyright (c) 2024, DjaoDjin inc.
+# Copyright (c) 2025, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@ from django.template.response import TemplateResponse
 from django.views.generic import UpdateView, TemplateView
 import requests
 from requests.exceptions import RequestException
-from deployutils.apps.django.settings import SESSION_COOKIE_NAME
+from deployutils.apps.django_deployutils.settings import SESSION_COOKIE_NAME
 
 from .. import settings
 from ..compat import get_model, http_cookies, reverse, six

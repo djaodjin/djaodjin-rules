@@ -124,6 +124,9 @@ class RulesMiddleware(CsrfViewMiddleware):
             request, callback, callback_args, callback_kwargs)
 
     def process_response(self, request, response):
+        # In case we receice a 'Do Not Track' Header
+        patch_vary_headers(response, ('DNT',))
+
         # Sets the CORS headers as appropriate.
         app = get_current_app(request)
         origin = request.META.get('HTTP_ORIGIN')
@@ -178,7 +181,7 @@ class RulesMiddleware(CsrfViewMiddleware):
                     "request %s was not initiated by origin %s",
                     '{scheme}://{host}{path}'.format(
                         scheme=request.scheme,
-                        host=request._get_raw_host(),
+                host=request._get_raw_host(),#pylint:disable=protected-access
                         path=request.get_full_path()),
                     origin)
         return super(RulesMiddleware, self).process_response(

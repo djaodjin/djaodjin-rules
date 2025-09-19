@@ -23,7 +23,7 @@ classifiers = [
 dependencies = [
   "Django>=1.11",
   "djangorestframework>=3.9.4",
-  "djaodjin-deployutils>=0.10.3",
+  "djaodjin-deployutils>=0.14.0",
   "requests>=2.22.0",
   "python-dateutil>=2.8.0"
 ]

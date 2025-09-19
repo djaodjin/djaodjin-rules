@@ -1,4 +1,4 @@
-# Copyright (c) 2024, DjaoDjin inc.
+# Copyright (c) 2025, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,11 +24,11 @@
 
 import logging
 
-from deployutils.apps.django.backends.encrypted_cookies import (
+from deployutils.apps.django_deployutils.backends.encrypted_cookies import (
     SessionStore as CookieSessionStore)
-from deployutils.apps.django.backends.jwt_session_store import (
+from deployutils.apps.django_deployutils.backends.jwt_session_store import (
     SessionStore as JWTSessionStore)
-from deployutils.apps.django.settings import SESSION_COOKIE_NAME
+from deployutils.apps.django_deployutils.settings import SESSION_COOKIE_NAME
 from django.contrib.auth import get_user_model
 from django.utils.module_loading import import_string
 from rest_framework.generics import get_object_or_404

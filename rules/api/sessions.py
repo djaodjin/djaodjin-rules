@@ -42,7 +42,7 @@ class GetSessionAPIView(GenericAPIView):
     # So far this is just a dummy used in `reverse` to get a base url.
     pass
 
-
+#pylint:disable=line-too-long
 class GetSessionDetailAPIView(SessionDataMixin, AppMixin, UserMixin,
                             RetrieveAPIView):
     """
