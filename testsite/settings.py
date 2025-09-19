@@ -13,6 +13,7 @@ FEATURES_DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 JS_FRAMEWORK = 'vuejs'
 
+ASSETS_CDN = {}
 
 def load_config(confpath):
     '''
