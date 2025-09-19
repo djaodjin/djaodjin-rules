@@ -1,3 +1,9 @@
+0.4.10
+
+  * upgrades prerequisites deployutils to 0.14.0
+
+ -- Sebastien Mirolo <smirolo@djaodjin.com>  Fri, 19 Sep 2025 11:00:00 -0700
+
 0.4.9
 
   * uses settings.AUTHENTICATION_OVERRIDE instead of as an App field

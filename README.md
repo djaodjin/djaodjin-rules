@@ -36,11 +36,10 @@ Tested with
 
 - **Python:** 3.10, **Django:** 4.2 ([LTS](https://www.djangoproject.com/download/))
 - **Python:** 3.12, **Django:** 5.2 (next)
-- **Python:** 3.7, **Django:** 3.2 (legacy)
+- **Python:** 3.9, **Django:** 3.2 (legacy)
 
-0.4.9
+0.4.10
 
-  * uses settings.AUTHENTICATION_OVERRIDE instead of as an App field
-  * fixes `get_raw_uri` was removed in Django4.2
+  * upgrades prerequisites deployutils to 0.14.0
 
 [previous release notes](changelog)
