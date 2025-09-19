@@ -13,9 +13,10 @@ RUN_DIR       ?= $(abspath $(srcDir))
 installDirs   ?= install -d
 installFiles  ?= install -p -m 644
 NPM           ?= npm
-PYTHON        := $(binDir)/python
-PIP           := $(binDir)/pip
-TWINE         := $(binDir)/twine
+PYTHON        := python
+PIP           := pip
+SQLITE        := sqlite3
+TWINE         := twine
 
 DB_NAME       ?= $(RUN_DIR)/db.sqlite
 
@@ -89,7 +90,7 @@ vendor-assets-prerequisites: $(installTop)/.npm/djaodjin-rules-packages
 
 $(installTop)/.npm/djaodjin-rules-packages: $(srcDir)/testsite/package.json
 	$(installFiles) $^ $(installTop)
-	$(NPM) install --loglevel verbose --cache $(installTop)/.npm --tmp $(installTop)/tmp --prefix $(installTop)
+	$(NPM) install --loglevel verbose --cache $(installTop)/.npm --prefix $(installTop)
 	$(installDirs) -d $(srcDir)/testsite/static/vendor
 	$(installFiles) $(installTop)/node_modules/jquery/dist/jquery.js $(srcDir)/testsite/static/vendor
 	$(installFiles) $(installTop)/node_modules/moment/moment.js $(srcDir)/testsite/static/vendor
