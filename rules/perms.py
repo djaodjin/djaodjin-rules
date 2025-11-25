@@ -100,6 +100,8 @@ def find_rule(request, app, prefixes=None):
 
 def redirect_or_denied(request, inserted_url,
                        redirect_field_name=REDIRECT_FIELD_NAME, descr=None):
+    if descr is None:
+        descr = "Permission denied"
     LOGGER.debug("redirect_or_denied((%s, %s), %s %s,"\
         " redirect_field_name=%s, descr=%s)", request.path, request.user,
         inserted_url, inserted_url.__class__, redirect_field_name, descr)
@@ -113,9 +115,7 @@ def redirect_or_denied(request, inserted_url,
         " inserted_url=%s is a string (%s)) => %s",
         request.META.get('HTTP_ACCEPT', '*/*'), 'text/html' in http_accepts,
         inserted_url, isinstance(inserted_url, six.string_types),
-      ('PermissionDenied("%s")' % str(descr)) if descr else "PermissionDenied")
-    if descr is None:
-        descr = ""
+      ('PermissionDenied("%s")' % str(descr)))
     raise PermissionDenied(descr)
 
 
