@@ -310,7 +310,9 @@ const djApi = {
 
     _safeUrl: function(base, path) {
         if( !path ) return base;
-        if( typeof path === 'string' && path.startsWith('http') ) return path;
+        if( typeof path === 'string' && (
+            path.startsWith('http') || (
+                base.length > 0 && path.startsWith(base))) ) return path;
 
         const parts = base ? [base].concat(
             ( typeof path === 'string' ) ? [path] : path) :
@@ -340,6 +342,9 @@ const djApi = {
         for( idx = 1; idx < cleanParts.length; ++idx ) {
             cleanUrl += '/' + cleanParts[idx];
         }
+        // We need to keep the '/' suffix when dealing
+        // with djaodjin-rules API calls.
+        if( path.endsWith('/') ) cleanUrl += '/';
 
         if( !cleanUrl.startsWith('http') && !cleanUrl.startsWith('/') ) {
             cleanUrl = '/' + cleanUrl

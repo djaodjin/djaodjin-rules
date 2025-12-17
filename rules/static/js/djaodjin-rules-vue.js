@@ -61,7 +61,7 @@ Vue.component('rules-table', {
         },
         update: function(rule){
             var vm = this;
-            vm.reqPut(vm.url + rule.path, rule,
+            vm.reqPut(vm._safeUrl(vm.url, rule.path), rule,
             function (resp) {
                 vm.ruleModalOpen = false;
             },
@@ -73,7 +73,7 @@ Vue.component('rules-table', {
         remove: function(idx){
             var vm = this;
             var rule = vm.items.results[idx]
-            vm.reqDelete(vm.url + rule.path,
+            vm.reqDelete(vm._safeUrl(vm.url, rule.path),
             function (resp) {
                 vm.params.page = 1;
                 vm.get();
