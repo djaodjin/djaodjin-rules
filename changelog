@@ -1,3 +1,9 @@
+0.4.11
+
+  * makes all API calls through djApi
+
+ -- Sebastien Mirolo <smirolo@djaodjin.com>  Wed, 17 Dec 2025 16:10:00 -0700
+
 0.4.10
 
   * upgrades prerequisites deployutils to 0.14.0

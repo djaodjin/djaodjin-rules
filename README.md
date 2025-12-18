@@ -38,8 +38,8 @@ Tested with
 - **Python:** 3.12, **Django:** 5.2 (next)
 - **Python:** 3.9, **Django:** 3.2 (legacy)
 
-0.4.10
+0.4.11
 
-  * upgrades prerequisites deployutils to 0.14.0
+  * makes all API calls through djApi
 
 [previous release notes](changelog)
