@@ -36,6 +36,7 @@ class GetSessionDataRequest(object):
 
     def __init__(self, user):
         self.user = user
+        self.path = ""
 
 
 class GetSessionAPIView(GenericAPIView):

@@ -1,4 +1,4 @@
-# Copyright (c) 2025, DjaoDjin inc.
+# Copyright (c) 2026, DjaoDjin inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -301,8 +301,16 @@ class SessionProxyMixin(SessionDataMixin):
         return requests_args
 
     def translate_response(self, response):
+        content_type = response.headers.get('content-type')
         proxy_response = HttpResponse(
-            response.content, status=response.status_code)
+            response.content,
+            # When forwarding 204 responses, Django will add
+            # a '<html><head></head><body></body></html>' body
+            # if we don't set `content_type` to "". That creates
+            # `HPE_INVALID_CONSTANT` erros when reading the response
+            # with the Javascript 'request' library.
+            content_type=content_type if response.content else "",
+            status=response.status_code)
         if 'set-cookie' in response.headers:
             # Here we have to decode the Set-Cookie ourselves because
             # requests will pack the set-cookie headers under the same key,
@@ -367,12 +375,14 @@ class SessionProxyMixin(SessionDataMixin):
             # headers, it can cause trouble as well.  Just let the server set
             # the value as it should be.
             'content-encoding',
-
-            # Since the remote server may or may not have sent the content
-            # in the same encoding as Django will, let Django worry about
-            # what the length should be.
-            'content-length',
         ])
+        if response.content:
+            excluded_headers |= set([
+                # Since the remote server may or may not have sent the content
+                # in the same encoding as Django will, let Django worry about
+                # what the length should be.
+                'content-length',
+            ])
         for key, value in six.iteritems(response.headers):
             if key.lower() in excluded_headers:
                 continue
