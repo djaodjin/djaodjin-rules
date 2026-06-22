@@ -43,6 +43,10 @@ dist::
 	$(TWINE) upload dist/*
 
 
+package-theme:
+	@echo "dummy target 'package-theme' for continuous testing workflow"
+
+
 build-assets: vendor-assets-prerequisites
 
 
@@ -92,7 +96,6 @@ $(installTop)/.npm/djaodjin-rules-packages: $(srcDir)/testsite/package.json
 	$(installFiles) $^ $(installTop)
 	$(NPM) install --loglevel verbose --cache $(installTop)/.npm --prefix $(installTop)
 	$(installDirs) -d $(srcDir)/testsite/static/vendor
-	$(installFiles) $(installTop)/node_modules/jquery/dist/jquery.js $(srcDir)/testsite/static/vendor
 	$(installFiles) $(installTop)/node_modules/vue/dist/vue.js $(srcDir)/testsite/static/vendor
 	touch $@
 

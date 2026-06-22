@@ -184,7 +184,7 @@ service.
                 ng-submit="getSessionData('#token-form')"
                 @submit.prevent="getSessionData">
             <input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
-            <input v-model="testUsername" maxlength="100" name="username" type="text">
+            <input v-model="testUsername" maxlength="100" name="testUsername" type="text">
             <button type="submit">Check</button>
           </form>
           <div>

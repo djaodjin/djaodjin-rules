@@ -1,8 +1,7 @@
 {
     "name": "djaodjin-rules-ui",
-    "version": "0.4.11-dev",
+    "version": "0.4.12-dev",
     "dependencies": {
-        "jquery": "~3.6.0",
         "vue": "~2.7.16"
     },
     "engines": {

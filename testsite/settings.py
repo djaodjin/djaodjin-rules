@@ -11,7 +11,6 @@ LOG_FILE = os.path.join(RUN_DIR, 'testsite-app.log')
 DEBUG = True
 FEATURES_DEBUG = True
 TEMPLATE_DEBUG = DEBUG
-JS_FRAMEWORK = 'vuejs'
 
 ASSETS_CDN = {}
 
@@ -228,7 +227,6 @@ TEMPLATES = [
     'django.contrib.messages.context_processors.messages', # because of admin/
     'django.template.context_processors.request',
     'django.template.context_processors.media',
-    'testsite.context_processors.js_framework'
             ],
             'loaders': [
                 'django.template.loaders.filesystem.Loader',
