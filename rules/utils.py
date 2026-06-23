@@ -144,7 +144,10 @@ def get_current_enc_key(request=None):
         if callable(enc_key):
             return enc_key(request=request)
         return enc_key
-    return get_current_app(request=request).enc_key
+    enc_key = get_current_app(request=request).enc_key
+    # pyjwt>=2.13 expects a non-empty key. deployutils `prepare` expects `None`
+    # instead of an empty string to pick up the default `DJAODJIN_SECRET_KEY`.
+    return enc_key if enc_key else None
 
 
 def get_current_entry_point(request=None):

@@ -13,6 +13,7 @@ FEATURES_DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ASSETS_CDN = {}
+RULES_ENC_KEY_OVERRIDE = None
 
 def load_config(confpath):
     '''
@@ -48,6 +49,14 @@ load_config(os.path.join(
 if not hasattr(sys.modules[__name__], "SECRET_KEY"):
     SECRET_KEY = "".join([choice(
         "abcdefghijklmnopqrstuvwxyz0123456789!@#$%^*-_=+") for i in range(50)])
+
+RULES_ENC_KEY_OVERRIDE = os.getenv('RULES_ENC_KEY_OVERRIDE',
+    RULES_ENC_KEY_OVERRIDE)
+if not RULES_ENC_KEY_OVERRIDE:
+    RULES_ENC_KEY_OVERRIDE = "".join([choice(
+        "abcdefghijklmnopqrstuvwxyz0123456789!@#$%^*-_=+") for i in range(50)])
+    sys.stderr.write(
+        "warning: RULES_ENC_KEY_OVERRIDE wasn't set; using random value.\n")
 
 INSTALLED_APPS = (
     'django_extensions',
@@ -265,6 +274,7 @@ SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 # Rules application
 # -----------------
 RULES = {
+    'ENC_KEY_OVERRIDE': RULES_ENC_KEY_OVERRIDE,
     'RULE_OPERATORS': (
         '',                                            # 0
         'rules.settings.fail_authenticated',           # 1
