@@ -34,12 +34,14 @@ Release Notes
 
 Tested with
 
-- **Python:** 3.10, **Django:** 4.2 ([LTS](https://www.djangoproject.com/download/))
-- **Python:** 3.12, **Django:** 5.2 (next)
+- **Python:** 3.12, **Django:** 5.2 ([LTS](https://www.djangoproject.com/download/))
+- **Python:** 3.14, **Django:** 6.0 (next)
+- **Python:** 3.10, **Django:** 4.2 (legacy)
 - **Python:** 3.9, **Django:** 3.2 (legacy)
 
-0.4.11
+0.4.12
 
-  * makes all API calls through djApi
+  * works around Django adding content to 204 response
+  * uses native `fetch` instead of jquery in all UI components
 
 [previous release notes](changelog)

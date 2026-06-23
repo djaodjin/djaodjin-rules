@@ -1,3 +1,10 @@
+0.4.12
+
+  * works around Django adding content to 204 response
+  * uses native `fetch` instead of jquery in all UI components
+
+ -- Sebastien Mirolo <smirolo@djaodjin.com>  Tue, 23 Jun 2026 08:40:00 -0700
+
 0.4.11
 
   * makes all API calls through djApi
